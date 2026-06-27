@@ -3,7 +3,24 @@
 Triển khai theo hướng **test-driven** và **incremental**: mỗi task cho ra một phần
 chạy được/demo được, kết thúc bằng việc ghép mọi thứ lại. Không để code "mồ côi".
 
-## 8.1. Thứ tự task
+## 8.0. Roadmap phân tầng (MVP / v1 / v2)
+
+Ước lượng giả định **nhóm nhỏ 1–2 devs**, phạm vi web-first. Mục tiêu xuyên suốt: vòng lặp
+**generate → validate → compile → patch** ổn định trước, rồi mới mở rộng.
+
+| Giai đoạn | Ước lượng | Deliverables chính |
+|-----------|----------:|--------------------|
+| **MVP** | 4–6 tuần | Editor web cơ bản; prompt → `article`/`report` (template-first); AST validation; compile sandbox Tectonic `--untrusted`; PDF preview + logs; vòng lặp tự sửa; 10–20 template chuẩn; smoke test cho 8 ca chính ([09](./09-evaluation.md)) |
+| **v1** | 6–8 tuần | RAG trên template/package docs/project files; **patch project có sẵn**; **Markdown→LaTeX** (Pandoc); BibTeX helper; AST validation mạnh hơn; metrics dashboard; hardening security cơ bản |
+| **v2** | 8–10 tuần | Agentic editing đa file; package/engine optimization; **multilingual** (CJK/RTL) hạng nhất; **OCR công thức**; CI regression + visual diff; team/project workspace; **self-host/local-first** (beta) |
+
+**Triết lý**: MVP không nhằm "AI thật thông minh" mà nhằm chứng minh **một vòng khép kín**:
+sinh được, validate được, compile được, preview được, tự sửa lỗi cơ bản. Chỉ cần 2–3 template +
+prompt tốt + compile sandbox là đủ kiểm nghiệm product-market fit. RAG và fine-tuning để **sau**.
+
+> Phần §8.1–§8.4 dưới đây là **chi tiết task breakdown của giai đoạn MVP**.
+
+## 8.1. Thứ tự task (MVP)
 
 ```mermaid
 flowchart LR
@@ -49,12 +66,15 @@ flowchart LR
 - **Demo**: `curl /api/compile` với LaTeX hợp lệ → tải về PDF.
 - **Tham chiếu**: [05-backend.md](./05-backend.md) §5.4.
 
-### Task 5 — Orchestrator + repair loop (`/api/document`)
-- **Mục tiêu**: ghép generate + compile + vòng lặp sửa lỗi (tối đa `MAX_REPAIR_ATTEMPTS`);
-  trả `{ latex, pdfBase64, attempts }` hoặc `{ error, latex, log, attempts }`.
-- **Test**: với `MockProvider` mô phỏng "lỗi lần 1 → đúng lần 2" + compile mock →
-  happy (attempts=1), repair (attempts=2), fail (attempts=N).
-- **Demo**: `curl /api/document` mô tả "khó" → log cho thấy tự sửa và trả PDF.
+### Task 5 — AST validation + Orchestrator + repair loop (`/api/document`)
+- **Mục tiêu**: thêm **lớp AST validation** (tree-sitter-latex / unified-latex / latex-utensils) kiểm
+  mã LaTeX **trước compile**; ghép generate → **validate** → compile → patch (tối đa `MAX_REPAIR_ATTEMPTS`);
+  trả `{ latex, pdfBase64, attempts, metadata }` hoặc `{ error, latex, log, attempts }`.
+- **Cài đặt**: module `validateLatex(latex) → { ok, diagnostics }`; orchestrator dùng diagnostics (rẻ)
+  trước rồi mới tới compile log; `errorContext` mang `previousLatex` + `diagnostics|errorLog`.
+- **Test**: với `MockProvider` mô phỏng "AST lỗi → sửa" và "compile lỗi lần 1 → đúng lần 2" + compile mock →
+  happy (attempts=1), AST-repair, compile-repair (attempts=2), fail (attempts=N).
+- **Demo**: `curl /api/document` mô tả "khó" → log cho thấy bắt lỗi AST sớm và/hoặc tự sửa, trả PDF.
 - **Tham chiếu**: [05-backend.md](./05-backend.md) §5.5, [06-ai-integration.md](./06-ai-integration.md) §6.4.
 
 ### Task 6 — Frontend UI
@@ -85,17 +105,29 @@ flowchart LR
 | Rủi ro | Giảm thiểu |
 |--------|-----------|
 | Đóng gói Tectonic trong Docker phức tạp | Làm sớm ở T3; cân nhắc image có sẵn TeX; prefetch bundle |
-| AI sinh LaTeX khó compile | Repair loop (T5) + prompt chặt + sanitize output |
+| AI sinh LaTeX khó compile / hallucinate package | AST validation + repair loop (T5) + template-first + sanitize; (v1) RAG grounding |
 | Chi phí gọi AI khi test | `MockProvider` cho hầu hết test; provider thật chỉ smoke/contract |
-| Bảo mật compile (input tùy ý) | Non-root, sandbox, timeout, resource limit, không shell-escape (T3) |
+| Bảo mật compile (input tùy ý) | Non-root, sandbox, timeout, resource limit, **`--untrusted`**, không shell-escape (T3); lưu ý lỗ hổng LuaTeX |
+| LaTeX không parse hoàn hảo (Turing-complete) | AST chỉ là lớp canh gác best-effort; compiler là nguồn sự thật cuối |
+| Prompt injection (khi có RAG ở v1) | Tách dữ liệu/lệnh, sanitization, provenance tagging, policy tool layer |
 | Thời gian phản hồi lâu (AI+compile) | Loading rõ ràng; (sau) streaming tiến trình |
 
-## 8.5. Hướng mở rộng sau MVP (không nằm trong phạm vi hiện tại)
+## 8.5. Hướng mở rộng sau MVP
 
-- Tài khoản người dùng + lưu/quản lý lịch sử tài liệu (thêm DB + auth).
-- Thêm loại tài liệu: Beamer slides, letter, CV, book — qua hệ thống template/prompt.
-- OCR ảnh/handwriting → LaTeX.
-- Editor LaTeX trong app cho phép chỉnh & re-compile trực tiếp.
-- Streaming tiến trình (SSE) để hiển thị bước generate/compile/repair.
-- Export sang Overleaf; chia sẻ link tài liệu.
+Chi tiết theo giai đoạn xem **§8.0 (roadmap phân tầng)**. Tóm tắt:
+
+**v1**
+- **RAG** trên template/package docs/project files (grounding, giảm hallucination).
+- **Markdown→LaTeX** (Pandoc); BibTeX/citation helper.
+- **Chỉnh sửa project có sẵn** theo phong cách hiện tại (diff tối thiểu).
+- Metrics dashboard (compile success rate, parse-pass rate — xem [09](./09-evaluation.md)).
+- Editor LaTeX trong app cho phép chỉnh & re-compile; streaming tiến trình (SSE).
+
+**v2**
+- Thêm template: Beamer slides, thesis, letter, CV, book.
+- **OCR** ảnh/handwriting công thức/bảng → LaTeX.
+- **Multilingual** hạng nhất (CJK/RTL) + chọn engine tự động (XeLaTeX/LuaLaTeX).
+- Agentic editing đa file; package/engine optimization.
+- CI regression + visual diff; team workspace; **self-host/local-first**.
+- Tài khoản người dùng + lưu/quản lý lịch sử (DB + auth); export Overleaf; chia sẻ link.
 - Rate limit/Cache phân tán (Redis) khi scale nhiều instance.

@@ -14,6 +14,9 @@ hoặc **log lỗi** (khi thất bại). Tách riêng khỏi Next.js để:
 - **Compile thông minh**: tự chạy đủ số pass, xử lý BibTeX/biber, cross-reference.
 - Một binary, dễ đóng gói Docker, phù hợp môi trường server.
 - Có **bundle cache**: lần compile sau nhanh hơn nhờ package đã tải.
+- **Chế độ `--untrusted`**: Tectonic hỗ trợ cờ `--untrusted` để compile input **không tin cậy**,
+  vô hiệu hóa các tính năng nguy hiểm (shell-escape, đọc/ghi file tùy tiện). **Bắt buộc bật** vì
+  ta nhận LaTeX tùy ý từ người dùng. Tectonic cũng có `--synctex`, `--only-cached` cho các nhu cầu khác.
 
 ## 7.3. API của compile service
 
@@ -57,28 +60,36 @@ flowchart TD
 Chi tiết:
 1. Tạo thư mục tạm **riêng cho mỗi request** (vd `/tmp/compile/<uuid>`).
 2. Ghi `main.tex` chứa LaTeX nhận được.
-3. Gọi Tectonic compile (vd `tectonic -X compile main.tex --outdir <dir>` hoặc API tương ứng),
-   **kèm timeout** (vd 30–60s).
+3. Gọi Tectonic compile ở **chế độ untrusted** (vd `tectonic -X compile --untrusted main.tex --outdir <dir>`
+   hoặc API tương ứng), **kèm timeout** (vd 30–60s).
 4. Nếu có `main.pdf` → đọc và trả về; nếu không → đọc log lỗi.
 5. **Luôn dọn** thư mục tạm (kể cả khi lỗi/timeout) trong `finally`.
 
 ## 7.5. Bảo mật (RẤT QUAN TRỌNG)
 
 Compile service chạy **binary TeX trên input tùy ý từ Internet** → bề mặt tấn công lớn.
-Các biện pháp bắt buộc:
+Đây là **tiêu chí chất lượng ngang hàng với compilability**, không phải "thêm cho có".
+
+### Phòng thủ nhiều lớp (defense-in-depth)
 
 | Rủi ro | Biện pháp |
 |--------|-----------|
-| Shell-escape / chạy lệnh tùy ý (`\write18`) | **KHÔNG bật** `--shell-escape`. Tectonic mặc định không cho shell-escape — giữ nguyên. |
-| Đọc/ghi file ngoài | Chạy trong thư mục tạm cô lập; user **non-root**; hạn chế quyền filesystem. |
-| Chiếm CPU/treo (infinite loop trong TeX) | **Timeout** cứng; kill process khi quá hạn. |
-| Cạn RAM/disk | Giới hạn tài nguyên container (memory/CPU/pids limit); giới hạn kích thước output. |
-| Input khổng lồ | Giới hạn kích thước `latex` đầu vào. |
-| Truy cập mạng ngoài ý muốn | Tectonic cần tải package từ CTAN → cho phép có kiểm soát, hoặc **prefetch/cache bundle** sẵn trong image để hạn chế mạng lúc chạy. |
+| Shell-escape / chạy lệnh tùy ý (`\write18`) | Bật **`tectonic --untrusted`**; **KHÔNG bật** `--shell-escape`. |
+| **Lỗ hổng LuaTeX** | TeX Live từng công bố lỗ hổng LuaTeX cho phép thực thi shell command **ngay cả khi shell-escape tắt** → **không** dựa duy nhất vào cờ; bắt buộc cô lập container. |
+| Đọc/ghi file ngoài | Thư mục tạm cô lập; user **non-root**; filesystem read-only ngoài thư mục tạm. |
+| Chiếm CPU/treo (loop trong TeX) | **Timeout** cứng; kill process khi quá hạn. |
+| Cạn RAM/disk | Giới hạn tài nguyên container (memory/CPU/pids); giới hạn kích thước output. |
+| Input khổng lồ | Giới hạn kích thước `latex` đầu vào (`MAX_LATEX_BYTES`). |
+| Truy cập mạng ngoài ý muốn | Tectonic cần tải package CTAN → **prefetch/cache bundle** sẵn trong image để hạn chế mạng lúc chạy; cân nhắc `--only-cached`. |
 | Lộ thông tin qua log | Rút gọn log trả về; không trả đường dẫn hệ thống nhạy cảm. |
 
-Nguyên tắc: container **non-root**, **read-only filesystem** ngoại trừ thư mục tạm,
-**không expose ra Internet** (chỉ Next.js gọi nội bộ).
+### Mô hình tham chiếu: Overleaf sandboxed compiles
+Overleaf compile mỗi project trong **container riêng (sandboxed compiles)** và cảnh báo rõ rằng
+compile **không sandbox** chỉ phù hợp khi người dùng **hoàn toàn tin cậy**. Ta áp dụng nguyên tắc
+cô lập tương tự: mỗi request compile chạy trong môi trường cô lập, non-root, có giới hạn tài nguyên.
+
+Nguyên tắc: container **non-root**, **read-only filesystem** (trừ thư mục tạm),
+**không expose ra Internet** (chỉ Next.js gọi nội bộ), và **không tin cậy input**.
 
 ## 7.6. Dockerfile (phác thảo)
 
