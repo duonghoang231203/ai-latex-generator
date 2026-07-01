@@ -45,8 +45,14 @@ export function getProvider(): LatexProvider {
 | `OpenAIProvider` | Production (thay thế) | GPT-4-class |
 
 Vì sao mặc định Claude/GPT: theo cộng đồng, các model lớn này sinh LaTeX hợp lệ tốt và
-hiểu được log lỗi TeX để tự sửa. Quyết định Claude **hay** GPT có thể chốt lúc triển khai
-dựa trên chi phí/độ sẵn có của key — kiến trúc không khoá vào nhà cung cấp nào.
+hiểu được log lỗi TeX để tự sửa.
+
+> **QUYẾT ĐỊNH (đã chốt cho MVP)**: provider mặc định là **Anthropic Claude**
+> (`AI_PROVIDER=anthropic`), model qua `AI_MODEL` (một model Claude hiện hành, vd họ
+> `claude-sonnet`/`claude-opus`, chốt phiên bản cụ thể lúc lấy key). Lý do: chất lượng sinh LaTeX
+> và khả năng đọc log lỗi TeX tốt trong thực tế cộng đồng. **`OpenAIProvider` là phương án thay thế
+> đầy đủ ngang hàng** — nhờ Nguyên tắc V (provider-agnostic), đổi sang GPT chỉ cần đổi biến môi
+> trường, không sửa code nghiệp vụ. Kiến trúc không khoá nhà cung cấp.
 
 ## 6.3. Thiết kế Prompt (template-first)
 
@@ -69,9 +75,16 @@ Quy tắc bắt buộc:
 - Chỉ dùng package phổ biến, có trên CTAN (Tectonic tự tải).
 - KHÔNG dùng \write18 / shell-escape / lệnh đọc-ghi file ngoài.
 - Ưu tiên cú pháp an toàn, biên dịch được; tránh package hiếm/khó tải.
-- Dùng UTF-8; nếu cần tiếng Việt, dùng cấu hình phù hợp (vd fontspec/polyglossia với XeLaTeX,
-  hoặc inputenc/babel hợp lý) — chọn cách Tectonic compile được.
+- Dùng UTF-8. Tectonic dùng engine **XeTeX** nên hãy soạn tài liệu theo hướng **XeLaTeX**:
+  dùng `fontspec` (và `polyglossia` khi cần đa ngôn ngữ) để xử lý Unicode/tiếng Việt trực tiếp.
+  KHÔNG dùng `inputenc`/`fontenc` kiểu pdfLaTeX (không cần và có thể gây lỗi với XeTeX).
 ```
+
+> **QUYẾT ĐỊNH (đã chốt cho MVP — xem NFR-6.1)**: engine mặc định là **XeLaTeX** (chính là engine
+> XeTeX mà Tectonic dùng mặc định). Xử lý tiếng Việt/Unicode bằng **`fontspec`** (+ `polyglossia`
+> khi cần), chọn font hỗ trợ tiếng Việt (vd Latin Modern/DejaVu/TeX Gyre). Lý do: Tectonic dựa trên
+> XeTeX → Unicode là công dân hạng nhất, không phải cấu hình `inputenc` mong manh của pdfLaTeX.
+> pdfLaTeX + `inputenc`/`babel` **không** phải đường đi mặc định ở MVP.
 
 ### 6.3.2. User prompt (theo docType) — lượt đầu
 ```
@@ -147,7 +160,8 @@ Dù prompt yêu cầu "chỉ trả mã LaTeX", model đôi khi vẫn kèm rác. 
 - **Timeout** mỗi lời gọi AI (`REQUEST_TIMEOUT_MS`); bắt lỗi mạng/quá tải → trả `502`.
 - **Token**: rút gọn log + giới hạn độ dài mô tả để kiểm soát chi phí.
 - **Tính không xác định (non-determinism)**: đặt nhiệt độ (temperature) thấp để output ổn định,
-  dễ compile hơn (giá trị cụ thể chốt khi code).
+  dễ compile hơn. **QUYẾT ĐỊNH (đã chốt)**: `temperature = 0.2` mặc định (đủ thấp để ổn định/dễ
+  compile, vẫn cho phép chút linh hoạt về diễn đạt nội dung); cấu hình được qua env nếu cần tinh chỉnh.
 - **Bảo mật**: API key chỉ ở server; không bao giờ gửi key/khoá ra client; không log secret.
 
 ## 6.7. Kiểm thử AI layer

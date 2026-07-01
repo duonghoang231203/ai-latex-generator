@@ -30,8 +30,9 @@ hoặc **log lỗi** (khi thất bại). Tách riêng khỏi Next.js để:
 - `Content-Type: application/pdf`
 - body: bytes PDF.
 
-(Hoặc JSON `{ "success": true, "pdfBase64": "..." }` nếu thống nhất dùng JSON xuyên suốt —
-chốt khi code; tài liệu backend đề xuất `/api/document` dùng base64.)
+> **QUYẾT ĐỊNH (đã chốt cho MVP — xem [11-data-model.md](./11-data-model.md) §11.5)**: compile
+> service `POST /compile` trả **PDF binary** (`application/pdf`) khi thành công. Việc bọc base64/JSON
+> để trả cho UI là trách nhiệm của `/api/document` ở tầng Next.js, không phải compile service.
 
 **Response — compile lỗi** `200` hoặc `422`
 ```json

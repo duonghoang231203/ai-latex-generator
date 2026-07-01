@@ -1,0 +1,154 @@
+{
+  "$schema": "./testcases.schema.json",
+  "version": "1.0.0",
+  "source": "docs/09-evaluation.md §9.2",
+  "note": "Bộ 8 ca đánh giá dạng máy đọc được cho CI/benchmark nội bộ. MVP tập trung các ca có scope='mvp' (1,2,5). Các ca v1/v2 đưa vào sớm để theo dõi tiến bộ nhưng không chặn MVP.",
+  "engineDefault": "xetex",
+  "cases": [
+    {
+      "id": "TC-01",
+      "title": "Bài báo cơ bản",
+      "scope": "mvp",
+      "docType": "article",
+      "input": {
+        "kind": "prompt",
+        "prompt": "Tạo bài báo khoa học 2 trang tiếng Việt về ứng dụng AI trong chẩn đoán ảnh y khoa, có abstract, 3 section, 5 citation placeholder."
+      },
+      "expect": {
+        "parsePass": true,
+        "compilePass": true,
+        "mustContain": ["\\documentclass", "\\begin{document}", "\\end{document}", "\\begin{abstract}", "\\section"],
+        "minSections": 3,
+        "unicodeVietnamese": true
+      },
+      "pass": "Parse pass; compile pass; abstract + >=3 section xuất hiện; ký tự tiếng Việt hiển thị đúng; không lỗi fatal.",
+      "fail": "Không compile; ký tự tiếng Việt hỏng; thiếu abstract/section."
+    },
+    {
+      "id": "TC-02",
+      "title": "Công thức toán",
+      "scope": "mvp",
+      "docType": "article",
+      "input": {
+        "kind": "prompt",
+        "prompt": "Viết chứng minh ngắn cho khai triển Taylor của e^x, có công thức hiển thị và căn chỉnh nhiều dòng."
+      },
+      "expect": {
+        "parsePass": true,
+        "compilePass": true,
+        "mustContainAnyOf": ["\\begin{align}", "\\begin{equation}", "\\begin{aligned}"],
+        "noUnclosedMathMode": true
+      },
+      "pass": "Parse pass; compile pass; công thức căn chỉnh đúng; không unclosed math mode.",
+      "fail": "Lỗi math mode; môi trường sai; compile fail."
+    },
+    {
+      "id": "TC-03",
+      "title": "Slide Beamer",
+      "scope": "v1",
+      "docType": "article",
+      "input": {
+        "kind": "prompt",
+        "prompt": "Tạo 6 slide Beamer giới thiệu RAG cho kỹ sư backend."
+      },
+      "expect": {
+        "compilePass": true,
+        "mustContain": ["\\documentclass{beamer}"],
+        "minFrames": 5
+      },
+      "pass": "Compile pass; >=5 frame; bố cục đọc được; không overflow nghiêm trọng.",
+      "fail": "Dùng nhầm article; frame lỗi; compile fail."
+    },
+    {
+      "id": "TC-04",
+      "title": "Markdown → LaTeX",
+      "scope": "v1",
+      "docType": "article",
+      "input": {
+        "kind": "file",
+        "path": "fixtures/tc-04-input.md",
+        "description": "File Markdown có heading, bảng, list, code block, citations."
+      },
+      "expect": {
+        "compilePass": true,
+        "preserveHeadings": true,
+        "preserveTables": true,
+        "preserveCitations": true
+      },
+      "pass": "Heading tương ứng; compile pass; bảng không vỡ; citation map đúng.",
+      "fail": "Mất sectioning; bảng lỗi; citation đứt; compile fail."
+    },
+    {
+      "id": "TC-05",
+      "title": "Sửa lỗi compile",
+      "scope": "mvp",
+      "docType": "article",
+      "input": {
+        "kind": "file",
+        "path": "fixtures/tc-05-broken.tex",
+        "description": "Project .tex thiếu \\end{table} + package conflict mô phỏng."
+      },
+      "expect": {
+        "compilePassAfterRepair": true,
+        "minimalDiff": true,
+        "warningsReduced": true
+      },
+      "pass": "Sau patch: compile pass; diff tối thiểu; warning giảm.",
+      "fail": "Sửa lan man; lỗi mới; compile vẫn fail."
+    },
+    {
+      "id": "TC-06",
+      "title": "Tối ưu package/engine",
+      "scope": "v2",
+      "docType": "article",
+      "input": {
+        "kind": "prompt",
+        "prompt": "Tài liệu có tiếng Nhật, tiếng Ả Rập và công thức; chọn engine và package tối thiểu hợp lý."
+      },
+      "expect": {
+        "compilePass": true,
+        "engineAnyOf": ["xetex", "luatex"],
+        "unicodeMultilingual": true,
+        "noConflictingPackages": true
+      },
+      "pass": "Compile pass với Unicode đa ngôn ngữ; package không dư thừa; không cấu hình mâu thuẫn.",
+      "fail": "Chọn pdflatex không xử lý Unicode; compile fail; package xung đột."
+    },
+    {
+      "id": "TC-07",
+      "title": "OCR công thức",
+      "scope": "v2",
+      "docType": "article",
+      "input": {
+        "kind": "image",
+        "path": "fixtures/tc-07-formula.png",
+        "description": "Ảnh công thức cần chuyển sang LaTeX."
+      },
+      "expect": {
+        "compilePass": true,
+        "humanJudgeRequired": true
+      },
+      "pass": "Render toán gần đúng; compile pass; human judge chấp nhận.",
+      "fail": "Ký hiệu sai trọng yếu; compile fail; render sai ngữ nghĩa."
+    },
+    {
+      "id": "TC-08",
+      "title": "Chỉnh sửa project có sẵn",
+      "scope": "v1",
+      "docType": "report",
+      "input": {
+        "kind": "project",
+        "path": "fixtures/tc-08-project/",
+        "description": "Repo có main.tex, .bib, figures; thêm Related Work theo phong cách hiện tại, không đổi template."
+      },
+      "expect": {
+        "compilePass": true,
+        "localDiffOnly": true,
+        "preserveClassAndPackages": true,
+        "preserveCitationStyle": true
+      },
+      "pass": "Diff cục bộ; compile pass; style nhất quán; không đổi ngoài phạm vi.",
+      "fail": "Reformat toàn file; đổi class/package vô cớ; compile fail."
+    }
+  ]
+}

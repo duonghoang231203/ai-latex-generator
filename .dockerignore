@@ -1,0 +1,15 @@
+node_modules
+.next
+.git
+Dockerfile*
+.dockerignore
+npm-debug.log*
+*.log
+.env*
+coverage
+compile-service/node_modules
+specs
+docs
+.specify
+.kiro
+.claude

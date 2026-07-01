@@ -1,36 +1,43 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AI LaTeX Generator
 
-## Getting Started
+Mô tả tài liệu bằng ngôn ngữ tự nhiên (tiếng Việt/Anh) → nhận **PDF LaTeX biên dịch thật** cùng mã
+nguồn. Hệ thống sinh theo template (`article`/`report`), **kiểm cấu trúc trước khi dựng**, biên dịch
+**an toàn** bằng Tectonic `--untrusted` trong sandbox, và **tự sửa lặp** khi lỗi.
 
-First, run the development server:
+Thiết kế đầy đủ: xem [`docs/`](./docs). Đặc tả spec-kit: [`specs/001-latex-document-generation/`](./specs/001-latex-document-generation).
 
+## Kiến trúc
+- **Next.js app** (UI + BFF orchestrator): `app/` + `lib/`.
+- **compile-service** (Node/Express + Tectonic, sandbox): `compile-service/`.
+
+## Chạy nhanh (dev, không cần compile thật)
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.example .env    # AI_PROVIDER=mock để chạy offline
+npm install
+npm run dev             # http://localhost:3000
 ```
+> Với `AI_PROVIDER=mock`, tầng AI trả LaTeX cố định. Để dựng PDF thật cần compile-service (Docker).
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Chạy toàn stack (Docker)
+```bash
+cp .env.example .env    # đặt AI_PROVIDER=anthropic + AI_API_KEY nếu muốn AI thật
+docker compose up --build
+# mở http://localhost:3000
+```
+`compile-service` không expose ra Internet; chỉ Next.js gọi nội bộ. Container compile chạy non-root,
+read-only fs, giới hạn tài nguyên (mem 1g / cpu 1.0 / pids 256), Tectonic `--untrusted`, không shell-escape.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Cấu hình (biến môi trường)
+Xem [`.env.example`](./.env.example) và `docs/11-data-model.md` §11.6. Không commit giá trị secret.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Kiểm thử
+```bash
+npm test                       # Vitest: unit + integration + component (dùng MockProvider)
+cd compile-service && npm test # node:test (ca cần Tectonic sẽ skip nếu không có tectonic)
+npm run lint && npm run build  # lint + build
+```
+Test-case đánh giá: `docs/testcases/testcases.json` (MVP: TC-01/02/05), chạy qua `tests/eval/`.
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Trạng thái
+MVP: soạn `article`/`report` + repair loop + sandbox. RAG, Markdown→LaTeX, OCR, đa ngôn ngữ hạng nhất,
+auth/lưu trữ thuộc v1/v2 — xem `docs/08-roadmap.md`.

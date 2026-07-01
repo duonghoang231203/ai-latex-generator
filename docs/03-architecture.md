@@ -174,8 +174,8 @@ interface DocumentError {
 | Frontend | Next.js 16 + React 19 + Tailwind 4 | Đã khởi tạo sẵn; App Router + Server Components hợp BFF |
 | Ngôn ngữ | TypeScript | An toàn kiểu, hợp đồng dữ liệu rõ ràng |
 | AI | Claude / GPT qua interface | Chất lượng sinh LaTeX tốt; provider-agnostic |
-| Validation | tree-sitter-latex / unified-latex / latex-utensils | Parse/validate AST trước compile (best-effort) |
-| Compile | Tectonic `--untrusted` | Tự tải package, compile đa pass, cache, mode untrusted, dễ Docker hóa |
+| Validation | **latex-utensils** (MVP) — unified-latex (v1) | Parse/validate AST + BibTeX trước compile, có vị trí lỗi (best-effort) |
+| Compile | Tectonic `--untrusted` (engine **XeTeX/XeLaTeX**) | Tự tải package, compile đa pass, cache, mode untrusted, Unicode hạng nhất, dễ Docker hóa |
 | Preview | pdf.js + KaTeX/MathJax | PDF + math preview phía web (phase sau) |
 | Đóng gói | Docker + docker-compose | Cô lập compile, ghép service, dễ chạy local & deploy |
 | Test | Vitest + React Testing Library | Nhanh, hợp hệ sinh thái TS/React |

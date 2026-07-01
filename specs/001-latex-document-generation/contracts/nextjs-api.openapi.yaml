@@ -1,0 +1,119 @@
+openapi: 3.1.0
+info:
+  title: AI LaTeX Generator — Next.js BFF API (MVP)
+  version: 1.0.0
+  description: >
+    Hợp đồng cho các API route của Next.js. Nguồn chuẩn type: docs/11-data-model.md.
+    Quyết định đã chốt: /api/document trả base64 JSON (single response), /api/compile trả PDF binary,
+    repair-fail trả HTTP 200 kèm cờ error.
+paths:
+  /api/document:
+    post:
+      summary: Orchestrator — generate → validate → compile → patch (endpoint chính UI dùng)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DocumentRequest' }
+      responses:
+        '200':
+          description: Thành công (DocumentResponse) HOẶC thất bại nghiệp vụ (DocumentError). Phân biệt bằng trường `error`.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/DocumentResponse'
+                  - $ref: '#/components/schemas/DocumentError'
+        '400': { description: Input không hợp lệ, $ref: '#/components/responses/ErrorBody' }
+        '429': { description: Vượt rate limit (10/phút/IP mặc định), $ref: '#/components/responses/ErrorBody' }
+        '502': { description: AI provider hoặc compile-service lỗi, $ref: '#/components/responses/ErrorBody' }
+        '500': { description: Lỗi không xác định, $ref: '#/components/responses/ErrorBody' }
+  /api/generate:
+    post:
+      summary: Chỉ sinh LaTeX (nội bộ/test)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DocumentRequest' }
+      responses:
+        '200':
+          description: LaTeX sinh ra
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [latex]
+                properties:
+                  latex: { type: string }
+        '400': { $ref: '#/components/responses/ErrorBody' }
+        '429': { $ref: '#/components/responses/ErrorBody' }
+        '502': { $ref: '#/components/responses/ErrorBody' }
+        '500': { $ref: '#/components/responses/ErrorBody' }
+  /api/compile:
+    post:
+      summary: Proxy compile — trả PDF binary hoặc log lỗi
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [latex]
+              properties:
+                latex: { type: string }
+      responses:
+        '200':
+          description: Thành công (PDF binary) hoặc compile lỗi (JSON)
+          content:
+            application/pdf:
+              schema: { type: string, format: binary }
+            application/json:
+              schema: { $ref: '#/components/schemas/CompileFailure' }
+        '500': { $ref: '#/components/responses/ErrorBody' }
+components:
+  responses:
+    ErrorBody:
+      description: Lỗi giao thức
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [error]
+            properties:
+              error: { type: string }
+  schemas:
+    DocumentRequest:
+      type: object
+      required: [description, docType]
+      properties:
+        description: { type: string, minLength: 1, maxLength: 5000 }
+        docType: { type: string, enum: [article, report], default: article }
+    DocumentResponse:
+      type: object
+      required: [latex, pdfBase64, attempts]
+      properties:
+        latex: { type: string }
+        pdfBase64: { type: string }
+        attempts: { type: integer, minimum: 1 }
+        metadata:
+          type: object
+          properties:
+            engine: { type: string, example: xetex }
+            packages: { type: array, items: { type: string } }
+            template: { type: string, enum: [article, report] }
+        log: { type: string }
+    DocumentError:
+      type: object
+      required: [error, attempts]
+      properties:
+        error: { type: string }
+        latex: { type: string }
+        log: { type: string }
+        attempts: { type: integer, minimum: 1 }
+    CompileFailure:
+      type: object
+      required: [success, log]
+      properties:
+        success: { type: boolean, enum: [false] }
+        log: { type: string }

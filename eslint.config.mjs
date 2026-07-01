@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // compile-service là microservice Node (CommonJS) độc lập — lint riêng.
+    "compile-service/**",
   ]),
 ]);
 

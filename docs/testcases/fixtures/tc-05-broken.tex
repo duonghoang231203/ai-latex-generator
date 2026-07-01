@@ -1,0 +1,26 @@
+% Fixture cho TC-05 (Sửa lỗi compile) — MVP.
+% Lỗi cố ý: (1) thiếu \end{table}; (2) mô phỏng package conflict (float + hyperref thứ tự xấu
+% + dùng \usepackage{subfigure} lỗi thời xung đột). Kỳ vọng: repair loop patch tối thiểu để compile.
+\documentclass{article}
+\usepackage{subfigure} % lỗi thời, dễ xung đột — kỳ vọng thay bằng subcaption
+\usepackage{graphicx}
+
+\begin{document}
+
+\section{Bảng dữ liệu}
+
+Dưới đây là một bảng ví dụ.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{ll}
+Cột A & Cột B \\
+1 & 2 \\
+\end{tabular}
+\caption{Bảng thiếu \textbackslash end\{table\}}
+% LỖI CỐ Ý: thiếu \end{table} ở đây
+
+\section{Kết luận}
+Nội dung không liên quan cần được giữ nguyên khi sửa.
+
+\end{document}

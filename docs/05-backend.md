@@ -142,11 +142,15 @@ flowchart TD
 | AI provider lỗi/timeout | 502 | `{ error }` |
 | Compile service không phản hồi | 502 | `{ error }` |
 | Vượt rate limit | 429 | `{ error }` |
-| Repair loop thất bại sau N lần | 200 hoặc 422 | `{ error, latex, log, attempts }` |
+| Repair loop thất bại sau N lần | 200 | `{ error, latex, log, attempts }` |
 | Lỗi không xác định | 500 | `{ error }` |
 
-> Quyết định: repair-loop-thất-bại trả `200` với cờ lỗi (vì là kết quả "bình thường" của luồng)
-> hoặc `422 Unprocessable`. Chốt cụ thể khi code; UI xử lý cả hai dựa trên trường `error`.
+> **QUYẾT ĐỊNH (đã chốt)**: repair-loop-thất-bại trả **`200`** kèm cờ lỗi trong body
+> (`{ error, latex, log, attempts }`). Lý do: đây là **kết quả "bình thường" của luồng nghiệp vụ**
+> (vẫn sinh ra latex + log hữu ích để người dùng tự xử lý/mang sang Overleaf), không phải lỗi giao
+> thức. UI phân biệt success/fail dựa trên sự hiện diện của trường `error`, không dựa HTTP status.
+> Các lỗi thực sự (input sai `400`, provider/compile-service lỗi `502`, rate limit `429`, khác `500`)
+> vẫn dùng status tương ứng ở bảng trên.
 
 ## 5.7. Truyền PDF: base64 vs binary
 
@@ -155,8 +159,11 @@ flowchart TD
 | **Base64 trong JSON** | Dễ kèm `latex`, `attempts` cùng response | Phình ~33% dung lượng |
 | **Binary stream** | Hiệu quả, đúng `Content-Type` | Khó kèm metadata; cần header riêng cho attempts |
 
-**Đề xuất MVP**: base64 trong JSON cho `/api/document` (vì cần kèm `latex` + `attempts`);
-endpoint `/api/compile` thuần có thể trả binary.
+**QUYẾT ĐỊNH (đã chốt cho MVP)**: `/api/document` trả **base64 trong JSON** (vì cần kèm `latex`,
+`attempts`, `metadata`, `log` trong cùng một response). `/api/compile` (endpoint thuần compile) trả
+**PDF binary** (`Content-Type: application/pdf`) khi thành công, JSON `{ success:false, log }` khi
+lỗi. Lý do: tối ưu cho từng use case — orchestrator cần đóng gói nhiều trường nên chấp nhận phình
+~33%; endpoint compile thuần ưu tiên hiệu quả truyền tải.
 
 ## 5.8. Cấu hình (biến môi trường)
 

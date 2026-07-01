@@ -29,8 +29,15 @@
 - FR-2.4: Chỉ dùng package phổ biến (có trên CTAN, Tectonic tự tải); tránh package hiếm/bịa.
 
 ### FR-3: Kiểm tra AST/parser trước compile
-- FR-3.1: Trước khi compile, hệ thống **parse/validate** mã LaTeX (tree-sitter-latex / unified-latex /
-  latex-utensils) để bắt sớm lỗi cấu trúc (môi trường không đóng, cặp lệnh sai, math mode hở).
+- FR-3.1: Trước khi compile, hệ thống **parse/validate** mã LaTeX để bắt sớm lỗi cấu trúc
+  (môi trường không đóng, cặp lệnh sai, math mode hở).
+
+  > **QUYẾT ĐỊNH (đã chốt cho MVP)**: dùng **`latex-utensils`** làm parser chính cho lớp validation.
+  > Lý do: parser LaTeX/BibTeX thuần JS/TS, xuất AST kèm **thông tin vị trí (dòng/cột)** và ném lỗi
+  > parse rõ ràng — rất hợp để tạo *diagnostics* đưa vào repair loop; đã được kiểm nghiệm trong hệ
+  > sinh thái (LaTeX Workshop). **`unified-latex`** để dành cho **v1** khi cần thao tác/biến đổi/autofix
+  > AST có cấu trúc; **`tree-sitter-latex`** cân nhắc cho editor (highlight/incremental) ở v1+.
+  > AST chỉ là lớp canh gác best-effort (FR-3.3); compiler vẫn là nguồn sự thật cuối.
 - FR-3.2: Nếu AST validation phát hiện lỗi, đưa chẩn đoán vào vòng lặp sửa **trước khi** tốn một lần compile.
 - FR-3.3: AST validation là **lớp canh gác best-effort** (LaTeX Turing-complete, không parse hoàn hảo);
   compiler vẫn là nguồn sự thật cuối cùng.
@@ -78,7 +85,12 @@
   content sanitization, provenance tagging, prompt compartmentalization, policy ở tool layer.
 
 ### NFR-6: Đa ngôn ngữ (multilingual)
-- NFR-6.1: Hỗ trợ **Unicode** ngay từ MVP (đặc biệt tiếng Việt) — chọn engine/cấu hình phù hợp.
+- NFR-6.1: Hỗ trợ **Unicode** ngay từ MVP (đặc biệt tiếng Việt).
+
+  > **QUYẾT ĐỊNH (đã chốt cho MVP)**: engine mặc định là **XeLaTeX** (chính là XeTeX mà Tectonic dùng
+  > mặc định), xử lý Unicode/tiếng Việt bằng **`fontspec`** (+ `polyglossia` khi cần đa ngôn ngữ) với
+  > font hỗ trợ tiếng Việt. Không dùng đường `pdflatex + inputenc/babel` ở MVP. Chi tiết prompt: xem
+  > [06-ai-integration.md](./06-ai-integration.md) §6.3.1.
 - NFR-6.2 (v1+): Coi CJK và script không-Latin (RTL) là **yêu cầu hạng nhất**, không phải add-on;
   chọn XeLaTeX/LuaLaTeX khi cần.
 

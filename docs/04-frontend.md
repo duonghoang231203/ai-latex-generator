@@ -10,8 +10,21 @@ bấm nút → xem PDF. Mọi sự phức tạp (sinh LaTeX, compile, sửa lỗ
 - **Next.js 16 App Router** (`app/`), **React 19**, **TypeScript**, **Tailwind CSS 4**.
 - Trang chính là `app/page.tsx`. Các thành phần tương tác là **Client Components**
   (`'use client'`) vì cần state và sự kiện.
-- Lưu ý: dự án dùng Next.js 16 — đọc `node_modules/next/dist/docs/` trước khi code để
-  tránh dùng API/convention cũ (theo `AGENTS.md`).
+
+> **GHI CHÚ KỸ THUẬT — ràng buộc Next.js 16 (BẮT BUỘC đọc trước khi code)**
+> Đây là bản Next.js **có breaking changes** so với kiến thức cũ (theo `AGENTS.md`/`CLAUDE.md`).
+> Trước khi viết bất kỳ code Next.js nào, **đọc `node_modules/next/dist/docs/`** cho đúng phiên bản
+> đã cài; không dùng API/convention theo trí nhớ. Các điểm cần đặc biệt kiểm chứng khi triển khai:
+> - **Async request APIs**: `cookies()`, `headers()`, `params`, `searchParams` có thể là **bất đồng bộ**
+>   (phải `await`) — ảnh hưởng Route Handlers `/api/*` và Server Components.
+> - **Ranh giới RSC/Client**: mặc định là Server Component; chỉ đánh `'use client'` cho phần cần state/
+>   sự kiện (form, tabs, preview). Không rò rỉ secret/logic server sang client bundle.
+> - **Route Handlers** (`app/api/.../route.ts`): xác nhận chữ ký handler, cách đọc body, cách trả
+>   `Response`/streaming, và cấu hình runtime (`nodejs` vs `edge`) — compile/AI cần **Node runtime**.
+> - **Caching mặc định**: kiểm tra hành vi cache của `fetch`/route mới; các endpoint AI/compile phải
+>   **không cache** (dynamic) vì output phụ thuộc input người dùng.
+> - **Config & fonts**: `next.config.ts`, `next/font`, Tailwind v4 (PostCSS) theo convention bản mới.
+> Chốt phiên bản chính xác của từng API tại thời điểm code, dựa vào docs nội bộ, không phải tài liệu online cũ.
 
 ## 4.3. Bố cục màn hình (layout)
 

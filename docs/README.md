@@ -21,6 +21,11 @@ ngôn ngữ tự nhiên, hệ thống sinh ra một **gói dự án LaTeX compil
 | 4 | Compile engine | **Tectonic** server-side trong **Docker**, chế độ `--untrusted` |
 | 5 | Loại tài liệu (MVP) | Chỉ **article** và **report** (template-first) |
 | 6 | Trạng thái/Auth | **Stateless**, không cần đăng nhập; tải PDF về |
+| 7 | Engine mặc định | **XeLaTeX** (Tectonic/XeTeX) + `fontspec`/`polyglossia` cho tiếng Việt/Unicode |
+| 8 | Thư viện AST | **latex-utensils** (MVP validation); unified-latex để dành v1 (manipulation) |
+| 9 | Provider mặc định | **Anthropic Claude** (`AI_PROVIDER=anthropic`), `temperature=0.2` |
+| 10 | Truyền PDF | `/api/document`: **base64/JSON**; `/api/compile`: **binary** |
+| 11 | Status khi repair fail | **HTTP 200** kèm `{ error, latex, log, attempts }` |
 
 Các năng lực lớn hơn (RAG, Markdown→LaTeX, sửa project nhiều file, OCR công thức, multilingual
 hạng nhất, self-host/local-first) nằm trong **roadmap v1/v2** — xem [08-roadmap.md](./08-roadmap.md).
@@ -39,6 +44,12 @@ hạng nhất, self-host/local-first) nằm trong **roadmap v1/v2** — xem [08-
 | [08-roadmap.md](./08-roadmap.md) | Roadmap phân tầng **MVP / v1 / v2**, task breakdown |
 | [09-evaluation.md](./09-evaluation.md) | Tiêu chí đánh giá + bộ 8 test case + metrics |
 | [10-references.md](./10-references.md) | Bảng nguồn nghiên cứu + thư viện/công cụ tham khảo |
+| [11-data-model.md](./11-data-model.md) | **Data model & API contracts tập trung** (nguồn chuẩn cho type/hợp đồng) |
+| [testcases/](./testcases/) | Bộ 8 ca đánh giá **máy đọc được** (`testcases.json` + schema + fixtures) |
+
+> **Hiến pháp dự án**: các nguyên tắc bất biến (test-first, security-first, provider-agnostic,
+> template-first, verification pipeline, ràng buộc Next.js 16) được chốt tại
+> [`.specify/memory/constitution.md`](../.specify/memory/constitution.md). Khi xung đột, hiến pháp thắng.
 
 ## Tech stack
 
