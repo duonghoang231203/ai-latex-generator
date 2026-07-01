@@ -15,6 +15,7 @@ export interface AnthropicOptions {
   model: string;
   temperature: number;
   timeoutMs: number;
+  maxTokens?: number;
 }
 
 const ENDPOINT = "https://api.anthropic.com/v1/messages";
@@ -38,7 +39,7 @@ export class AnthropicProvider implements LatexProvider {
         },
         body: JSON.stringify({
           model: this.opts.model,
-          max_tokens: 8192,
+          max_tokens: this.opts.maxTokens ?? 8192,
           temperature: this.opts.temperature,
           system: SYSTEM_PROMPT,
           messages: [{ role: "user", content: buildUserPrompt(input) }],

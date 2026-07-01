@@ -11,11 +11,20 @@ services:
       - AI_MODEL=${AI_MODEL:-}
       - AI_BASE_URL=${AI_BASE_URL:-}
       - AI_TEMPERATURE=${AI_TEMPERATURE:-0.2}
+      - AI_MAX_TOKENS=${AI_MAX_TOKENS:-8192}
+      - MAX_INPUT_CHARS=${MAX_INPUT_CHARS:-20000}
+      - MAX_SOURCE_FILES=${MAX_SOURCE_FILES:-10}
+      - MAX_SOURCE_CHARS=${MAX_SOURCE_CHARS:-100000}
+      - MAX_PROMPT_SOURCE_CHARS=${MAX_PROMPT_SOURCE_CHARS:-12000}
       - COMPILE_SERVICE_URL=http://compile-service:8080
       - MAX_REPAIR_ATTEMPTS=${MAX_REPAIR_ATTEMPTS:-3}
-      - MAX_INPUT_CHARS=${MAX_INPUT_CHARS:-5000}
       - REQUEST_TIMEOUT_MS=${REQUEST_TIMEOUT_MS:-60000}
       - RATE_LIMIT_PER_MINUTE=${RATE_LIMIT_PER_MINUTE:-10}
+      - DATA_DIR=${DATA_DIR:-/data}
+    volumes:
+      # Lưu trữ tài liệu đã generate (CRUD + chat-edit). Volume rỗng sẽ kế thừa
+      # quyền sở hữu của /data (appuser) từ image → ghi được dưới non-root.
+      - documents-data:/data
     depends_on:
       - compile-service
 
@@ -50,3 +59,4 @@ services:
 
 volumes:
   tectonic-cache:
+  documents-data:

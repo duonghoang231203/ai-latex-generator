@@ -66,6 +66,10 @@ export class MockProvider implements LatexProvider {
           : { latex: invalidLatex(input.docType) };
       case "happy":
       default:
+        // Lượt chỉnh sửa: trả LaTeX hợp lệ có chứa nội dung chỉ thị (để test được).
+        if (input.editContext) {
+          return { latex: validLatex(input.editContext.instruction, input.docType) };
+        }
         return { latex: validLatex(input.description, input.docType) };
     }
   }

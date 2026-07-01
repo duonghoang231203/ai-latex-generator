@@ -13,6 +13,10 @@
 # testing
 /coverage
 
+# stored documents (file-based data dir)
+/.data/
+/data/
+
 # next.js
 /.next/
 /out/

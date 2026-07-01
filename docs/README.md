@@ -20,7 +20,7 @@ ngôn ngữ tự nhiên, hệ thống sinh ra một **gói dự án LaTeX compil
 | 3 | AI provider | **Provider-agnostic** (pluggable), mặc định Claude/GPT |
 | 4 | Compile engine | **Tectonic** server-side trong **Docker**, chế độ `--untrusted` |
 | 5 | Loại tài liệu (MVP) | Chỉ **article** và **report** (template-first) |
-| 6 | Trạng thái/Auth | **Stateless**, không cần đăng nhập; tải PDF về |
+| 6 | Trạng thái/Auth | **Lưu trữ file-based** (`DATA_DIR`) + CRUD + chat-edit; **chưa có auth** (không đăng nhập); tải PDF về |
 | 7 | Engine mặc định | **XeLaTeX** (Tectonic/XeTeX) + `fontspec`/`polyglossia` cho tiếng Việt/Unicode |
 | 8 | Thư viện AST | **latex-utensils** (MVP validation); unified-latex để dành v1 (manipulation) |
 | 9 | Provider mặc định | **Anthropic Claude** (`AI_PROVIDER=anthropic`), `temperature=0.2` |

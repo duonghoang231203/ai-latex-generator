@@ -42,6 +42,62 @@ export interface DocumentError {
   log?: string;             // log lỗi lần cuối (đã rút gọn)
   attempts: number;
 }
+
+/** File nguồn người dùng tải lên (đã đọc thành text ở client). */
+export interface SourceFile {
+  name: string;
+  content: string;
+}
+
+/** Yêu cầu chỉnh sửa một tài liệu đã có (chat-edit). */
+export interface EditRequest {
+  currentLatex: string;
+  instruction: string;
+  docType: DocType;
+}
+```
+
+### Kiểu dữ liệu lưu trữ (file-based persistence)
+
+```ts
+// types/document.ts (tiếp)
+
+export type ChatRole = 'user' | 'assistant';
+
+/** Một lượt trong lịch sử chat chỉnh sửa tài liệu. */
+export interface ChatMessage {
+  id: string;
+  role: ChatRole;
+  content: string;
+  createdAt: string;        // ISO 8601
+}
+
+/** Tài liệu được lưu trữ (một file JSON / tài liệu trong DATA_DIR/documents). */
+export interface StoredDocument {
+  id: string;               // randomUUID
+  title: string;            // suy ra từ mô tả / tên file nguồn
+  docType: DocType;
+  description: string;
+  latex: string;
+  pdfBase64?: string;
+  log?: string;
+  error?: string;           // thất bại nghiệp vụ gần nhất (nếu có)
+  attempts: number;
+  messages: ChatMessage[];  // lịch sử chat-edit
+  createdAt: string;        // ISO 8601
+  updatedAt: string;        // ISO 8601
+}
+
+/** Bản tóm tắt cho danh sách (không kèm latex/pdf nặng). */
+export interface DocumentSummary {
+  id: string;
+  title: string;
+  docType: DocType;
+  attempts: number;
+  hasPdf: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
 ```
 
 ## 11.2. Kiểu dữ liệu tầng compile
@@ -71,10 +127,18 @@ export interface ErrorContext {
   errorLog: string;         // diagnostics (AST) hoặc log Tectonic (đã rút gọn)
 }
 
+/** Ngữ cảnh cho lượt CHỈNH SỬA nội dung theo chỉ thị (chat-edit). */
+export interface EditContext {
+  currentLatex: string;
+  instruction: string;
+}
+
 export interface GenerateInput {
   description: string;
   docType: DocType;
-  errorContext?: ErrorContext;   // có => đây là lượt sửa lỗi
+  sources?: SourceFile[];        // tài liệu nguồn (dữ liệu tham khảo)
+  errorContext?: ErrorContext;   // có => lượt sửa lỗi compile/validate
+  editContext?: EditContext;     // có => lượt chỉnh sửa nội dung (chat-edit)
 }
 
 /** Interface duy nhất mà code nghiệp vụ phụ thuộc (Nguyên tắc V — provider-agnostic). */
@@ -105,7 +169,32 @@ export interface ValidationResult {
 
 ## 11.5. Hợp đồng API (HTTP contracts)
 
-### `POST /api/document` — orchestrator (endpoint chính UI dùng)
+### Documents API (có lưu trữ — UI dùng cho luồng chính)
+
+#### `GET /api/documents` — danh sách
+- **200**: `{ documents: DocumentSummary[] }` (sắp xếp `updatedAt` giảm dần).
+
+#### `POST /api/documents` — tạo mới (orchestrator + lưu trữ)
+- **Request**: `DocumentRequest` (kèm `sources?`).
+- **201**: `StoredDocument` (kể cả thất bại nghiệp vụ vẫn có `id` + `latex`/`log`/`error`).
+- **Lỗi**: `400` input · `429` rate limit · `502` provider/compile-service.
+
+#### `GET /api/documents/[id]`
+- **200**: `StoredDocument` · **404**: không tìm thấy.
+
+#### `PATCH /api/documents/[id]` — sửa tiêu đề / mã LaTeX
+- **Request**: `{ title?: string, latex?: string }`. Có `latex` ⇒ validate + recompile (không gọi AI).
+- **200**: `StoredDocument` (kèm `log`/`error` nếu compile lỗi) · **400** · **404** · **502**.
+
+#### `DELETE /api/documents/[id]`
+- **200**: `{ ok: true }` · **404**: không tìm thấy.
+
+#### `POST /api/documents/[id]/chat` — chat-edit
+- **Request**: `{ instruction: string }` (≤ 4000 ký tự).
+- **200**: `StoredDocument` đã cập nhật (latex/pdf mới nếu thành công; giữ bản cũ nếu lỗi) + 2 message.
+- **Lỗi**: `400` thiếu instruction · `404` · `429` rate limit · `502` (vẫn lưu lịch sử chat).
+
+### `POST /api/document` — orchestrator stateless (nội bộ/test, giữ tương thích)
 - **Request** (JSON): `DocumentRequest`.
 - **200 thành công**: `DocumentResponse` (PDF **base64** trong JSON). **[CHỐT §5.7]**
 - **200 thất bại nghiệp vụ**: `DocumentError` (repair loop vượt N lần — phân biệt bằng trường
@@ -144,8 +233,9 @@ export interface ValidationResult {
 | `AI_TEMPERATURE` | Nhiệt độ sinh | `0.2` **[CHỐT §6.6]** |
 | `COMPILE_SERVICE_URL` | URL compile service | `http://compile-service:8080` |
 | `MAX_REPAIR_ATTEMPTS` | Số lần thử compile | `3` |
-| `MAX_INPUT_CHARS` | Giới hạn độ dài mô tả | `5000` |
+| `MAX_INPUT_CHARS` | Giới hạn độ dài mô tả | `20000` |
 | `REQUEST_TIMEOUT_MS` | Timeout gọi AI/compile | `60000` |
+| `DATA_DIR` | Thư mục lưu trữ tài liệu (file-based) | `.data` (Docker: `/data`) |
 
 ### Compile service
 | Biến | Ý nghĩa | Mặc định/Ví dụ |

@@ -16,6 +16,7 @@ export function getProvider(): LatexProvider {
         model: cfg.aiModel || "claude-3-5-sonnet-latest",
         temperature: cfg.aiTemperature,
         timeoutMs: cfg.requestTimeoutMs,
+        maxTokens: cfg.aiMaxTokens,
       });
     case "openai":
       return new OpenAIProvider({
@@ -23,6 +24,7 @@ export function getProvider(): LatexProvider {
         model: cfg.aiModel || "gpt-4o",
         temperature: cfg.aiTemperature,
         timeoutMs: cfg.requestTimeoutMs,
+        maxTokens: cfg.aiMaxTokens,
         baseUrl: cfg.aiBaseUrl,
       });
     case "mock":

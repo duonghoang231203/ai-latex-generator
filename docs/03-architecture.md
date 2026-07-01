@@ -61,10 +61,12 @@ flowchart TB
     end
     subgraph "Next.js Server (BFF)"
         DOC["/api/document<br/>Orchestrator + repair loop"]
+        DOCS["/api/documents(/[id])(/chat)<br/>CRUD + chat-edit"]
         GEN["/api/generate"]
         CMP["/api/compile"]
         AIIF[LatexProvider interface]
         ASTV[AST validation layer]
+        STORE[(File store<br/>DATA_DIR)]
     end
     subgraph External
         AISVC[AI Provider<br/>Claude / GPT]
@@ -73,27 +75,38 @@ flowchart TB
         EXP[Express server]
         TEC["Tectonic --untrusted"]
     end
-    UI -->|POST /api/document| DOC
+    UI -->|POST /api/documents| DOCS
+    UI -->|GET/PATCH/DELETE /api/documents/id| DOCS
+    UI -->|POST /api/documents/id/chat| DOCS
+    DOCS --> DOC
+    DOCS <--> STORE
     DOC --> AIIF --> AISVC
     DOC --> ASTV
     DOC -->|HTTP POST latex| EXP --> TEC
     TEC -->|PDF + log| EXP --> DOC
-    DOC -->|artifact: pdf + latex + attempts| UI
+    DOC -->|artifact: pdf + latex + attempts| DOCS
 ```
 
-**MVP có:** template-first generation, AST validation, compiler-in-the-loop (repair), sandbox.
+**MVP có:** template-first generation, AST validation, compiler-in-the-loop (repair), sandbox,
+**lưu trữ file-based** (`DATA_DIR`), **CRUD tài liệu** đã sinh, và **chat-edit** (chỉnh sửa nội dung
+một tài liệu bằng ngôn ngữ tự nhiên + sửa mã nguồn thủ công).
 **MVP chưa có (v1/v2):** RAG/Vector DB, Git/project storage, auth, CI regression suite, monitoring đầy đủ,
-multi-file editing, conversion, OCR.
+multi-file/agentic editing, conversion, OCR, object storage/DB chia sẻ.
 
 ## 3.3. Thành phần (MVP)
 
 ### 3.3.1. Next.js app
-- **UI layer** (`app/`): form nhập, chọn template, preview PDF, hiển thị source, trạng thái.
+- **UI layer** (`app/`): trang chủ (form nhập + chọn template + **danh sách tài liệu đã lưu**),
+  trang **workspace** `/documents/[id]` (preview PDF, editor mã nguồn, **chat chỉnh sửa**), trạng thái.
 - **API routes (BFF):**
-  - `/api/generate` — gọi AI sinh LaTeX (không compile).
-  - `/api/compile` — gọi compile sandbox.
-  - `/api/document` — **orchestrator**: generate → AST validate → compile → patch loop. Endpoint chính.
-- **AST validation layer** — parse/validate trước khi compile (tree-sitter-latex / unified-latex / latex-utensils).
+  - `/api/generate` — gọi AI sinh LaTeX (không compile). Nội bộ/test.
+  - `/api/compile` — gọi compile sandbox. Nội bộ/test.
+  - `/api/document` — **orchestrator** stateless: generate → AST validate → compile → patch loop. Nội bộ/test (giữ tương thích).
+  - `/api/documents` — **CRUD** tài liệu: `GET` (danh sách), `POST` (tạo mới = orchestrator + **lưu trữ**). Endpoint UI dùng khi tạo.
+  - `/api/documents/[id]` — `GET` / `PATCH` (sửa tiêu đề hoặc mã LaTeX + recompile) / `DELETE`.
+  - `/api/documents/[id]/chat` — **chat-edit**: gửi chỉ thị → AI sửa LaTeX hiện có → validate → compile → lưu.
+- **File store** (`lib/store/`) — lưu trữ tài liệu dạng JSON theo `DATA_DIR` (một file/tài liệu, ghi atomic, chống path traversal).
+- **AST validation layer** — parse/validate trước khi compile (latex-utensils + kiểm khớp môi trường).
 - **Provider abstraction** — `LatexProvider` interface (Claude/GPT/Mock).
 
 ### 3.3.2. Compile sandbox
@@ -212,4 +225,4 @@ flowchart LR
 | AST validation | Có (best-effort) trước compile | Thêm 1 lớp; đổi lại bắt lỗi sớm, tiết kiệm lượt compile |
 | AI provider | Provider-agnostic interface | Thêm lớp trừu tượng; đổi lại không khoá nhà cung cấp |
 | RAG | Hoãn tới v1 | MVP có thể hallucinate hơn; đổi lại ra MVP nhanh |
-| State | Stateless (MVP) | Không lưu lịch sử; đổi lại đơn giản |
+| State | File-based persistence (JSON theo `DATA_DIR`) | Không phải DB/đa-instance; đổi lại lưu được tài liệu + lịch sử chat, đơn giản, không cần hạ tầng ngoài |

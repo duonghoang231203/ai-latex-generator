@@ -17,6 +17,7 @@ describe("GeneratorForm (US1)", () => {
     expect(onSubmit).toHaveBeenCalledWith({
       description: "Một bài báo",
       docType: "report",
+      sources: [],
     });
   });
 });

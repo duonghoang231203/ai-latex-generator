@@ -7,12 +7,19 @@ cộng với **compile service** tách riêng (mô tả ở [07-compile-service.
 
 | Endpoint | Method | Vai trò | Public? |
 |----------|--------|---------|---------|
-| `/api/document` | POST | Orchestrator: generate → compile → repair loop. **Endpoint chính UI dùng.** | Có |
+| `/api/documents` | GET | Liệt kê tài liệu đã lưu (summary). | Có |
+| `/api/documents` | POST | Tạo mới: orchestrator (generate → compile → repair) + **lưu trữ**. **UI dùng khi tạo.** | Có |
+| `/api/documents/[id]` | GET | Đọc một tài liệu (kèm latex, pdf, lịch sử chat). | Có |
+| `/api/documents/[id]` | PATCH | Sửa tiêu đề, hoặc sửa mã LaTeX thủ công → validate + recompile. | Có |
+| `/api/documents/[id]` | DELETE | Xoá tài liệu. | Có |
+| `/api/documents/[id]/chat` | POST | **Chat-edit**: chỉ thị → AI sửa LaTeX → validate → compile → lưu. | Có |
+| `/api/document` | POST | Orchestrator **stateless** (không lưu). Nội bộ/test, giữ tương thích. | Tuỳ chọn |
 | `/api/generate` | POST | Chỉ sinh LaTeX (không compile). Hữu ích để test/tái dùng. | Tuỳ chọn |
 | `/api/compile` | POST | Chỉ compile LaTeX → PDF (gọi compile service). | Tuỳ chọn |
 
-> MVP có thể chỉ phơi `/api/document` ra UI; `/api/generate` và `/api/compile` giữ làm
-> module nội bộ + endpoint phục vụ test. Tách rõ để dễ kiểm thử từng phần.
+> UI ở MVP dùng **`/api/documents*`** (có lưu trữ) cho luồng chính: tạo → xem → sửa (thủ công/chat) → xoá.
+> `/api/document`, `/api/generate`, `/api/compile` giữ làm module nội bộ + endpoint phục vụ test.
+> Chi tiết CRUD + chat-edit + store xem §5.11.
 
 ## 5.2. Kiểu dữ liệu dùng chung
 
@@ -50,7 +57,8 @@ export type CompileResult = CompileSuccess | CompileFailure;
 ```
 
 **Xử lý**
-1. Validate input: `description` không rỗng, độ dài ≤ giới hạn (vd 5.000 ký tự); `docType ∈ {article, report}`.
+1. Validate input: `description` không rỗng (hoặc có ≥1 file nguồn), độ dài ≤ `MAX_INPUT_CHARS`
+   (mặc định 20.000 ký tự); `docType ∈ {article, report}`.
 2. Lấy provider qua factory (`getProvider()` đọc env `AI_PROVIDER`).
 3. Gọi `provider.generate({ description, docType })`.
 4. Trả `{ latex }`.
@@ -174,10 +182,15 @@ lỗi. Lý do: tối ưu cho từng use case — orchestrator cần đóng gói 
 | `AI_MODEL` | Model cụ thể | `claude-...` / `gpt-...` |
 | `COMPILE_SERVICE_URL` | URL compile service | `http://compile-service:8080` |
 | `MAX_REPAIR_ATTEMPTS` | Số lần thử compile | `3` |
-| `MAX_INPUT_CHARS` | Giới hạn độ dài mô tả | `5000` |
+| `MAX_INPUT_CHARS` | Giới hạn độ dài mô tả | `20000` |
 | `REQUEST_TIMEOUT_MS` | Timeout gọi AI/compile | `60000` |
+| `DATA_DIR` | Thư mục lưu trữ tài liệu (file-based) | `.data` (Docker: `/data`) |
 
 Quy tắc: **không log giá trị secret**; chỉ tham chiếu theo tên biến.
+
+> Danh sách env đầy đủ (gồm `AI_BASE_URL`, `AI_MAX_TOKENS`, `MAX_SOURCE_FILES`, `MAX_SOURCE_CHARS`,
+> `MAX_PROMPT_SOURCE_CHARS`, `RATE_LIMIT_PER_MINUTE`...) xem [`.env.example`](../.env.example) và
+> [11-data-model.md](./11-data-model.md) §11.6.
 
 ## 5.9. Rate limiting & lạm dụng
 
@@ -193,3 +206,42 @@ Quy tắc: **không log giá trị secret**; chỉ tham chiếu theo tên biến
   - repair path: compile lỗi lần 1 → sửa → OK, `attempts=2`.
   - fail path: lỗi đủ N lần → trả `error + latex + log`, `attempts=N`.
 - **Integration `/api/compile`**: mock compile service trả PDF / log.
+
+## 5.11. Lưu trữ tài liệu, CRUD & chat-edit
+
+Từ MVP, tài liệu đã sinh được **lưu trữ file-based** để có thể xem lại, chỉnh sửa và xoá.
+
+### 5.11.1. File store (`lib/store/documentStore.ts`)
+- Mỗi tài liệu là **một file JSON** trong `${DATA_DIR}/documents/<id>.json`.
+- Ghi **atomic** (ghi file tạm → `rename`) để tránh file hỏng khi ghi dở.
+- `id` là `randomUUID`; mọi truy cập kiểm **`isValidId`** (chỉ `[A-Za-z0-9_-]`, chống path traversal).
+- API: `createDocument`, `getDocument`, `listDocuments` (trả summary, sắp xếp `updatedAt` giảm dần),
+  `updateDocument`, `appendMessages`, `deleteDocument`.
+- `listDocuments` chịu lỗi thư mục không ghi/đọc được → trả `[]` (không làm sập trang liệt kê).
+
+### 5.11.2. `POST /api/documents` — tạo mới (có lưu trữ)
+1. Rate limit theo IP; validate input như `/api/document`.
+2. Chạy `runDocument` (orchestrator). Kể cả **thất bại nghiệp vụ** vẫn lưu (latex + log + error) để sửa tiếp.
+3. Suy ra `title` (dòng đầu mô tả hoặc tên file nguồn), tạo `StoredDocument`.
+4. Trả **`201`** với `StoredDocument`. UI điều hướng tới `/documents/[id]`.
+
+### 5.11.3. `GET /api/documents` — danh sách
+- Trả `{ documents: DocumentSummary[] }` (không kèm latex/pdf nặng).
+
+### 5.11.4. `GET|PATCH|DELETE /api/documents/[id]`
+- `GET`: `200` `StoredDocument` | `404`.
+- `PATCH` `{ title?, latex? }`: sửa tiêu đề; nếu có `latex` thì **validate + compile lại** (không gọi AI).
+  Lưu kết quả kể cả khi lỗi (kèm `log`/`error`) để người dùng thấy và sửa tiếp. `200` | `404` | `502` (compile service).
+- `DELETE`: `200` `{ ok: true }` | `404`.
+- Route dùng chữ ký Next.js 16: `ctx.params` là **Promise** (`const { id } = await ctx.params`).
+
+### 5.11.5. `POST /api/documents/[id]/chat` — chat-edit
+1. Rate limit theo IP (mỗi lượt gọi AI). Kiểm tra tài liệu tồn tại và có `latex`.
+2. Validate `instruction` (không rỗng, ≤ 4000 ký tự).
+3. Gọi `runEdit({ currentLatex, instruction, docType })` → generate(editContext) → validate → compile → repair loop.
+4. Nối 2 message (user + assistant) vào lịch sử; nếu thành công cập nhật `latex`/`pdfBase64`,
+   nếu thất bại **giữ nguyên** tài liệu cũ (không phá bản đang có) + message cảnh báo.
+5. Trả `200` `StoredDocument` (đã cập nhật). Lỗi hạ tầng: `502` nhưng vẫn lưu lịch sử chat.
+
+> Kiểu dữ liệu `StoredDocument`, `ChatMessage`, `DocumentSummary`, `EditRequest` — xem
+> [11-data-model.md](./11-data-model.md) §11.1.

@@ -12,10 +12,17 @@ export interface ErrorContext {
   errorLog: string;        // log lỗi từ Tectonic
 }
 
+export interface EditContext {
+  currentLatex: string;    // mã LaTeX hiện tại của tài liệu
+  instruction: string;     // chỉ thị chỉnh sửa (ngôn ngữ tự nhiên)
+}
+
 export interface GenerateInput {
   description: string;
   docType: 'article' | 'report';
-  errorContext?: ErrorContext;   // có => đây là lượt sửa lỗi
+  sources?: SourceFile[];        // tài liệu nguồn người dùng tải lên (dữ liệu tham khảo)
+  errorContext?: ErrorContext;   // có => lượt sửa lỗi compile/validate
+  editContext?: EditContext;     // có => lượt chỉnh sửa nội dung theo yêu cầu (chat-edit)
 }
 
 export interface LatexProvider {
@@ -113,6 +120,24 @@ Chỉ trả về mã LaTeX đã sửa hoàn chỉnh.
 --- Chẩn đoán (AST) / Log lỗi (Tectonic) ---
 {diagnostics | errorLog (đã rút gọn quanh dòng lỗi)}
 ```
+
+### 6.3.4. Edit prompt — khi có `editContext` (chat-edit)
+Khi người dùng yêu cầu chỉnh sửa một tài liệu **đã có** (qua `/api/documents/[id]/chat`), provider
+nhận `editContext = { currentLatex, instruction }` và trả về **toàn bộ tài liệu đã cập nhật**:
+```
+Đây là một tài liệu LaTeX ĐÃ CÓ. Người dùng muốn CHỈNH SỬA nội dung theo yêu cầu bên dưới.
+Hãy áp dụng yêu cầu và trả về TOÀN BỘ tài liệu LaTeX ĐÃ CẬP NHẬT, hoàn chỉnh và compile được.
+Giữ nguyên các phần KHÔNG liên quan đến yêu cầu; chỉ thay đổi những gì cần thiết.
+Chỉ trả về mã LaTeX, KHÔNG giải thích, KHÔNG markdown fence.
+
+--- YÊU CẦU CHỈNH SỬA (chỉ thị của người dùng) ---
+{instruction}
+
+--- TÀI LIỆU LATEX HIỆN TẠI ---
+{currentLatex}
+```
+Sau lượt edit, nếu validate/compile lỗi thì tiếp tục dùng **repair prompt** (§6.3.3) để tự sửa,
+vẫn giới hạn bởi `MAX_REPAIR_ATTEMPTS`. Xem `runEdit` ở [05-backend.md](./05-backend.md) §5.11.5.
 
 ## 6.4. Vòng lặp generate → validate → compile → patch
 

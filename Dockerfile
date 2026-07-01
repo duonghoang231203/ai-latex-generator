@@ -17,6 +17,10 @@ ENV NODE_ENV=production
 ENV HOSTNAME=0.0.0.0
 ENV PORT=3000
 RUN useradd --create-home appuser
+# Thư mục lưu tài liệu (file-based) — cần ghi được bởi non-root appuser.
+# Mount named volume vào đây (docker-compose) để giữ dữ liệu qua các lần restart.
+RUN mkdir -p /data && chown appuser:appuser /data
+ENV DATA_DIR=/data
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static

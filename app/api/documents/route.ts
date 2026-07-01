@@ -1,18 +1,26 @@
-// app/api/document/route.ts
+// app/api/documents/route.ts
+// CRUD tài liệu: GET (danh sách), POST (tạo mới = generate + lưu trữ).
 import { getConfig } from "@/lib/config";
-import { getProvider } from "@/lib/ai/factory";
 import { validateDocumentInput } from "@/lib/validation/input";
 import { runDocument } from "@/lib/orchestrator/document";
-import { compileLatex, CompileServiceError } from "@/lib/compile/client";
+import { buildOrchestratorDeps, deriveTitle } from "@/lib/orchestrator/deps";
+import { CompileServiceError } from "@/lib/compile/client";
 import { getRateLimiter, clientIp } from "@/lib/ratelimit/tokenBucket";
+import { createDocument, listDocuments } from "@/lib/store/documentStore";
+import { isDocumentError } from "@/lib/types/document";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+export async function GET(): Promise<Response> {
+  const docs = await listDocuments();
+  return Response.json({ documents: docs }, { status: 200 });
+}
+
 export async function POST(request: Request): Promise<Response> {
   const cfg = getConfig();
 
-  // Rate limit theo IP (10/phút mặc định).
+  // Rate limit theo IP (tạo mới gọi AI).
   const limiter = getRateLimiter(cfg.rateLimitPerMinute);
   const ip = clientIp(request.headers);
   if (!limiter.take(ip)) {
@@ -39,25 +47,29 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   try {
-    const provider = getProvider();
     const result = await runDocument(
       {
         description: parsed.value.description,
         docType: parsed.value.docType,
         sources: parsed.value.sources,
       },
-      {
-        provider,
-        maxAttempts: cfg.maxRepairAttempts,
-        compile: (latex) =>
-          compileLatex(latex, {
-            serviceUrl: cfg.compileServiceUrl,
-            timeoutMs: cfg.requestTimeoutMs,
-          }),
-      },
+      buildOrchestratorDeps(),
     );
-    // Thành công hoặc thất bại nghiệp vụ đều trả 200 (phân biệt bằng trường 'error').
-    return Response.json(result, { status: 200 });
+
+    const failed = isDocumentError(result);
+    const doc = await createDocument({
+      title: deriveTitle(parsed.value.description, parsed.value.sources),
+      docType: parsed.value.docType,
+      description: parsed.value.description,
+      latex: result.latex ?? "",
+      pdfBase64: failed ? undefined : result.pdfBase64,
+      log: result.log,
+      error: failed ? result.error : undefined,
+      attempts: result.attempts,
+    });
+
+    // Trả tài liệu đã lưu (kể cả thất bại nghiệp vụ) — client điều hướng tới workspace.
+    return Response.json(doc, { status: 201 });
   } catch (e) {
     if (e instanceof CompileServiceError) {
       return Response.json(
@@ -65,7 +77,6 @@ export async function POST(request: Request): Promise<Response> {
         { status: 502 },
       );
     }
-    // Lỗi provider AI hoặc khác.
     const msg = e instanceof Error ? e.message : "Lỗi không xác định";
     return Response.json({ error: `Lỗi xử lý: ${msg}` }, { status: 502 });
   }

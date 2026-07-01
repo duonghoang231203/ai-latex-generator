@@ -110,7 +110,8 @@
 - NFR-3.4: Có test cho từng layer (unit, integration, component).
 
 ### NFR-4: Khả năng mở rộng
-- NFR-4.1: Stateless ở MVP, nhưng kiến trúc cho phép thêm auth/lưu trữ sau (xem roadmap).
+- NFR-4.1: MVP đã có **lưu trữ file-based** (`DATA_DIR`) cho tài liệu + lịch sử chat; kiến trúc cho
+  phép nâng lên DB chia sẻ + auth sau (xem roadmap).
 - NFR-4.2: Thêm loại tài liệu mới (slides, letter...) qua hệ thống template/prompt.
 - NFR-4.3: Compile service scale ngang được (nhiều instance sau load balancer).
 

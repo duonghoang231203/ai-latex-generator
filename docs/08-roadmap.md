@@ -18,6 +18,12 @@ chạy được/demo được, kết thúc bằng việc ghép mọi thứ lại
 sinh được, validate được, compile được, preview được, tự sửa lỗi cơ bản. Chỉ cần 2–3 template +
 prompt tốt + compile sandbox là đủ kiểm nghiệm product-market fit. RAG và fine-tuning để **sau**.
 
+> **Đã bổ sung ngoài phạm vi MVP gốc**: **lưu trữ file-based** (`DATA_DIR`) + **CRUD** tài liệu +
+> **chỉnh sửa một tài liệu** trong app (sửa mã nguồn thủ công + recompile, và **chat-edit** bằng
+> ngôn ngữ tự nhiên có lịch sử hội thoại). Đây là phần rút gọn/đi trước của các mục v1
+> ("Editor LaTeX trong app", "Chỉnh sửa project có sẵn"). Phần **RAG, đa file/agentic, auth & DB
+> chia sẻ, Markdown→LaTeX, OCR** vẫn thuộc v1/v2.
+
 > Phần §8.1–§8.4 dưới đây là **chi tiết task breakdown của giai đoạn MVP**.
 
 ## 8.1. Thứ tự task (MVP)

@@ -55,17 +55,26 @@ Trên màn hình hẹp (mobile/tablet): hai panel xếp dọc (input trên, outp
 ```
 app/
 ├── layout.tsx                 (root layout - đã có)
-├── page.tsx                   (trang chính, ghép các component)
+├── page.tsx                   (Server Component: đọc danh sách tài liệu → render HomeClient)
+├── documents/
+│   └── [id]/page.tsx           (Server Component: đọc tài liệu theo id → render DocumentWorkspace)
 └── components/
-    ├── GeneratorForm.tsx       (chọn docType + textarea + nút submit)
+    ├── HomeClient.tsx          (client: form tạo + điều hướng + danh sách tài liệu)
+    ├── GeneratorForm.tsx       (chọn docType + textarea + upload nguồn + submit)
     ├── DocTypeSelect.tsx       (dropdown article/report)
-    ├── ResultPanel.tsx         (tab PDF | source, nút download)
+    ├── DocumentList.tsx        (danh sách tài liệu đã lưu, mở/xoá)
+    ├── DocumentWorkspace.tsx   (client: tab PDF | mã nguồn (sửa+recompile) + chat, xoá)
+    ├── ChatEditor.tsx          (khung chat: lịch sử message + ô nhập chỉ thị)
+    ├── ResultPanel.tsx         (tab PDF | source — dùng cho luồng stateless/test)
     ├── PdfPreview.tsx          (hiển thị PDF từ blob/base64)
-    ├── LatexSource.tsx         (hiển thị mã LaTeX, read-only ở MVP)
-    └── StatusBanner.tsx        (loading / sửa lỗi / lỗi / thành công)
+    ├── LatexSource.tsx         (hiển thị mã LaTeX read-only)
+    └── StatusBanner.tsx        (loading / lỗi / thành công)
 ```
 
-> Tổ chức `app/components/` là gợi ý; có thể đặt ở `components/` ngoài `app/` tuỳ convention chốt khi code.
+> **Fetch dữ liệu ở Server Component**: trang chủ và trang workspace đọc store **server-side** rồi
+> truyền `initialDocuments`/`initialDoc` xuống client (tránh fetch-trong-effect; hợp quy tắc
+> `react-hooks/set-state-in-effect` của React 19). Các thao tác mutate (tạo/sửa/chat/xoá) gọi API
+> trong event handler và cập nhật state cục bộ.
 
 ## 4.5. State (phía client)
 
@@ -98,14 +107,20 @@ interface UIState {
 
 ## 4.6. Luồng tương tác
 
-1. Người dùng chọn `docType`, nhập mô tả.
-2. Bấm **Tạo tài liệu** → validate (không rỗng) → `status = 'generating'`.
-3. Gọi `POST /api/document` với `{ description, docType }`.
-4. Nhận response:
-   - **Thành công**: tạo object URL từ PDF → `status = 'success'`, hiển thị preview + cho download,
-     hiển thị `attempts`.
-   - **Lỗi**: `status = 'error'`, hiển thị thông báo thân thiện + (tuỳ chọn) xem LaTeX/log gần nhất.
-5. Người dùng có thể sửa mô tả và thử lại.
+**Trang chủ (`/`)** — tạo mới + danh sách:
+1. Người dùng chọn `docType`, nhập mô tả (và/hoặc tải file nguồn).
+2. Bấm **Tạo tài liệu** → validate (không rỗng) → `status = 'loading'`.
+3. Gọi `POST /api/documents` với `{ description, docType, sources }`.
+4. Nhận `StoredDocument` (được **lưu trữ**, có `id`) → điều hướng sang workspace `/documents/[id]`
+   (kể cả khi thất bại nghiệp vụ vẫn có `id` để vào sửa).
+5. `DocumentList` hiển thị các tài liệu đã lưu; mở lại hoặc xoá.
+
+**Trang workspace (`/documents/[id]`)** — xem & chỉnh sửa:
+- Tab **PDF**: preview + tải PDF (nếu có).
+- Tab **Mã nguồn**: sửa LaTeX thủ công → **Lưu & biên dịch** (`PATCH /api/documents/[id]`) → recompile.
+- **Chat chỉnh sửa**: nhập chỉ thị → `POST /api/documents/[id]/chat` → AI sửa LaTeX → recompile →
+  cập nhật PDF + lịch sử chat (hiển thị lạc quan lượt của người dùng).
+- **Xoá** tài liệu → `DELETE /api/documents/[id]` → về trang chủ.
 
 ## 4.7. Xử lý PDF ở client
 

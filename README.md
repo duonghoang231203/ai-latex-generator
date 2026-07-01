@@ -39,5 +39,7 @@ npm run lint && npm run build  # lint + build
 Test-case đánh giá: `docs/testcases/testcases.json` (MVP: TC-01/02/05), chạy qua `tests/eval/`.
 
 ## Trạng thái
-MVP: soạn `article`/`report` + repair loop + sandbox. RAG, Markdown→LaTeX, OCR, đa ngôn ngữ hạng nhất,
-auth/lưu trữ thuộc v1/v2 — xem `docs/08-roadmap.md`.
+MVP: soạn `article`/`report` + repair loop + sandbox, **lưu trữ file-based** (`DATA_DIR`) với **CRUD**
+tài liệu và **chat-edit** (chỉnh sửa nội dung bằng ngôn ngữ tự nhiên + sửa mã nguồn thủ công + recompile).
+RAG, Markdown→LaTeX, OCR, đa ngôn ngữ hạng nhất, chỉnh sửa đa file/agentic, auth & DB chia sẻ thuộc
+v1/v2 — xem `docs/08-roadmap.md`.

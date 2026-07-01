@@ -5,6 +5,7 @@ import type {
   DocumentRequest,
   DocumentResult,
   DocumentMetadata,
+  EditRequest,
 } from "@/lib/types/document";
 import type { LatexProvider } from "@/lib/ai/types";
 import { validateLatex, diagnosticsToLog, type ValidationResult } from "@/lib/validation/validate";
@@ -36,26 +37,23 @@ function metadataFor(latex: string, docType: DocType): DocumentMetadata {
 }
 
 /**
- * Orchestrator: generate → AST validate → compile → patch, tối đa maxAttempts.
- * `attempts` = số lần generate. Happy path = 1. Trả DocumentResponse hoặc DocumentError.
+ * Vòng lặp validate → compile → patch DÙNG CHUNG cho cả generate và edit.
+ * `initialLatex` là LaTeX xuất phát; `regenerate(prev, log)` được gọi để sửa lỗi.
+ * `attempts` = số lần sinh/sửa LaTeX. Bị chặn cứng bởi maxAttempts (không vô hạn).
  */
-export async function runDocument(
-  req: DocumentRequest,
+async function runRepairLoop(
+  initialLatex: string,
+  regenerate: (previousLatex: string, errorLog: string) => Promise<string>,
+  docType: DocType,
   deps: OrchestratorDeps,
 ): Promise<DocumentResult> {
   const validate = deps.validate ?? validateLatex;
   const maxAttempts = Math.max(1, deps.maxAttempts);
 
   let attempts = 1;
-  let latex = (
-    await deps.provider.generate({
-      description: req.description,
-      docType: req.docType,
-    })
-  ).latex;
+  let latex = initialLatex;
   let lastLog = "";
 
-  // Vòng lặp bị chặn bởi maxAttempts (không vô hạn).
   for (;;) {
     // 1) AST validation (rẻ) trước compile.
     const v = validate(latex);
@@ -69,7 +67,7 @@ export async function runDocument(
           latex,
           pdfBase64: toBase64(c.pdf),
           attempts,
-          metadata: metadataFor(latex, req.docType),
+          metadata: metadataFor(latex, docType),
         };
       }
       lastLog = truncateLog(c.log);
@@ -88,12 +86,74 @@ export async function runDocument(
 
     // 3) Patch: đưa log/diagnostics cho provider sửa.
     attempts += 1;
-    latex = (
-      await deps.provider.generate({
-        description: req.description,
-        docType: req.docType,
-        errorContext: { previousLatex: latex, errorLog: lastLog },
-      })
-    ).latex;
+    latex = await regenerate(latex, lastLog);
   }
 }
+
+/**
+ * Orchestrator: generate → AST validate → compile → patch, tối đa maxAttempts.
+ * `attempts` = số lần generate. Happy path = 1. Trả DocumentResponse hoặc DocumentError.
+ */
+export async function runDocument(
+  req: DocumentRequest,
+  deps: OrchestratorDeps,
+): Promise<DocumentResult> {
+  const initial = (
+    await deps.provider.generate({
+      description: req.description,
+      docType: req.docType,
+      sources: req.sources,
+    })
+  ).latex;
+
+  return runRepairLoop(
+    initial,
+    async (previousLatex, errorLog) =>
+      (
+        await deps.provider.generate({
+          description: req.description,
+          docType: req.docType,
+          sources: req.sources,
+          errorContext: { previousLatex, errorLog },
+        })
+      ).latex,
+    req.docType,
+    deps,
+  );
+}
+
+/**
+ * Chỉnh sửa tài liệu ĐÃ CÓ theo chỉ thị người dùng (chat-edit):
+ * generate(editContext) → AST validate → compile → patch, tối đa maxAttempts.
+ * Trả DocumentResponse (LaTeX + PDF mới) hoặc DocumentError (giữ LaTeX gần nhất).
+ */
+export async function runEdit(
+  req: EditRequest,
+  deps: OrchestratorDeps,
+): Promise<DocumentResult> {
+  const initial = (
+    await deps.provider.generate({
+      description: "",
+      docType: req.docType,
+      editContext: {
+        currentLatex: req.currentLatex,
+        instruction: req.instruction,
+      },
+    })
+  ).latex;
+
+  return runRepairLoop(
+    initial,
+    async (previousLatex, errorLog) =>
+      (
+        await deps.provider.generate({
+          description: "",
+          docType: req.docType,
+          errorContext: { previousLatex, errorLog },
+        })
+      ).latex,
+    req.docType,
+    deps,
+  );
+}
+

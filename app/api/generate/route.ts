@@ -15,7 +15,11 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ error: "JSON không hợp lệ" }, { status: 400 });
   }
 
-  const parsed = validateDocumentInput(body, cfg.maxInputChars);
+  const parsed = validateDocumentInput(body, {
+    maxInputChars: cfg.maxInputChars,
+    maxSourceFiles: cfg.maxSourceFiles,
+    maxSourceChars: cfg.maxSourceChars,
+  });
   if (!parsed.ok) {
     return Response.json({ error: parsed.error }, { status: 400 });
   }
@@ -25,6 +29,7 @@ export async function POST(request: Request): Promise<Response> {
     const { latex } = await provider.generate({
       description: parsed.value.description,
       docType: parsed.value.docType,
+      sources: parsed.value.sources,
     });
     return Response.json({ latex });
   } catch (e) {
