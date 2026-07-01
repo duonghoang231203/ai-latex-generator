@@ -7,6 +7,32 @@ export interface SanitizeResult {
   reason?: string;
 }
 
+// Font Windows độc quyền (không có trên Linux) → font tương đương sẵn có trong image compile.
+const FONT_REMAP: Record<string, string> = {
+  "times new roman": "Liberation Serif",
+  times: "TeX Gyre Termes",
+  arial: "Liberation Sans",
+  helvetica: "TeX Gyre Heros",
+  calibri: "Liberation Sans",
+  cambria: "TeX Gyre Termes",
+  "courier new": "Liberation Mono",
+  courier: "Liberation Mono",
+  georgia: "TeX Gyre Termes",
+  verdana: "Liberation Sans",
+  tahoma: "Liberation Sans",
+};
+
+/** Đổi \set*font{FontWindows} sang font Linux tương đương để compile được dưới --untrusted. */
+export function remapFonts(latex: string): string {
+  return latex.replace(
+    /(\\set(?:main|sans|mono)font)(\[[^\]]*\])?\{([^}]+)\}/g,
+    (whole, cmd: string, opt: string | undefined, name: string) => {
+      const repl = FONT_REMAP[name.trim().toLowerCase()];
+      return repl ? `${cmd}${opt ?? ""}{${repl}}` : whole;
+    },
+  );
+}
+
 export function sanitizeLatex(raw: string): SanitizeResult {
   let text = raw ?? "";
 
@@ -28,6 +54,9 @@ export function sanitizeLatex(raw: string): SanitizeResult {
   }
 
   text = text.trim() + "\n";
+
+  // Đổi font Windows độc quyền → font Linux tương đương (chống model phớt lờ prompt).
+  text = remapFonts(text);
 
   const hasClass = /\\documentclass/.test(text);
   const hasBegin = /\\begin\{document\}/.test(text);

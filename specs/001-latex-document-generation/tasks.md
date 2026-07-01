@@ -135,7 +135,7 @@
 - [X] T049 [P] Hoàn thiện `.env.example` + cập nhật `README.md` cách chạy `docker compose up`
 - [X] T050 Security suite: `\write18`/shell-escape bị từ chối, xác nhận `--untrusted`, non-root trong `compile-service/test/security.test.js` (doc 09 §9.1 mục 5)
 - [X] T051 [P] Test-case runner đọc `docs/testcases/testcases.json` lọc `scope=mvp` (TC-01/02/05) trong `tests/eval/testcases.test.ts`
-- [ ] T052 Chạy kiểm chứng `quickstart.md` end-to-end (V1–V5) qua `docker compose up` — ⏳ CHƯA CHẠY: môi trường hiện không có Docker/Tectonic + AI key thật. Cần chạy khi có hạ tầng.
+- [ ] T052 Chạy kiểm chứng `quickstart.md` end-to-end (V1–V5) qua `docker compose up` — ✅ V1 (happy path) ĐÃ VERIFY THẬT: `docker compose up` trên máy arm64, `/api/document` (mock) → Tectonic compile → PDF (attempts:1, engine xetex). Còn lại: V4 security \write18 và chạy với AI provider thật (OpenAI/Anthropic) khi có key.
 - [X] T053 [P] Lint/build sạch toàn repo + đồng bộ ghi chú `docs/` nếu có sai khác thực tế
 
 ---

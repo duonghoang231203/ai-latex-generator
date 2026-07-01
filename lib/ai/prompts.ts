@@ -12,6 +12,10 @@ export const SYSTEM_PROMPT = [
   "- KHÔNG dùng \\write18 / shell-escape / lệnh đọc-ghi file ngoài.",
   "- Dùng UTF-8. Vì compile bằng XeLaTeX: dùng fontspec (và polyglossia khi cần)",
   "  cho Unicode/tiếng Việt. KHÔNG dùng inputenc/fontenc kiểu pdfLaTeX.",
+  "- KHÔNG đặt \\setmainfont/\\setsansfont với font hệ điều hành độc quyền",
+  "  (vd 'Times New Roman', 'Arial', 'Calibri', 'Cambria'). Ưu tiên KHÔNG đặt font",
+  "  (dùng Latin Modern mặc định). Nếu cần đổi font, chỉ dùng font có sẵn trên Linux/TeX:",
+  "  'Latin Modern Roman', 'TeX Gyre Termes', 'TeX Gyre Pagella', hoặc 'Liberation Serif'.",
   "- Ưu tiên cú pháp an toàn, biên dịch được; tránh package hiếm/khó tải.",
 ].join("\n");
 

@@ -9,9 +9,10 @@ export interface OpenAIOptions {
   model: string;
   temperature: number;
   timeoutMs: number;
+  baseUrl?: string; // OpenAI-compatible base (vd Groq/OpenRouter/Gemini). Rỗng = OpenAI.
 }
 
-const ENDPOINT = "https://api.openai.com/v1/chat/completions";
+const DEFAULT_BASE = "https://api.openai.com/v1";
 
 export class OpenAIProvider implements LatexProvider {
   readonly name = "openai";
@@ -19,10 +20,11 @@ export class OpenAIProvider implements LatexProvider {
 
   async generate(input: GenerateInput): Promise<{ latex: string }> {
     if (!this.opts.apiKey) throw new ProviderError("Thiếu AI_API_KEY");
+    const base = (this.opts.baseUrl || DEFAULT_BASE).replace(/\/+$/, "");
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), this.opts.timeoutMs);
     try {
-      const res = await fetch(ENDPOINT, {
+      const res = await fetch(`${base}/chat/completions`, {
         method: "POST",
         signal: controller.signal,
         headers: {

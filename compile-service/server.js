@@ -25,9 +25,11 @@ app.post("/compile", async (req, res) => {
     }
     return res.status(200).json({ success: false, log: result.log });
   } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error("compile-service error:", e && e.stack ? e.stack : e);
     return res
       .status(500)
-      .json({ success: false, log: "Lỗi hệ thống compile-service" });
+      .json({ success: false, log: `Lỗi hệ thống compile-service: ${e && e.message ? e.message : e}` });
   }
 });
 

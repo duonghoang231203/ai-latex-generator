@@ -4,6 +4,7 @@
 export interface AppConfig {
   aiProvider: string; // 'anthropic' | 'openai' | 'mock'
   aiModel: string;
+  aiBaseUrl: string; // OpenAI-compatible base URL (Groq/OpenRouter/Gemini...); rỗng = OpenAI mặc định
   aiTemperature: number;
   compileServiceUrl: string;
   maxRepairAttempts: number;
@@ -21,6 +22,7 @@ export function getConfig(): AppConfig {
   return {
     aiProvider: process.env.AI_PROVIDER ?? "mock",
     aiModel: process.env.AI_MODEL ?? "",
+    aiBaseUrl: process.env.AI_BASE_URL ?? "",
     aiTemperature: num(process.env.AI_TEMPERATURE, 0.2),
     compileServiceUrl:
       process.env.COMPILE_SERVICE_URL ?? "http://localhost:8080",

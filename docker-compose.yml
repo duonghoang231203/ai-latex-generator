@@ -4,9 +4,12 @@ services:
     ports:
       - "3000:3000"
     environment:
+      - HOSTNAME=0.0.0.0
+      - PORT=3000
       - AI_PROVIDER=${AI_PROVIDER:-mock}
       - AI_API_KEY=${AI_API_KEY:-}
       - AI_MODEL=${AI_MODEL:-}
+      - AI_BASE_URL=${AI_BASE_URL:-}
       - AI_TEMPERATURE=${AI_TEMPERATURE:-0.2}
       - COMPILE_SERVICE_URL=http://compile-service:8080
       - MAX_REPAIR_ATTEMPTS=${MAX_REPAIR_ATTEMPTS:-3}
@@ -22,15 +25,18 @@ services:
     expose:
       - "8080"
     read_only: true
-    tmpfs:
-      - /tmp/compile
     volumes:
+      - type: tmpfs
+        target: /tmp/compile
+        tmpfs:
+          mode: 01777
       - tectonic-cache:/var/cache/tectonic
     environment:
       - PORT=8080
       - COMPILE_TIMEOUT_MS=45000
       - MAX_LATEX_BYTES=1000000
       - WORK_DIR=/tmp/compile
+      - XDG_CACHE_HOME=/var/cache/tectonic
       - TECTONIC_CACHE_DIR=/var/cache/tectonic
     # Giới hạn tài nguyên cụ thể (đóng CHK005 của security checklist).
     mem_limit: 1g

@@ -23,6 +23,7 @@ export function getProvider(): LatexProvider {
         model: cfg.aiModel || "gpt-4o",
         temperature: cfg.aiTemperature,
         timeoutMs: cfg.requestTimeoutMs,
+        baseUrl: cfg.aiBaseUrl,
       });
     case "mock":
       return new MockProvider("happy");
