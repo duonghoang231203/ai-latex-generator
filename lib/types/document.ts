@@ -5,6 +5,27 @@ export type DocType = "article" | "report";
 
 export const DOC_TYPES: readonly DocType[] = ["article", "report"] as const;
 
+/**
+ * Template cụ thể người dùng chọn để định hình format/layout/gói LaTeX.
+ * `docType` (article|report) là LỚP nền; `TemplateId` là DẠNG tài liệu cụ thể.
+ */
+export type TemplateId =
+  | "general" // Báo cáo thường — thuần văn bản
+  | "academic" // Bài báo học thuật — abstract + tài liệu tham khảo
+  | "math" // Tài liệu Toán học — định lý, chứng minh, công thức
+  | "physics" // Tài liệu Vật lý — công thức, đơn vị SI, hình minh hoạ
+  | "technical" // Báo cáo kỹ thuật — bảng, sơ đồ, hình
+  | "thesis"; // Luận văn/Báo cáo dài — nhiều chương, mục lục
+
+export const TEMPLATE_IDS: readonly TemplateId[] = [
+  "general",
+  "academic",
+  "math",
+  "physics",
+  "technical",
+  "thesis",
+] as const;
+
 /** File nguồn người dùng tải lên (đã đọc thành text ở client). */
 export interface SourceFile {
   name: string;
@@ -14,13 +35,15 @@ export interface SourceFile {
 export interface DocumentRequest {
   description: string;
   docType: DocType;
+  template?: TemplateId; // dạng tài liệu cụ thể (định hình format/layout/gói)
   sources?: SourceFile[];
 }
 
 export interface DocumentMetadata {
   engine: string; // 'xetex'
   packages?: string[];
-  template: DocType;
+  template: DocType; // lớp nền (article|report) — giữ tên field tương thích
+  templateId?: TemplateId; // dạng tài liệu cụ thể
 }
 
 /** Response thành công của /api/document. */
@@ -52,6 +75,7 @@ export interface EditRequest {
   currentLatex: string;
   instruction: string;
   docType: DocType;
+  template?: TemplateId;
 }
 
 // ---- Persistence (lưu trữ tài liệu đã generate) ----
@@ -70,6 +94,7 @@ export interface StoredDocument {
   id: string;
   title: string;
   docType: DocType;
+  template: TemplateId;
   description: string;
   latex: string;
   pdfBase64?: string;
@@ -100,6 +125,7 @@ export interface DocumentSummary {
   id: string;
   title: string;
   docType: DocType;
+  template: TemplateId;
   attempts: number;
   hasPdf: boolean;
   createdAt: string;

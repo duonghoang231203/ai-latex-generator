@@ -66,6 +66,7 @@ export async function POST(request: Request, ctx: Ctx): Promise<Response> {
         currentLatex: doc.latex,
         instruction: instruction.trim(),
         docType: doc.docType,
+        template: doc.template,
       },
       buildOrchestratorDeps(),
     );

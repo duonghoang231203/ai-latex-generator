@@ -1,5 +1,5 @@
 // lib/ai/types.ts
-import type { DocType, SourceFile } from "@/lib/types/document";
+import type { DocType, SourceFile, TemplateId } from "@/lib/types/document";
 
 /** Ngữ cảnh cho lượt SỬA lỗi — đến từ AST validation HOẶC compile. */
 export interface ErrorContext {
@@ -16,6 +16,7 @@ export interface EditContext {
 export interface GenerateInput {
   description: string;
   docType: DocType;
+  template?: TemplateId; // dạng tài liệu cụ thể (định hình format/gói)
   sources?: SourceFile[]; // tài liệu nguồn người dùng tải lên (dữ liệu tham khảo)
   errorContext?: ErrorContext; // có => lượt sửa lỗi compile/validate
   editContext?: EditContext; // có => lượt chỉnh sửa nội dung theo yêu cầu

@@ -29,6 +29,7 @@ export async function POST(request: Request): Promise<Response> {
     const { latex } = await provider.generate({
       description: parsed.value.description,
       docType: parsed.value.docType,
+      template: parsed.value.template,
       sources: parsed.value.sources,
     });
     return Response.json({ latex });

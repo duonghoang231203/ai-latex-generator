@@ -6,6 +6,7 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { getConfig } from "@/lib/config";
+import { templateForDocType } from "@/lib/templates/registry";
 import type {
   ChatMessage,
   CreateDocumentInput,
@@ -57,6 +58,7 @@ function toSummary(doc: StoredDocument): DocumentSummary {
     id: doc.id,
     title: doc.title,
     docType: doc.docType,
+    template: doc.template,
     attempts: doc.attempts,
     hasPdf: Boolean(doc.pdfBase64),
     createdAt: doc.createdAt,
@@ -72,6 +74,8 @@ async function readDoc(id: string): Promise<StoredDocument | null> {
     // Phòng thủ tối thiểu: id trong file phải khớp tên file.
     if (parsed.id !== id) return null;
     if (!Array.isArray(parsed.messages)) parsed.messages = [];
+    // Migration nhẹ: tài liệu cũ chưa có template → suy ra từ docType.
+    if (!parsed.template) parsed.template = templateForDocType(parsed.docType);
     return parsed;
   } catch {
     return null;
@@ -95,6 +99,7 @@ export async function createDocument(
     id: randomUUID(),
     title: input.title,
     docType: input.docType,
+    template: input.template,
     description: input.description,
     latex: input.latex,
     pdfBase64: input.pdfBase64,

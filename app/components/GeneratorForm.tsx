@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import type { DocType, SourceFile } from "@/lib/types/document";
-import DocTypeSelect from "@/app/components/DocTypeSelect";
+import type { TemplateId, SourceFile } from "@/lib/types/document";
+import TemplateSelect from "@/app/components/TemplateSelect";
 
 export interface GeneratorFormValues {
   description: string;
-  docType: DocType;
+  template: TemplateId;
   sources: SourceFile[];
 }
 
@@ -20,7 +20,7 @@ export default function GeneratorForm({
   busy?: boolean;
 }) {
   const [description, setDescription] = useState("");
-  const [docType, setDocType] = useState<DocType>("article");
+  const [template, setTemplate] = useState<TemplateId>("general");
   const [files, setFiles] = useState<File[]>([]);
   const [touched, setTouched] = useState(false);
 
@@ -48,12 +48,12 @@ export default function GeneratorForm({
     const sources: SourceFile[] = await Promise.all(
       files.map(async (f) => ({ name: f.name, content: await f.text() })),
     );
-    onSubmit({ description: description.trim(), docType, sources });
+    onSubmit({ description: description.trim(), template, sources });
   }
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-      <DocTypeSelect value={docType} onChange={setDocType} disabled={busy} />
+      <TemplateSelect value={template} onChange={setTemplate} disabled={busy} />
       <label className="flex flex-col gap-1 text-sm">
         <span className="font-medium">Mô tả tài liệu</span>
         <textarea

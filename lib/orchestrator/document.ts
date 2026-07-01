@@ -6,6 +6,7 @@ import type {
   DocumentResult,
   DocumentMetadata,
   EditRequest,
+  TemplateId,
 } from "@/lib/types/document";
 import type { LatexProvider } from "@/lib/ai/types";
 import { validateLatex, diagnosticsToLog, type ValidationResult } from "@/lib/validation/validate";
@@ -32,8 +33,17 @@ function extractPackages(latex: string): string[] {
   return [...set];
 }
 
-function metadataFor(latex: string, docType: DocType): DocumentMetadata {
-  return { engine: "xetex", template: docType, packages: extractPackages(latex) };
+function metadataFor(
+  latex: string,
+  docType: DocType,
+  templateId?: TemplateId,
+): DocumentMetadata {
+  return {
+    engine: "xetex",
+    template: docType,
+    templateId,
+    packages: extractPackages(latex),
+  };
 }
 
 /**
@@ -46,6 +56,7 @@ async function runRepairLoop(
   regenerate: (previousLatex: string, errorLog: string) => Promise<string>,
   docType: DocType,
   deps: OrchestratorDeps,
+  templateId?: TemplateId,
 ): Promise<DocumentResult> {
   const validate = deps.validate ?? validateLatex;
   const maxAttempts = Math.max(1, deps.maxAttempts);
@@ -67,7 +78,7 @@ async function runRepairLoop(
           latex,
           pdfBase64: toBase64(c.pdf),
           attempts,
-          metadata: metadataFor(latex, docType),
+          metadata: metadataFor(latex, docType, templateId),
         };
       }
       lastLog = truncateLog(c.log);
@@ -102,6 +113,7 @@ export async function runDocument(
     await deps.provider.generate({
       description: req.description,
       docType: req.docType,
+      template: req.template,
       sources: req.sources,
     })
   ).latex;
@@ -113,12 +125,14 @@ export async function runDocument(
         await deps.provider.generate({
           description: req.description,
           docType: req.docType,
+          template: req.template,
           sources: req.sources,
           errorContext: { previousLatex, errorLog },
         })
       ).latex,
     req.docType,
     deps,
+    req.template,
   );
 }
 
@@ -135,6 +149,7 @@ export async function runEdit(
     await deps.provider.generate({
       description: "",
       docType: req.docType,
+      template: req.template,
       editContext: {
         currentLatex: req.currentLatex,
         instruction: req.instruction,
@@ -149,11 +164,13 @@ export async function runEdit(
         await deps.provider.generate({
           description: "",
           docType: req.docType,
+          template: req.template,
           errorContext: { previousLatex, errorLog },
         })
       ).latex,
     req.docType,
     deps,
+    req.template,
   );
 }
 

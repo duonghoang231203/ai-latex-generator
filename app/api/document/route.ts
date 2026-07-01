@@ -44,6 +44,7 @@ export async function POST(request: Request): Promise<Response> {
       {
         description: parsed.value.description,
         docType: parsed.value.docType,
+        template: parsed.value.template,
         sources: parsed.value.sources,
       },
       {

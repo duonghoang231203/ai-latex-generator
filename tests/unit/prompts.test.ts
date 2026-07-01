@@ -56,6 +56,24 @@ describe("buildUserPrompt", () => {
     expect(p).not.toContain("EDIT_INSTR");
   });
 
+  it("có template: chèn hướng dẫn cấu trúc + documentclass + gói của template", () => {
+    const p = buildUserPrompt({
+      description: "Báo cáo vật lý",
+      docType: "article",
+      template: "physics",
+    });
+    expect(p).toContain("Dạng template: physics");
+    expect(p).toContain("DẠNG: Tài liệu Vật lý");
+    expect(p).toContain("siunitx");
+    expect(p).toContain("\\documentclass{article}");
+  });
+
+  it("không có template: dùng structureHint theo docType (tương thích ngược)", () => {
+    const p = buildUserPrompt({ description: "x", docType: "report" });
+    expect(p).toContain("Cấu trúc report");
+    expect(p).not.toContain("Dạng template:");
+  });
+
   it("cắt bớt nội dung nguồn khi vượt ngân sách MAX_PROMPT_SOURCE_CHARS", () => {
     const prev = process.env.MAX_PROMPT_SOURCE_CHARS;
     process.env.MAX_PROMPT_SOURCE_CHARS = "1000";

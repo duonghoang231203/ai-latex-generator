@@ -1,6 +1,7 @@
 // lib/ai/mock.ts
 import type { DocType } from "@/lib/types/document";
 import type { GenerateInput, LatexProvider } from "@/lib/ai/types";
+import { renderTemplateLatex } from "@/lib/templates/registry";
 
 export type MockScenario = "happy" | "fail-then-succeed" | "always-invalid";
 
@@ -68,9 +69,14 @@ export class MockProvider implements LatexProvider {
       default:
         // Lượt chỉnh sửa: trả LaTeX hợp lệ có chứa nội dung chỉ thị (để test được).
         if (input.editContext) {
-          return { latex: validLatex(input.editContext.instruction, input.docType) };
+          return input.template
+            ? { latex: renderTemplateLatex(input.template, input.editContext.instruction) }
+            : { latex: validLatex(input.editContext.instruction, input.docType) };
         }
-        return { latex: validLatex(input.description, input.docType) };
+        // Có template → dùng khung theo dạng tài liệu; nếu không → khung cơ bản theo docType.
+        return input.template
+          ? { latex: renderTemplateLatex(input.template, input.description) }
+          : { latex: validLatex(input.description, input.docType) };
     }
   }
 }

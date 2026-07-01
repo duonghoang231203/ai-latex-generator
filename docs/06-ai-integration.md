@@ -139,6 +139,25 @@ Chỉ trả về mã LaTeX, KHÔNG giải thích, KHÔNG markdown fence.
 Sau lượt edit, nếu validate/compile lỗi thì tiếp tục dùng **repair prompt** (§6.3.3) để tự sửa,
 vẫn giới hạn bởi `MAX_REPAIR_ATTEMPTS`. Xem `runEdit` ở [05-backend.md](./05-backend.md) §5.11.5.
 
+### 6.3.5. Danh mục template theo dạng tài liệu (`lib/templates/registry.ts`)
+Người dùng chọn một **template cụ thể**; mỗi template định hình `documentClass` nền, gói LaTeX gợi ý,
+và **hướng dẫn cấu trúc/format** (`promptGuidance`) được chèn vào user prompt (thay cho structureHint
+theo docType). Đăng ký hiện có:
+
+| `TemplateId` | Dạng | Lớp nền | Gói tiêu biểu |
+|--------------|------|---------|---------------|
+| `general` | Báo cáo thường (thuần văn bản) | article | geometry |
+| `academic` | Bài báo học thuật (abstract + refs) | article | amsmath, graphicx, hyperref |
+| `math` | Tài liệu Toán học (định lý/chứng minh) | article | amsmath, amssymb, amsthm, mathtools |
+| `physics` | Tài liệu Vật lý (công thức, đơn vị SI, hình) | article | siunitx, graphicx, tikz |
+| `technical` | Báo cáo kỹ thuật (bảng, sơ đồ, mã) | article | booktabs, tikz, listings |
+| `thesis` | Luận văn/Báo cáo dài (nhiều chương) | report | amsmath, graphicx, hyperref |
+
+Ràng buộc an toàn compile: hình minh hoạ vẽ bằng **TikZ**/placeholder, **không** `\includegraphics`
+file ngoài (không tồn tại trong sandbox). Mỗi template cũng cung cấp khung LaTeX mẫu hợp lệ
+(`renderMock`) cho `MockProvider`/dev offline. Nếu chỉ có `docType` (tương thích ngược), template
+mặc định được suy ra: `report→thesis`, còn lại `→general`.
+
 ## 6.4. Vòng lặp generate → validate → compile → patch
 
 Logic điều phối ở `/api/document` (xem [05-backend.md](./05-backend.md)). Có **2 lớp canh gác**

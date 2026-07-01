@@ -51,6 +51,7 @@ export async function POST(request: Request): Promise<Response> {
       {
         description: parsed.value.description,
         docType: parsed.value.docType,
+        template: parsed.value.template,
         sources: parsed.value.sources,
       },
       buildOrchestratorDeps(),
@@ -60,6 +61,7 @@ export async function POST(request: Request): Promise<Response> {
     const doc = await createDocument({
       title: deriveTitle(parsed.value.description, parsed.value.sources),
       docType: parsed.value.docType,
+      template: parsed.value.template,
       description: parsed.value.description,
       latex: result.latex ?? "",
       pdfBase64: failed ? undefined : result.pdfBase64,

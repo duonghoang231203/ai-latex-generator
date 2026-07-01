@@ -6,6 +6,7 @@ import Link from "next/link";
 import PdfPreview from "@/app/components/PdfPreview";
 import ChatEditor from "@/app/components/ChatEditor";
 import type { StoredDocument } from "@/lib/types/document";
+import { getTemplate } from "@/lib/templates/registry";
 
 type Tab = "pdf" | "source" | "chat";
 
@@ -142,7 +143,7 @@ export default function DocumentWorkspace({
         </Link>
         <h1 className="min-w-0 flex-1 truncate text-xl font-semibold">{doc.title}</h1>
         <span className="text-xs text-zinc-500">
-          {doc.docType} · {doc.pdfBase64 ? "có PDF" : "chưa có PDF"} · attempts:{" "}
+          {getTemplate(doc.template).label} · {doc.pdfBase64 ? "có PDF" : "chưa có PDF"} · attempts:{" "}
           {doc.attempts}
         </span>
         <button

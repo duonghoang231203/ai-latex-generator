@@ -16,10 +16,25 @@ của bước spec-kit `plan`.
 /** Loại tài liệu = template ở MVP (template-first). */
 export type DocType = 'article' | 'report';
 
+/**
+ * Dạng tài liệu cụ thể (định hình format/layout/gói LaTeX). `docType` là LỚP nền;
+ * `TemplateId` là DẠNG cụ thể. Đăng ký chi tiết ở lib/templates/registry.ts.
+ *   general   — Báo cáo thường (thuần văn bản)      → article
+ *   academic  — Bài báo học thuật (abstract + refs)  → article
+ *   math      — Tài liệu Toán học (định lý/công thức)→ article
+ *   physics   — Tài liệu Vật lý (siunitx/TikZ/hình)  → article
+ *   technical — Báo cáo kỹ thuật (booktabs/TikZ/code) → article
+ *   thesis    — Luận văn/Báo cáo dài (nhiều chương)  → report
+ */
+export type TemplateId =
+  | 'general' | 'academic' | 'math' | 'physics' | 'technical' | 'thesis';
+
 /** Request từ UI tới orchestrator. */
 export interface DocumentRequest {
   description: string;   // mô tả ngôn ngữ tự nhiên (tiếng Việt/Anh)
   docType: DocType;
+  template?: TemplateId; // dạng tài liệu cụ thể (nếu có → docType = lớp nền của template)
+  sources?: SourceFile[];
 }
 
 /** Response thành công của /api/document (gói artifact). */
@@ -77,6 +92,7 @@ export interface StoredDocument {
   id: string;               // randomUUID
   title: string;            // suy ra từ mô tả / tên file nguồn
   docType: DocType;
+  template: TemplateId;     // dạng tài liệu cụ thể
   description: string;
   latex: string;
   pdfBase64?: string;

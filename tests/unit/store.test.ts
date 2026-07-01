@@ -29,6 +29,7 @@ function baseInput() {
   return {
     title: "Tài liệu test",
     docType: "article" as const,
+    template: "general" as const,
     description: "mô tả",
     latex: "\\documentclass{article}\\begin{document}x\\end{document}",
     pdfBase64: "UERG",

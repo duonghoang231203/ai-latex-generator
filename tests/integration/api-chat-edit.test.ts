@@ -150,6 +150,7 @@ describe("chat-edit API — các trường hợp", () => {
     const empty = await createDocument({
       title: "Rỗng",
       docType: "article",
+      template: "general",
       description: "",
       latex: "",
       attempts: 1,

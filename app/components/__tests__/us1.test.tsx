@@ -5,18 +5,18 @@ import GeneratorForm from "@/app/components/GeneratorForm";
 import ResultPanel from "@/app/components/ResultPanel";
 
 describe("GeneratorForm (US1)", () => {
-  it("submit gọi onSubmit với đúng { description, docType }", async () => {
+  it("submit gọi onSubmit với đúng { description, template }", async () => {
     const onSubmit = vi.fn();
     render(<GeneratorForm onSubmit={onSubmit} />);
     await userEvent.type(
       screen.getByLabelText("Mô tả tài liệu"),
       "Một bài báo",
     );
-    await userEvent.selectOptions(screen.getByLabelText("Loại tài liệu"), "report");
+    await userEvent.selectOptions(screen.getByLabelText("Dạng tài liệu"), "math");
     await userEvent.click(screen.getByRole("button", { name: /Tạo tài liệu/ }));
     expect(onSubmit).toHaveBeenCalledWith({
       description: "Một bài báo",
-      docType: "report",
+      template: "math",
       sources: [],
     });
   });

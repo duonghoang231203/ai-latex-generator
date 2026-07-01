@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import type { DocumentSummary } from "@/lib/types/document";
+import { getTemplate } from "@/lib/templates/registry";
 
 export default function DocumentList({
   initialDocuments,
@@ -74,7 +75,7 @@ export default function DocumentList({
             >
               <span className="truncate font-medium">{d.title}</span>
               <span className="text-xs text-zinc-500">
-                {d.docType} · {d.hasPdf ? "có PDF" : "chưa có PDF"} ·{" "}
+                {getTemplate(d.template).label} · {d.hasPdf ? "có PDF" : "chưa có PDF"} ·{" "}
                 {new Date(d.updatedAt).toLocaleString()}
               </span>
             </Link>

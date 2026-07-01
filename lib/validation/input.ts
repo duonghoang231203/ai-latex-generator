@@ -1,9 +1,11 @@
 // lib/validation/input.ts
-import { DOC_TYPES, type DocType, type SourceFile } from "@/lib/types/document";
+import { DOC_TYPES, type DocType, type SourceFile, type TemplateId } from "@/lib/types/document";
+import { TEMPLATES, isTemplateId, templateForDocType } from "@/lib/templates/registry";
 
 export interface ValidatedInput {
   description: string;
   docType: DocType;
+  template: TemplateId;
   sources: SourceFile[];
 }
 
@@ -52,9 +54,10 @@ export function validateDocumentInput(
   if (typeof body !== "object" || body === null) {
     return { ok: false, error: "Body không hợp lệ" };
   }
-  const { description, docType, sources } = body as {
+  const { description, docType, template, sources } = body as {
     description?: unknown;
     docType?: unknown;
+    template?: unknown;
     sources?: unknown;
   };
 
@@ -72,16 +75,34 @@ export function validateDocumentInput(
     return { ok: false, error: `Mô tả quá dài (tối đa ${limits.maxInputChars} ký tự)` };
   }
 
-  let dt: DocType = "article";
-  if (docType !== undefined) {
-    if (typeof docType !== "string" || !DOC_TYPES.includes(docType as DocType)) {
-      return { ok: false, error: "docType phải là 'article' hoặc 'report'" };
+  // Ưu tiên `template` (dạng tài liệu cụ thể). Nếu có, docType = lớp nền của template.
+  // Tương thích ngược: nếu chỉ có `docType`, suy ra template mặc định tương ứng.
+  let tpl: TemplateId;
+  let dt: DocType;
+  if (template !== undefined) {
+    if (!isTemplateId(template)) {
+      return { ok: false, error: "template không hợp lệ" };
     }
-    dt = docType as DocType;
+    tpl = template;
+    dt = TEMPLATES[tpl].documentClass;
+  } else {
+    dt = "article";
+    if (docType !== undefined) {
+      if (typeof docType !== "string" || !DOC_TYPES.includes(docType as DocType)) {
+        return { ok: false, error: "docType phải là 'article' hoặc 'report'" };
+      }
+      dt = docType as DocType;
+    }
+    tpl = templateForDocType(dt);
   }
 
   return {
     ok: true,
-    value: { description: desc.trim(), docType: dt, sources: parsedSources.sources },
+    value: {
+      description: desc.trim(),
+      docType: dt,
+      template: tpl,
+      sources: parsedSources.sources,
+    },
   };
 }

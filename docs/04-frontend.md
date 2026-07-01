@@ -60,8 +60,9 @@ app/
 │   └── [id]/page.tsx           (Server Component: đọc tài liệu theo id → render DocumentWorkspace)
 └── components/
     ├── HomeClient.tsx          (client: form tạo + điều hướng + danh sách tài liệu)
-    ├── GeneratorForm.tsx       (chọn docType + textarea + upload nguồn + submit)
-    ├── DocTypeSelect.tsx       (dropdown article/report)
+    ├── GeneratorForm.tsx       (chọn template + textarea + upload nguồn + submit)
+    ├── TemplateSelect.tsx      (chọn dạng tài liệu — nhóm theo category, kèm mô tả)
+    ├── DocTypeSelect.tsx       (dropdown article/report — legacy, không còn dùng ở form)
     ├── DocumentList.tsx        (danh sách tài liệu đã lưu, mở/xoá)
     ├── DocumentWorkspace.tsx   (client: tab PDF | mã nguồn (sửa+recompile) + chat, xoá)
     ├── ChatEditor.tsx          (khung chat: lịch sử message + ô nhập chỉ thị)

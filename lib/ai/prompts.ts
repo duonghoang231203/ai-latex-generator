@@ -1,5 +1,6 @@
 // lib/ai/prompts.ts
 import type { GenerateInput } from "@/lib/ai/types";
+import { TEMPLATES } from "@/lib/templates/registry";
 
 export const SYSTEM_PROMPT = [
   "Bạn là chuyên gia LaTeX. Nhiệm vụ: từ mô tả của người dùng, sinh ra MỘT tài liệu LaTeX",
@@ -19,8 +20,22 @@ export const SYSTEM_PROMPT = [
   "- Ưu tiên cú pháp an toàn, biên dịch được; tránh package hiếm/khó tải.",
 ].join("\n");
 
-function structureHint(docType: GenerateInput["docType"]): string {
-  return docType === "report"
+function structureHint(input: GenerateInput): string {
+  // Ưu tiên hướng dẫn theo TEMPLATE cụ thể (nếu có).
+  if (input.template && TEMPLATES[input.template]) {
+    const t = TEMPLATES[input.template];
+    return [
+      t.promptGuidance,
+      `Dùng \\documentclass{${t.documentClass}}.`,
+      t.packages.length
+        ? `Gói nên dùng (khi phù hợp): ${t.packages.join(", ")}.`
+        : "",
+    ]
+      .filter(Boolean)
+      .join(" ");
+  }
+  // Tương thích ngược: chỉ có docType.
+  return input.docType === "report"
     ? [
         "Cấu trúc report: trang tiêu đề, mục lục (\\tableofcontents), nhiều \\chapter",
         "(vd: Mở đầu/Giới thiệu, các chương nội dung chính, Kết luận & Khuyến nghị).",
@@ -63,12 +78,13 @@ export function buildUserPrompt(input: GenerateInput): string {
   }
   return [
     `Loại tài liệu: ${input.docType}   (article | report)`,
+    input.template ? `Dạng template: ${input.template}` : "",
     "Mô tả của người dùng:",
     '"""',
     input.description || "(không có mô tả — hãy dựa vào tài liệu nguồn bên dưới)",
     '"""',
     sourcesBlock(input),
-    structureHint(input.docType),
+    structureHint(input),
     "",
     "YÊU CẦU VỀ NỘI DUNG:",
     "- Viết một tài liệu ĐẦY ĐỦ, CHI TIẾT và MẠCH LẠC, không phải bản khung sơ sài.",

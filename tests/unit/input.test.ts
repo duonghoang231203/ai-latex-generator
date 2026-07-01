@@ -40,3 +40,46 @@ describe("validateDocumentInput với sources", () => {
     expect(r.ok).toBe(false);
   });
 });
+
+describe("validateDocumentInput với template", () => {
+  it("template hợp lệ → suy ra docType từ lớp nền (thesis→report)", () => {
+    const r = validateDocumentInput({ description: "x", template: "thesis" }, limits);
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.value.template).toBe("thesis");
+      expect(r.value.docType).toBe("report");
+    }
+  });
+
+  it("template hợp lệ dạng article (math→article)", () => {
+    const r = validateDocumentInput({ description: "x", template: "math" }, limits);
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.value.template).toBe("math");
+      expect(r.value.docType).toBe("article");
+    }
+  });
+
+  it("template không hợp lệ → lỗi", () => {
+    const r = validateDocumentInput({ description: "x", template: "khong-co" }, limits);
+    expect(r.ok).toBe(false);
+  });
+
+  it("không có template, chỉ docType → suy ra template mặc định (report→thesis)", () => {
+    const r = validateDocumentInput({ description: "x", docType: "report" }, limits);
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.value.docType).toBe("report");
+      expect(r.value.template).toBe("thesis");
+    }
+  });
+
+  it("không có template lẫn docType → mặc định article/general", () => {
+    const r = validateDocumentInput({ description: "x" }, limits);
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.value.docType).toBe("article");
+      expect(r.value.template).toBe("general");
+    }
+  });
+});
