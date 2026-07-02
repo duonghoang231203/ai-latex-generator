@@ -8,6 +8,7 @@ import { CompileServiceError } from "@/lib/compile/client";
 import { getRateLimiter, clientIp } from "@/lib/ratelimit/tokenBucket";
 import { createDocument, listDocuments } from "@/lib/store/documentStore";
 import { isDocumentError } from "@/lib/types/document";
+import { log } from "@/lib/log";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -71,6 +72,14 @@ export async function POST(request: Request): Promise<Response> {
     });
 
     // Trả tài liệu đã lưu (kể cả thất bại nghiệp vụ) — client điều hướng tới workspace.
+    log.info("document.create", {
+      id: doc.id,
+      template: parsed.value.template,
+      docType: parsed.value.docType,
+      attempts: result.attempts,
+      ok: !failed,
+      sources: parsed.value.sources.length,
+    });
     return Response.json(doc, { status: 201 });
   } catch (e) {
     if (e instanceof CompileServiceError) {

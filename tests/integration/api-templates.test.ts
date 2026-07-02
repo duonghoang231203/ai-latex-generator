@@ -86,4 +86,35 @@ describe("tạo tài liệu theo template", () => {
     const data = (await res.json()) as { documents: DocumentSummary[] };
     expect(data.documents[0].template).toBe("academic");
   });
+
+  it("slides (beamer): docType=article, latex có documentclass beamer + frame", async () => {
+    const res = await createPOST(req({ description: "Bài thuyết trình", template: "slides" }));
+    const doc = (await res.json()) as StoredDocument;
+    expect(doc.template).toBe("slides");
+    expect(doc.docType).toBe("article");
+    expect(doc.latex).toContain("\\documentclass{beamer}");
+    expect(doc.latex).toContain("\\begin{frame}");
+  });
+
+  it("exam: latex dùng class exam + questions", async () => {
+    const res = await createPOST(req({ description: "Đề kiểm tra", template: "exam" }));
+    const doc = (await res.json()) as StoredDocument;
+    expect(doc.latex).toContain("\\documentclass{exam}");
+    expect(doc.latex).toContain("\\begin{questions}");
+  });
+
+  it("letter: class letter, có begin{letter}, không maketitle", async () => {
+    const res = await createPOST(req({ description: "Thư mời", template: "letter" }));
+    const doc = (await res.json()) as StoredDocument;
+    expect(doc.docType).toBe("article");
+    expect(doc.latex).toContain("\\documentclass{letter}");
+    expect(doc.latex).toContain("\\begin{letter}");
+    expect(doc.latex).not.toContain("\\maketitle");
+  });
+
+  it("chemistry: latex dùng mhchem \\ce", async () => {
+    const res = await createPOST(req({ description: "Phản ứng oxi hoá", template: "chemistry" }));
+    const doc = (await res.json()) as StoredDocument;
+    expect(doc.latex).toContain("\\ce{");
+  });
 });

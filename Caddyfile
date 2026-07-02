@@ -1,0 +1,23 @@
+# Caddyfile — reverse proxy cho next-app.
+# SITE_ADDRESS:
+#   - 'http://localhost' (mặc định) → HTTP thuần trên :80, KHÔNG TLS, KHÔNG redirect
+#     → vào http://localhost không gặp cảnh báo chứng chỉ (hợp local/staging).
+#   - '<domain.com>' (không kèm scheme) → Caddy tự cấp TLS thật (Let's Encrypt) + HTTP→HTTPS.
+{$SITE_ADDRESS:http://localhost} {
+	encode zstd gzip
+
+	# Giới hạn kích thước request (khớp upload/latex tối đa).
+	request_body {
+		max_size 20MB
+	}
+
+	reverse_proxy next-app:3000
+
+	# Header bảo mật cơ bản.
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
+}

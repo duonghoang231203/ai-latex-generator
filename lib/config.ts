@@ -15,6 +15,9 @@ export interface AppConfig {
   requestTimeoutMs: number;
   rateLimitPerMinute: number;
   dataDir: string; // thư mục lưu trữ tài liệu (file-based)
+  maxUploadBytes: number; // giới hạn kích thước 1 file upload để trích xuất
+  ocrEnabled: boolean; // bật OCR ảnh (Tesseract)
+  ocrLangs: string; // ngôn ngữ OCR (vd 'vie+eng')
 }
 
 function num(value: string | undefined, fallback: number): number {
@@ -38,5 +41,8 @@ export function getConfig(): AppConfig {
     requestTimeoutMs: num(process.env.REQUEST_TIMEOUT_MS, 60000),
     rateLimitPerMinute: num(process.env.RATE_LIMIT_PER_MINUTE, 10),
     dataDir: process.env.DATA_DIR ?? ".data",
+    maxUploadBytes: num(process.env.MAX_UPLOAD_BYTES, 15 * 1024 * 1024),
+    ocrEnabled: (process.env.OCR_ENABLED ?? "true").toLowerCase() !== "false",
+    ocrLangs: process.env.OCR_LANGS ?? "vie+eng",
   };
 }

@@ -5,9 +5,12 @@ export type DocType = "article" | "report";
 
 export const DOC_TYPES: readonly DocType[] = ["article", "report"] as const;
 
+/** documentClass LaTeX thực tế của template (rộng hơn DocType). */
+export type LatexClass = "article" | "report" | "beamer" | "exam" | "letter";
+
 /**
  * Template cụ thể người dùng chọn để định hình format/layout/gói LaTeX.
- * `docType` (article|report) là LỚP nền; `TemplateId` là DẠNG tài liệu cụ thể.
+ * `docType` (article|report) là LỚP nền coarse; `TemplateId` là DẠNG tài liệu cụ thể.
  */
 export type TemplateId =
   | "general" // Báo cáo thường — thuần văn bản
@@ -15,7 +18,12 @@ export type TemplateId =
   | "math" // Tài liệu Toán học — định lý, chứng minh, công thức
   | "physics" // Tài liệu Vật lý — công thức, đơn vị SI, hình minh hoạ
   | "technical" // Báo cáo kỹ thuật — bảng, sơ đồ, hình
-  | "thesis"; // Luận văn/Báo cáo dài — nhiều chương, mục lục
+  | "thesis" // Luận văn/Báo cáo dài — nhiều chương, mục lục
+  | "slides" // Trình chiếu Beamer
+  | "letter" // Thư trang trọng
+  | "cv" // Sơ yếu lý lịch / CV
+  | "exam" // Đề thi / bài kiểm tra
+  | "chemistry"; // Hóa học — phương trình phản ứng (mhchem)
 
 export const TEMPLATE_IDS: readonly TemplateId[] = [
   "general",
@@ -24,6 +32,11 @@ export const TEMPLATE_IDS: readonly TemplateId[] = [
   "physics",
   "technical",
   "thesis",
+  "slides",
+  "letter",
+  "cv",
+  "exam",
+  "chemistry",
 ] as const;
 
 /** File nguồn người dùng tải lên (đã đọc thành text ở client). */

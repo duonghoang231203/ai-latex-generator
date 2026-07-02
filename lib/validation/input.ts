@@ -1,6 +1,6 @@
 // lib/validation/input.ts
 import { DOC_TYPES, type DocType, type SourceFile, type TemplateId } from "@/lib/types/document";
-import { TEMPLATES, isTemplateId, templateForDocType } from "@/lib/templates/registry";
+import { TEMPLATES, isTemplateId, templateForDocType, docTypeForClass } from "@/lib/templates/registry";
 
 export interface ValidatedInput {
   description: string;
@@ -84,7 +84,7 @@ export function validateDocumentInput(
       return { ok: false, error: "template không hợp lệ" };
     }
     tpl = template;
-    dt = TEMPLATES[tpl].documentClass;
+    dt = docTypeForClass(TEMPLATES[tpl].documentClass);
   } else {
     dt = "article";
     if (docType !== undefined) {

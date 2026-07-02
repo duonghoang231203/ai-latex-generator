@@ -1,8 +1,30 @@
 services:
+  # Reverse proxy + TLS (Caddy auto-HTTPS). Điểm vào DUY NHẤT ra Internet.
+  caddy:
+    image: caddy:2.8
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      # Địa chỉ site:
+      #   - 'http://localhost' (mặc định) → HTTP thuần, không cảnh báo chứng chỉ (local/staging).
+      #   - '<domain>' (không scheme) → Caddy tự cấp TLS thật (Let's Encrypt).
+      - SITE_ADDRESS=${SITE_ADDRESS:-http://localhost}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      next-app:
+        condition: service_healthy
+
   next-app:
     build: .
-    ports:
-      - "3000:3000"
+    restart: unless-stopped
+    # KHÔNG expose ra host — chỉ Caddy trong mạng nội bộ compose gọi tới.
+    expose:
+      - "3000"
     environment:
       - HOSTNAME=0.0.0.0
       - PORT=3000
@@ -21,18 +43,37 @@ services:
       - REQUEST_TIMEOUT_MS=${REQUEST_TIMEOUT_MS:-60000}
       - RATE_LIMIT_PER_MINUTE=${RATE_LIMIT_PER_MINUTE:-10}
       - DATA_DIR=${DATA_DIR:-/data}
+      - MAX_UPLOAD_BYTES=${MAX_UPLOAD_BYTES:-15728640}
+      - OCR_ENABLED=${OCR_ENABLED:-true}
+      - OCR_LANGS=${OCR_LANGS:-vie+eng}
+      - TESSERACT_CACHE_DIR=/var/cache/tesseract
     volumes:
-      # Lưu trữ tài liệu đã generate (CRUD + chat-edit). Volume rỗng sẽ kế thừa
-      # quyền sở hữu của /data (appuser) từ image → ghi được dưới non-root.
+      # Lưu trữ tài liệu (CRUD + chat-edit) + cache model OCR (bền vững qua restart).
       - documents-data:/data
+      - tesseract-cache:/var/cache/tesseract
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://localhost:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
     depends_on:
-      - compile-service
+      compile-service:
+        condition: service_healthy
 
   compile-service:
     build: ./compile-service
-    # KHÔNG mở ports ra ngoài — chỉ truy cập nội bộ compose.
+    restart: unless-stopped
+    # KHÔNG expose ra Internet. Publish ra LOOPBACK host (127.0.0.1) để `npm run dev`
+    # chạy trên máy có thể gọi compile thật; vẫn không mở ra mạng ngoài.
     expose:
       - "8080"
+    ports:
+      - "127.0.0.1:8080:8080"
     read_only: true
     volumes:
       - type: tmpfs
@@ -47,6 +88,16 @@ services:
       - WORK_DIR=/tmp/compile
       - XDG_CACHE_HOME=/var/cache/tectonic
       - TECTONIC_CACHE_DIR=/var/cache/tectonic
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://localhost:8080/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     # Giới hạn tài nguyên cụ thể (đóng CHK005 của security checklist).
     mem_limit: 1g
     memswap_limit: 1g
@@ -60,3 +111,6 @@ services:
 volumes:
   tectonic-cache:
   documents-data:
+  tesseract-cache:
+  caddy-data:
+  caddy-config:

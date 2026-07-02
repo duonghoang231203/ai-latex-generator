@@ -1,7 +1,8 @@
 # AI LaTeX Generator
 
 Mô tả tài liệu bằng ngôn ngữ tự nhiên (tiếng Việt/Anh) → nhận **PDF LaTeX biên dịch thật** cùng mã
-nguồn. Hệ thống sinh theo template (`article`/`report`), **kiểm cấu trúc trước khi dựng**, biên dịch
+nguồn. Hệ thống sinh theo template đa dạng (báo cáo, học thuật, toán/lý/hóa, kỹ thuật, luận văn,
+Beamer, thư/CV, đề thi), **kiểm cấu trúc trước khi dựng**, biên dịch
 **an toàn** bằng Tectonic `--untrusted` trong sandbox, và **tự sửa lặp** khi lỗi.
 
 Thiết kế đầy đủ: xem [`docs/`](./docs). Đặc tả spec-kit: [`specs/001-latex-document-generation/`](./specs/001-latex-document-generation).
@@ -22,10 +23,12 @@ npm run dev             # http://localhost:3000
 ```bash
 cp .env.example .env    # đặt AI_PROVIDER=anthropic + AI_API_KEY nếu muốn AI thật
 docker compose up --build
-# mở http://localhost:3000
+# mở http://localhost  (Caddy reverse proxy; mặc định HTTP thuần, không cảnh báo chứng chỉ)
 ```
-`compile-service` không expose ra Internet; chỉ Next.js gọi nội bộ. Container compile chạy non-root,
-read-only fs, giới hạn tài nguyên (mem 1g / cpu 1.0 / pids 256), Tectonic `--untrusted`, không shell-escape.
+Kiến trúc chạy: **Caddy** (reverse proxy) là điểm vào duy nhất; `next-app` chỉ
+truy cập nội bộ (không expose ra host). `compile-service` cũng chỉ nội bộ, chạy non-root, read-only
+fs, giới hạn tài nguyên (mem 1g / cpu 1.0 / pids 256), Tectonic `--untrusted`, không shell-escape.
+Đặt `SITE_ADDRESS=<domain>` (không kèm scheme) để Caddy tự cấp TLS thật (Let's Encrypt). Healthcheck: `GET /api/health`.
 
 ## Cấu hình (biến môi trường)
 Xem [`.env.example`](./.env.example) và `docs/11-data-model.md` §11.6. Không commit giá trị secret.
@@ -40,7 +43,14 @@ Test-case đánh giá: `docs/testcases/testcases.json` (MVP: TC-01/02/05), chạ
 
 ## Trạng thái
 MVP: **nhiều template theo dạng tài liệu** (thuần văn bản, học thuật, toán học, vật lý, kỹ thuật,
-luận văn) trên nền `article`/`report` + repair loop + sandbox, **lưu trữ file-based** (`DATA_DIR`) với **CRUD**
+luận văn, trình chiếu Beamer, thư, CV, đề thi, hóa học) trên nền `article`/`report`/`beamer`/`exam`/`letter`
++ repair loop + sandbox, **lưu trữ file-based** (`DATA_DIR`) với **CRUD**
 tài liệu và **chat-edit** (chỉnh sửa nội dung bằng ngôn ngữ tự nhiên + sửa mã nguồn thủ công + recompile).
 RAG, Markdown→LaTeX, OCR, đa ngôn ngữ hạng nhất, chỉnh sửa đa file/agentic, auth & DB chia sẻ thuộc
 v1/v2 — xem `docs/08-roadmap.md`.
+
+## Kế hoạch phát hành
+Xem [`docs/13-release-plan.md`](./docs/13-release-plan.md) — chia phase để đưa lên staging → production.
+
+## License
+[MIT](./LICENSE).

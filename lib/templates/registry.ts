@@ -10,7 +10,7 @@
 //   TikZ hoặc hộp placeholder.
 // - Chỉ gói phổ biến trên CTAN; dùng fontspec (không inputenc/fontenc).
 
-import type { DocType, TemplateId } from "@/lib/types/document";
+import type { DocType, LatexClass, TemplateId } from "@/lib/types/document";
 import { TEMPLATE_IDS } from "@/lib/types/document";
 
 export interface DocumentTemplate {
@@ -18,33 +18,49 @@ export interface DocumentTemplate {
   label: string; // nhãn tiếng Việt cho UI
   category: string; // nhóm hiển thị
   description: string; // mô tả ngắn
-  documentClass: DocType; // lớp nền
+  documentClass: LatexClass; // documentClass LaTeX thực tế
   packages: string[]; // gói gợi ý (đưa vào prompt + preamble mock)
   promptGuidance: string; // hướng dẫn cấu trúc/format cho AI
   renderMock: (description: string) => string; // khung LaTeX hợp lệ (mock/dev)
 }
 
-/** Ghép preamble + body thành tài liệu hoàn chỉnh, hợp lệ (dùng cho mock). */
-function wrap(
-  documentClass: DocType,
+/** documentClass → DocType coarse (dùng cho metadata/tương thích). */
+export function docTypeForClass(cls: LatexClass): DocType {
+  return cls === "report" ? "report" : "article";
+}
+
+/** Tài liệu hoàn chỉnh, KHÔNG tự thêm title/maketitle — template tự kiểm soát body. */
+function docRaw(
+  documentClass: LatexClass,
   packages: string[],
-  preambleExtra: string[],
+  preamble: string[],
   body: string[],
 ): string {
-  const usepackages = packages.map((p) => `\\usepackage{${p}}`);
   return [
     `\\documentclass{${documentClass}}`,
     "\\usepackage{fontspec}",
-    ...usepackages,
-    ...preambleExtra,
-    "\\title{Tài liệu mẫu}",
-    "\\author{AI LaTeX Generator}",
+    ...packages.map((p) => `\\usepackage{${p}}`),
+    ...preamble,
     "\\begin{document}",
-    "\\maketitle",
     ...body,
     "\\end{document}",
     "",
   ].join("\n");
+}
+
+/** Tài liệu có \title/\author + \maketitle (cho class hỗ trợ: article/report/beamer/exam). */
+function wrap(
+  documentClass: LatexClass,
+  packages: string[],
+  preambleExtra: string[],
+  body: string[],
+): string {
+  return docRaw(
+    documentClass,
+    packages,
+    [...preambleExtra, "\\title{Tài liệu mẫu}", "\\author{AI LaTeX Generator}"],
+    ["\\maketitle", ...body],
+  );
 }
 
 export const TEMPLATES: Record<TemplateId, DocumentTemplate> = {
@@ -274,6 +290,183 @@ export const TEMPLATES: Record<TemplateId, DocumentTemplate> = {
           "Chi tiết.",
           "\\chapter{Kết luận}",
           "Tổng kết và khuyến nghị.",
+        ],
+      ),
+  },
+
+  slides: {
+    id: "slides",
+    label: "Trình chiếu (Beamer)",
+    category: "Trình chiếu",
+    description:
+      "Slide thuyết trình Beamer: trang tiêu đề, các frame, danh sách, block, công thức.",
+    documentClass: "beamer",
+    packages: ["amsmath"],
+    promptGuidance: [
+      "DẠNG: Trình chiếu Beamer (\\documentclass{beamer}).",
+      "Bắt đầu bằng \\title/\\author và \\maketitle (frame tiêu đề). Mỗi slide là",
+      "\\begin{frame}{Tiêu đề slide} ... \\end{frame}. Dùng itemize/enumerate, \\begin{block}{...},",
+      "và công thức khi cần. Giữ mỗi frame NGẮN GỌN (vài ý). Có thể \\section để chia phần.",
+      "TRÁNH \\includegraphics file ngoài; nếu cần hình thì vẽ bằng TikZ.",
+    ].join(" "),
+    renderMock: (d) =>
+      wrap(
+        "beamer",
+        ["amsmath"],
+        [],
+        [
+          "\\begin{frame}{Giới thiệu}",
+          `${d}`,
+          "\\begin{itemize}",
+          "\\item Ý chính thứ nhất.",
+          "\\item Ý chính thứ hai.",
+          "\\end{itemize}",
+          "\\end{frame}",
+          "\\begin{frame}{Kết luận}",
+          "\\begin{block}{Tóm lại}",
+          "Thông điệp chính.",
+          "\\end{block}",
+          "\\end{frame}",
+        ],
+      ),
+  },
+
+  letter: {
+    id: "letter",
+    label: "Thư trang trọng",
+    category: "Thư tín & Hồ sơ",
+    description:
+      "Thư trang trọng: địa chỉ người gửi/nhận, lời mở đầu, nội dung, lời kết và chữ ký.",
+    documentClass: "letter",
+    packages: [],
+    promptGuidance: [
+      "DẠNG: Thư trang trọng (\\documentclass{letter}).",
+      "Preamble: \\address{Người gửi\\\\Địa chỉ}, \\signature{Tên người gửi}.",
+      "Thân: \\begin{letter}{Người nhận\\\\Địa chỉ} \\opening{Kính gửi ...,} <các đoạn nội dung>",
+      "\\closing{Trân trọng,} \\end{letter}. KHÔNG dùng \\maketitle (class letter không có).",
+    ].join(" "),
+    renderMock: (d) =>
+      docRaw(
+        "letter",
+        [],
+        ["\\address{Người gửi\\\\Địa chỉ người gửi}", "\\signature{Người gửi}"],
+        [
+          "\\begin{letter}{Người nhận\\\\Địa chỉ người nhận}",
+          "\\opening{Kính gửi Quý vị,}",
+          `${d}`,
+          "Rất mong nhận được phản hồi từ Quý vị.",
+          "\\closing{Trân trọng,}",
+          "\\end{letter}",
+        ],
+      ),
+  },
+
+  cv: {
+    id: "cv",
+    label: "Sơ yếu lý lịch / CV",
+    category: "Thư tín & Hồ sơ",
+    description:
+      "CV một trang: tiêu đề tên + liên hệ, các mục Mục tiêu, Kinh nghiệm, Học vấn, Kỹ năng.",
+    documentClass: "article",
+    packages: ["geometry", "hyperref", "enumitem"],
+    promptGuidance: [
+      "DẠNG: Sơ yếu lý lịch / CV (documentclass article, gọn 1–2 trang).",
+      "Đầu trang: tên (cỡ lớn, in đậm) + thông tin liên hệ (email, điện thoại) căn giữa.",
+      "Các mục dùng \\section*{...}: Mục tiêu, Kinh nghiệm, Học vấn, Kỹ năng.",
+      "Trình bày mục kinh nghiệm/học vấn theo dòng: đơn vị — vai trò (thời gian), rồi mô tả.",
+      "KHÔNG dùng class moderncv (dễ lỗi tải); chỉ dùng gói phổ biến. Không hình ngoài.",
+    ].join(" "),
+    renderMock: (d) =>
+      docRaw(
+        "article",
+        ["geometry", "hyperref", "enumitem"],
+        [],
+        [
+          "\\begin{center}",
+          "{\\LARGE \\textbf{Nguyễn Văn A}}\\\\[2pt]",
+          "email@example.com \\quad 0123 456 789",
+          "\\end{center}",
+          "\\section*{Mục tiêu}",
+          `${d}`,
+          "\\section*{Kinh nghiệm}",
+          "\\textbf{Công ty X} — Kỹ sư phần mềm (2020--2023)\\\\",
+          "Phát triển và bảo trì hệ thống.",
+          "\\section*{Học vấn}",
+          "Đại học Y — Cử nhân CNTT (2016--2020).",
+          "\\section*{Kỹ năng}",
+          "\\begin{itemize}[nosep]",
+          "\\item Ngôn ngữ: TypeScript, Python.",
+          "\\item Công cụ: Git, Docker.",
+          "\\end{itemize}",
+        ],
+      ),
+  },
+
+  exam: {
+    id: "exam",
+    label: "Đề thi / Bài kiểm tra",
+    category: "Giáo dục",
+    description:
+      "Đề thi dùng class exam: danh sách câu hỏi, câu hỏi con (parts), điểm số.",
+    documentClass: "exam",
+    packages: ["amsmath"],
+    promptGuidance: [
+      "DẠNG: Đề thi/bài kiểm tra (\\documentclass{exam}).",
+      "Dùng môi trường \\begin{questions} ... \\end{questions} với mỗi câu là \\question[điểm].",
+      "Câu hỏi con dùng \\begin{parts}\\part ...\\end{parts}. Có thể chèn công thức (amsmath).",
+      "Có thể thêm phần hướng dẫn/đầu đề ngắn trước danh sách câu hỏi.",
+    ].join(" "),
+    renderMock: (d) =>
+      wrap(
+        "exam",
+        ["amsmath"],
+        [],
+        [
+          `Hướng dẫn: ${d}`,
+          "\\begin{questions}",
+          "\\question[2] Tính đạo hàm của $f(x) = x^2$.",
+          "\\begin{parts}",
+          "\\part Nêu công thức đạo hàm.",
+          "\\part Áp dụng cho $f(x)=x^2$.",
+          "\\end{parts}",
+          "\\question[3] Giải phương trình $x + 1 = 0$.",
+          "\\end{questions}",
+        ],
+      ),
+  },
+
+  chemistry: {
+    id: "chemistry",
+    label: "Tài liệu Hóa học",
+    category: "Khoa học",
+    description:
+      "Hóa học: phương trình phản ứng bằng mhchem (\\ce), công thức, bảng số liệu.",
+    documentClass: "article",
+    packages: ["geometry", "amsmath", "mhchem"],
+    promptGuidance: [
+      "DẠNG: Tài liệu Hóa học.",
+      "Dùng gói mhchem: viết phản ứng/công thức bằng \\ce{...} (vd \\ce{2 H2 + O2 -> 2 H2O},",
+      "\\ce{H2SO4}). Phương trình phản ứng quan trọng đặt trong equation. Bảng số liệu bằng tabular.",
+      "Trình bày lý thuyết, phương trình phản ứng, và ví dụ tính toán (mol, khối lượng).",
+    ].join(" "),
+    renderMock: (d) =>
+      wrap(
+        "article",
+        ["geometry", "amsmath", "mhchem"],
+        [],
+        [
+          "\\section{Phản ứng}",
+          `${d}`,
+          "Phản ứng đốt cháy khí hydro:",
+          "\\begin{equation}",
+          "\\ce{2 H2 + O2 -> 2 H2O}",
+          "\\end{equation}",
+          "\\section{Bảng dữ liệu}",
+          "\\begin{tabular}{lr}",
+          "Chất & Khối lượng mol (g/mol) \\\\",
+          "\\ce{H2} & 2 \\\\",
+          "\\ce{O2} & 32 \\\\",
+          "\\end{tabular}",
         ],
       ),
   },

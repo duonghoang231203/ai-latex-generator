@@ -152,6 +152,15 @@ theo docType). Đăng ký hiện có:
 | `physics` | Tài liệu Vật lý (công thức, đơn vị SI, hình) | article | siunitx, graphicx, tikz |
 | `technical` | Báo cáo kỹ thuật (bảng, sơ đồ, mã) | article | booktabs, tikz, listings |
 | `thesis` | Luận văn/Báo cáo dài (nhiều chương) | report | amsmath, graphicx, hyperref |
+| `slides` | Trình chiếu Beamer (frame, block) | **beamer** | amsmath |
+| `letter` | Thư trang trọng (opening/closing) | **letter** | — |
+| `cv` | Sơ yếu lý lịch / CV (1–2 trang) | article | geometry, hyperref, enumitem |
+| `exam` | Đề thi / bài kiểm tra (questions/parts) | **exam** | amsmath |
+| `chemistry` | Tài liệu Hóa học (phản ứng \ce) | article | amsmath, mhchem |
+
+> `documentClass` thực tế có thể khác `article`/`report` (kiểu `LatexClass` gồm cả `beamer`, `exam`,
+> `letter`). `docType` lưu kèm chỉ là phân loại coarse (`report→report`, còn lại `→article`) cho
+> metadata/tương thích; dạng cụ thể nằm ở `template`.
 
 Ràng buộc an toàn compile: hình minh hoạ vẽ bằng **TikZ**/placeholder, **không** `\includegraphics`
 file ngoài (không tồn tại trong sandbox). Mỗi template cũng cung cấp khung LaTeX mẫu hợp lệ

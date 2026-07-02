@@ -17,17 +17,26 @@ của bước spec-kit `plan`.
 export type DocType = 'article' | 'report';
 
 /**
- * Dạng tài liệu cụ thể (định hình format/layout/gói LaTeX). `docType` là LỚP nền;
+ * Dạng tài liệu cụ thể (định hình format/layout/gói LaTeX). `docType` là LỚP nền coarse;
  * `TemplateId` là DẠNG cụ thể. Đăng ký chi tiết ở lib/templates/registry.ts.
- *   general   — Báo cáo thường (thuần văn bản)      → article
- *   academic  — Bài báo học thuật (abstract + refs)  → article
- *   math      — Tài liệu Toán học (định lý/công thức)→ article
- *   physics   — Tài liệu Vật lý (siunitx/TikZ/hình)  → article
- *   technical — Báo cáo kỹ thuật (booktabs/TikZ/code) → article
- *   thesis    — Luận văn/Báo cáo dài (nhiều chương)  → report
+ *   general   — Báo cáo thường (thuần văn bản)       → article
+ *   academic  — Bài báo học thuật (abstract + refs)   → article
+ *   math      — Tài liệu Toán học (định lý/công thức) → article
+ *   physics   — Tài liệu Vật lý (siunitx/TikZ/hình)   → article
+ *   technical — Báo cáo kỹ thuật (booktabs/TikZ/code)  → article
+ *   thesis    — Luận văn/Báo cáo dài (nhiều chương)   → report
+ *   slides    — Trình chiếu Beamer                    → beamer
+ *   letter    — Thư trang trọng                       → letter
+ *   cv        — Sơ yếu lý lịch / CV                    → article
+ *   exam      — Đề thi / bài kiểm tra                  → exam
+ *   chemistry — Hóa học (mhchem \ce)                   → article
  */
 export type TemplateId =
-  | 'general' | 'academic' | 'math' | 'physics' | 'technical' | 'thesis';
+  | 'general' | 'academic' | 'math' | 'physics' | 'technical' | 'thesis'
+  | 'slides' | 'letter' | 'cv' | 'exam' | 'chemistry';
+
+/** documentClass LaTeX thực tế (rộng hơn DocType). */
+export type LatexClass = 'article' | 'report' | 'beamer' | 'exam' | 'letter';
 
 /** Request từ UI tới orchestrator. */
 export interface DocumentRequest {

@@ -6,6 +6,7 @@ import {
   getTemplate,
   templateForDocType,
   renderTemplateLatex,
+  docTypeForClass,
 } from "@/lib/templates/registry";
 import { TEMPLATE_IDS } from "@/lib/types/document";
 import { validateLatex } from "@/lib/validation/validate";
@@ -50,5 +51,34 @@ describe("template registry", () => {
     expect(renderTemplateLatex("physics", "x")).toContain("tikzpicture");
     expect(renderTemplateLatex("thesis", "x")).toContain("\\tableofcontents");
     expect(renderTemplateLatex("math", "x")).toContain("\\begin{proof}");
+  });
+
+  it("các dạng đặc thù: documentClass & marker đặc trưng", () => {
+    expect(TEMPLATES.slides.documentClass).toBe("beamer");
+    expect(renderTemplateLatex("slides", "x")).toContain("\\begin{frame}");
+
+    expect(TEMPLATES.letter.documentClass).toBe("letter");
+    const letter = renderTemplateLatex("letter", "x");
+    expect(letter).toContain("\\begin{letter}");
+    expect(letter).toContain("\\opening{");
+    // Class letter không có \maketitle.
+    expect(letter).not.toContain("\\maketitle");
+
+    expect(TEMPLATES.cv.documentClass).toBe("article");
+    expect(renderTemplateLatex("cv", "x")).toContain("\\section*{Kinh nghiệm}");
+
+    expect(TEMPLATES.exam.documentClass).toBe("exam");
+    expect(renderTemplateLatex("exam", "x")).toContain("\\begin{questions}");
+
+    expect(TEMPLATES.chemistry.packages).toContain("mhchem");
+    expect(renderTemplateLatex("chemistry", "x")).toContain("\\ce{");
+  });
+
+  it("docTypeForClass: report→report; beamer/exam/letter/article→article", () => {
+    expect(docTypeForClass("report")).toBe("report");
+    expect(docTypeForClass("beamer")).toBe("article");
+    expect(docTypeForClass("exam")).toBe("article");
+    expect(docTypeForClass("letter")).toBe("article");
+    expect(docTypeForClass("article")).toBe("article");
   });
 });

@@ -7,6 +7,7 @@ import { CompileServiceError } from "@/lib/compile/client";
 import { getRateLimiter, clientIp } from "@/lib/ratelimit/tokenBucket";
 import { getDocument, newMessage, updateDocument } from "@/lib/store/documentStore";
 import { isDocumentError, type ChatMessage } from "@/lib/types/document";
+import { log } from "@/lib/log";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -90,6 +91,12 @@ export async function POST(request: Request, ctx: Ctx): Promise<Response> {
     if (!updated) {
       return Response.json({ error: "Không tìm thấy tài liệu" }, { status: 404 });
     }
+    log.info("document.chat_edit", {
+      id,
+      template: doc.template,
+      attempts: result.attempts,
+      ok: !failed,
+    });
     return Response.json(updated, { status: 200 });
   } catch (e) {
     // Lỗi hạ tầng: vẫn lưu lượt user + một message lỗi để không mất lịch sử.
