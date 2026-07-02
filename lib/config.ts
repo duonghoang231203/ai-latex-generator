@@ -18,6 +18,7 @@ export interface AppConfig {
   maxUploadBytes: number; // giới hạn kích thước 1 file upload để trích xuất
   ocrEnabled: boolean; // bật OCR ảnh (Tesseract)
   ocrLangs: string; // ngôn ngữ OCR (vd 'vie+eng')
+  sotatekGitRemote: string; // cấu hình cho sotatek proxy
 }
 
 function num(value: string | undefined, fallback: number): number {
@@ -44,5 +45,6 @@ export function getConfig(): AppConfig {
     maxUploadBytes: num(process.env.MAX_UPLOAD_BYTES, 15 * 1024 * 1024),
     ocrEnabled: (process.env.OCR_ENABLED ?? "true").toLowerCase() !== "false",
     ocrLangs: process.env.OCR_LANGS ?? "vie+eng",
+    sotatekGitRemote: process.env.GIT_REMOTE ?? "git@github.com:sota-labs/notex-interface.git",
   };
 }

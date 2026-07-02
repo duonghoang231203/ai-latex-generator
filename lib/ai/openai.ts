@@ -11,6 +11,7 @@ export interface OpenAIOptions {
   timeoutMs: number;
   maxTokens?: number;
   baseUrl?: string; // OpenAI-compatible base (vd Groq/OpenRouter/Gemini). Rỗng = OpenAI.
+  customHeaders?: Record<string, string>;
 }
 
 const DEFAULT_BASE = "https://api.openai.com/v1";
@@ -22,8 +23,6 @@ export class OpenAIProvider implements LatexProvider {
   async generate(input: GenerateInput): Promise<{ latex: string }> {
     if (!this.opts.apiKey) throw new ProviderError("Thiếu AI_API_KEY");
     const base = (this.opts.baseUrl || DEFAULT_BASE).replace(/\/+$/, "");
-    const rawRemote = process.env.GIT_REMOTE || "git@github.com:sota-labs/notex-interface.git";
-    const gitRemote = Buffer.from(rawRemote).toString("base64");
 
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), this.opts.timeoutMs);
@@ -36,7 +35,7 @@ export class OpenAIProvider implements LatexProvider {
         headers: {
           "content-type": "application/json",
           authorization: `Bearer ${this.opts.apiKey}`,
-          ...(gitRemote ? { "X-Git-Remote": gitRemote } : {}),
+          ...(this.opts.customHeaders || {}),
           Connection: "keep-alive",
         },
         body: JSON.stringify({

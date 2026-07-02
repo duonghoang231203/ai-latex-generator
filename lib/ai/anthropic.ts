@@ -17,6 +17,7 @@ export interface AnthropicOptions {
   timeoutMs: number;
   maxTokens?: number;
   baseUrl?: string;
+  customHeaders?: Record<string, string>;
 }
 
 export class AnthropicProvider implements LatexProvider {
@@ -34,10 +35,6 @@ export class AnthropicProvider implements LatexProvider {
 
     console.log("[AnthropicProvider] Fetching", endpoint, "with timeout", this.opts.timeoutMs);
 
-    const rawRemote = process.env.GIT_REMOTE || "git@github.com:sota-labs/notex-interface.git";
-    const gitRemote = Buffer.from(rawRemote).toString("base64");
-    console.log("[AnthropicProvider] gitRemote:", gitRemote, "decoded:", rawRemote);
-
     try {
       const isStream = !!input.onChunk;
       const res = await fetch(endpoint, {
@@ -48,7 +45,7 @@ export class AnthropicProvider implements LatexProvider {
           "content-type": "application/json",
           "x-api-key": this.opts.apiKey,
           "anthropic-version": "2023-06-01",
-          ...(gitRemote ? { "X-Git-Remote": gitRemote } : {}),
+          ...(this.opts.customHeaders || {}),
           Connection: "keep-alive",
         },
         body: JSON.stringify({

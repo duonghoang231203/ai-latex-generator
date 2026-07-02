@@ -10,6 +10,30 @@ export function getProvider(): LatexProvider {
   const cfg = getConfig();
   const apiKey = process.env.AI_API_KEY ?? "";
   switch (cfg.aiProvider) {
+    case "sotatek-anthropic": {
+      const gitRemote = Buffer.from(cfg.sotatekGitRemote).toString("base64");
+      return new AnthropicProvider({
+        apiKey,
+        model: cfg.aiModel || "claude-3-5-sonnet-latest",
+        temperature: cfg.aiTemperature,
+        timeoutMs: cfg.requestTimeoutMs,
+        maxTokens: cfg.aiMaxTokens,
+        baseUrl: cfg.aiBaseUrl,
+        customHeaders: { "X-Git-Remote": gitRemote },
+      });
+    }
+    case "sotatek-openai": {
+      const gitRemote = Buffer.from(cfg.sotatekGitRemote).toString("base64");
+      return new OpenAIProvider({
+        apiKey,
+        model: cfg.aiModel || "gpt-4o",
+        temperature: cfg.aiTemperature,
+        timeoutMs: cfg.requestTimeoutMs,
+        maxTokens: cfg.aiMaxTokens,
+        baseUrl: cfg.aiBaseUrl,
+        customHeaders: { "X-Git-Remote": gitRemote },
+      });
+    }
     case "anthropic":
       return new AnthropicProvider({
         apiKey,
