@@ -47,48 +47,76 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ error: parsed.error }, { status: 400 });
   }
 
-  try {
-    const result = await runDocument(
-      {
-        description: parsed.value.description,
-        docType: parsed.value.docType,
-        template: parsed.value.template,
-        sources: parsed.value.sources,
-      },
-      buildOrchestratorDeps(),
-    );
+  const stream = new ReadableStream({
+    async start(controller) {
+      const encoder = new TextEncoder();
+      const enqueue = (event: string, data: any) => {
+        const jsonString = JSON.stringify(data);
+        const lines = jsonString.split("\n");
+        for (const line of lines) {
+          controller.enqueue(
+            encoder.encode(`event: ${event}\ndata: ${line}\n\n`),
+          );
+        }
+      };
 
-    const failed = isDocumentError(result);
-    const doc = await createDocument({
-      title: deriveTitle(parsed.value.description, parsed.value.sources),
-      docType: parsed.value.docType,
-      template: parsed.value.template,
-      description: parsed.value.description,
-      latex: result.latex ?? "",
-      pdfBase64: failed ? undefined : result.pdfBase64,
-      log: result.log,
-      error: failed ? result.error : undefined,
-      attempts: result.attempts,
-    });
+      try {
+        const result = await runDocument(
+          {
+            description: parsed.value.description,
+            docType: parsed.value.docType,
+            template: parsed.value.template,
+            sources: parsed.value.sources,
+          },
+          buildOrchestratorDeps(),
+          (chunk) => {
+            enqueue("chunk", { text: chunk });
+          },
+        );
 
-    // Trả tài liệu đã lưu (kể cả thất bại nghiệp vụ) — client điều hướng tới workspace.
-    log.info("document.create", {
-      id: doc.id,
-      template: parsed.value.template,
-      docType: parsed.value.docType,
-      attempts: result.attempts,
-      ok: !failed,
-      sources: parsed.value.sources.length,
-    });
-    return Response.json(doc, { status: 201 });
-  } catch (e) {
-    if (e instanceof CompileServiceError) {
-      return Response.json(
-        { error: `Compile service không phản hồi: ${e.message}` },
-        { status: 502 },
-      );
-    }
-    const msg = e instanceof Error ? e.message : "Lỗi không xác định";
-    return Response.json({ error: `Lỗi xử lý: ${msg}` }, { status: 502 });
-  }
+        const failed = isDocumentError(result);
+        const doc = await createDocument({
+          title: deriveTitle(parsed.value.description, parsed.value.sources),
+          docType: parsed.value.docType,
+          template: parsed.value.template,
+          description: parsed.value.description,
+          latex: result.latex ?? "",
+          pdfBase64: failed ? undefined : result.pdfBase64,
+          log: result.log,
+          error: failed ? result.error : undefined,
+          attempts: result.attempts,
+        });
+
+        log.info("document.create", {
+          id: doc.id,
+          template: parsed.value.template,
+          docType: parsed.value.docType,
+          attempts: result.attempts,
+          ok: !failed,
+          sources: parsed.value.sources.length,
+        });
+
+        enqueue("complete", { doc });
+        controller.close();
+      } catch (e) {
+        if (e instanceof CompileServiceError) {
+          enqueue("error", {
+            message: `Compile service không phản hồi: ${e.message}`,
+          });
+        } else {
+          const msg = e instanceof Error ? e.message : "Lỗi không xác định";
+          enqueue("error", { message: `Lỗi xử lý: ${msg}` });
+        }
+        controller.close();
+      }
+    },
+  });
+
+  return new Response(stream, {
+    headers: {
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache",
+      Connection: "keep-alive",
+    },
+  });
 }

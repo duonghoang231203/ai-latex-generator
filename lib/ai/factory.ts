@@ -17,6 +17,7 @@ export function getProvider(): LatexProvider {
         temperature: cfg.aiTemperature,
         timeoutMs: cfg.requestTimeoutMs,
         maxTokens: cfg.aiMaxTokens,
+        baseUrl: cfg.aiBaseUrl,
       });
     case "openai":
       return new OpenAIProvider({

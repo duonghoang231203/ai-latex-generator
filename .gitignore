@@ -44,5 +44,10 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# spec-kit agent folder (may contain credentials/auth tokens)
+# AI agent/skill folders (may contain credentials/auth tokens)
+.agent/
+.agents/
 .claude/
+.gitnexus/
+.kiro/
+.specify/

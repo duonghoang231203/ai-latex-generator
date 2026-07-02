@@ -108,6 +108,7 @@ async function runRepairLoop(
 export async function runDocument(
   req: DocumentRequest,
   deps: OrchestratorDeps,
+  onChunk?: (text: string) => void
 ): Promise<DocumentResult> {
   const initial = (
     await deps.provider.generate({
@@ -115,6 +116,7 @@ export async function runDocument(
       docType: req.docType,
       template: req.template,
       sources: req.sources,
+      onChunk,
     })
   ).latex;
 

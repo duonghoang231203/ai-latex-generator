@@ -20,6 +20,7 @@ export interface GenerateInput {
   sources?: SourceFile[]; // tài liệu nguồn người dùng tải lên (dữ liệu tham khảo)
   errorContext?: ErrorContext; // có => lượt sửa lỗi compile/validate
   editContext?: EditContext; // có => lượt chỉnh sửa nội dung theo yêu cầu
+  onChunk?: (chunk: string) => void; // callback để stream text/suy luận
 }
 
 /** Interface duy nhất code nghiệp vụ phụ thuộc (Nguyên tắc V — provider-agnostic). */
