@@ -61,6 +61,12 @@
       "skillPath": ".claude/skills/gitnexus/gitnexus-taint-analysis/SKILL.md",
       "computedHash": "85c76145ea0a7db65d810b877eb80171ca21d0e28177dc45270f3a8385828f97"
     },
+    "roadmap-planning": {
+      "source": "deanpeters/product-manager-skills",
+      "sourceType": "github",
+      "skillPath": "skills/roadmap-planning/SKILL.md",
+      "computedHash": "c00261ab88f619056d3008cd51563591cdfb2653233f36e80f565895ee77d897"
+    },
     "shadcn": {
       "source": "shadcn/ui",
       "sourceType": "github",
