@@ -10,9 +10,9 @@ The system is divided into two main components: a Next.js frontend/BFF and a Nod
 - Orchestrates the auto-repair loop when compilation fails.
 
 ### 2.2 Compile Service (Sandbox)
-- A stateless, sandboxed Express server running inside Docker.
+- A stateless, sandboxed Express server running inside Docker (or locally via CLI).
 - Receives LaTeX source code.
-- Executes `tectonic --untrusted` to compile the source to PDF.
+- Executes `tectonic --untrusted` to compile the source to PDF, with automatic V2-to-V1 fallback and local package caching for performance.
 - Returns either a base64-encoded PDF or the compilation error logs.
 - Resources are limited (1GB RAM, 1 CPU, non-root, read-only filesystem except for output).
 
@@ -24,7 +24,7 @@ The system is divided into two main components: a Next.js frontend/BFF and a Nod
 ## 3. Data Flow
 1. User submits a request via the Next.js UI.
 2. Next.js API calls the AI Provider to generate LaTeX.
-3. Next.js sends the LaTeX to the Compile Service.
+3. Next.js sends the LaTeX to the Compile Service and streams status via Server-Sent Events (SSE) back to the client.
 4. Compile Service returns a PDF or error.
 5. If error, Next.js enters a repair loop with the AI Provider.
 6. The final PDF is returned to the UI.

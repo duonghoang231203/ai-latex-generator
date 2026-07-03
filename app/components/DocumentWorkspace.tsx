@@ -26,6 +26,7 @@ export default function DocumentWorkspace({
   const [draft, setDraft] = useState(initialDoc?.latex ?? "");
   const [saving, setSaving] = useState(false);
   const [chatBusy, setChatBusy] = useState(false);
+  const [isStreaming, setIsStreaming] = useState(false);
   const [actionError, setActionError] = useState<string>();
 
   // Tải lại từ server (dùng sau khi có lỗi mutate để đồng bộ trạng thái đã lưu).
@@ -68,43 +69,138 @@ export default function DocumentWorkspace({
   }
 
   async function sendChat(instruction: string) {
-    if (!doc || chatBusy) return;
+    if (!doc || chatBusy || isStreaming) return;
     setChatBusy(true);
+    setIsStreaming(true);
     setActionError(undefined);
-    // Hiển thị lạc quan lượt của người dùng.
+    
+    // Automatically switch to source tab to see live changes
+    setTab("source");
+
+    const tempAssistantId = `assistant-tmp-${Date.now()}`;
+    const initialAssistantMsg = {
+      id: tempAssistantId,
+      role: "assistant" as const,
+      content: "Đang chuẩn bị chỉnh sửa...",
+      createdAt: new Date().toISOString(),
+    };
+
     const optimistic: StoredDocument = {
       ...doc,
       messages: [
         ...doc.messages,
         {
-          id: `tmp-${Date.now()}`,
+          id: `user-tmp-${Date.now()}`,
           role: "user",
           content: instruction,
           createdAt: new Date().toISOString(),
         },
+        initialAssistantMsg,
       ],
     };
     setDoc(optimistic);
+    
+    let accumulatedLatex = "";
+
     try {
       const res = await fetch(`/api/documents/${doc.id}/chat`, {
         method: "POST",
-        headers: { "content-type": "application/json" },
+        headers: {
+          "content-type": "application/json",
+          accept: "text/event-stream",
+        },
         body: JSON.stringify({ instruction }),
       });
-      const data = (await res.json()) as StoredDocument & { error?: string };
+
       if (!res.ok) {
-        setActionError(data.error ?? "Chỉnh sửa thất bại.");
-        // Tải lại để lấy trạng thái đã lưu (bao gồm message lỗi).
+        const errorData = await res.json().catch(() => ({}));
+        setActionError(errorData.error ?? "Chỉnh sửa thất bại.");
         await reload();
         return;
       }
-      setDoc(data);
-      setDraft(data.latex);
+
+      if (!res.body) {
+         setActionError("Không nhận được dữ liệu stream từ server.");
+         await reload();
+         return;
+      }
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() ?? "";
+
+        for (const line of lines) {
+          if (line.startsWith("data: ")) {
+            const dataStr = line.slice(6).trim();
+            if (!dataStr) continue;
+            try {
+              const data = JSON.parse(dataStr);
+              if (data.text) {
+                accumulatedLatex += data.text;
+                setDraft(accumulatedLatex);
+
+                setDoc((prev) => {
+                  if (!prev) return null;
+                  return {
+                    ...prev,
+                    messages: prev.messages.map((m) => {
+                      if (m.id === tempAssistantId) {
+                        return {
+                          ...m,
+                          content: `Đang nhận mã nguồn LaTeX... (${accumulatedLatex.length} ký tự)`,
+                        };
+                      }
+                      return m;
+                    }),
+                  };
+                });
+              } else if (data.status === "compiling") {
+                setDoc((prev) => {
+                  if (!prev) return null;
+                  return {
+                    ...prev,
+                    messages: prev.messages.map((m) => {
+                      if (m.id === tempAssistantId) {
+                        return {
+                          ...m,
+                          content: "Đang biên dịch tài liệu PDF...",
+                        };
+                      }
+                      return m;
+                    }),
+                  };
+                });
+              } else if (data.doc) {
+                setDoc(data.doc);
+                setDraft(data.doc.latex);
+                if (data.doc.pdfBase64) {
+                  setTab("pdf");
+                }
+                return;
+              } else if (data.message) {
+                setActionError(data.message);
+                await reload();
+                return;
+              }
+            } catch {
+              // ignore
+            }
+          }
+        }
+      }
     } catch {
       setActionError("Không kết nối được máy chủ.");
       await reload();
     } finally {
       setChatBusy(false);
+      setIsStreaming(false);
     }
   }
 
@@ -194,16 +290,17 @@ export default function DocumentWorkspace({
             <div className="flex flex-col gap-2">
               <textarea
                 aria-label="Mã LaTeX"
-                className="min-h-[55vh] w-full rounded border border-zinc-300 bg-zinc-950 p-3 font-mono text-xs text-zinc-100 dark:border-zinc-700"
+                className="min-h-[55vh] w-full rounded border border-zinc-300 bg-zinc-950 p-3 font-mono text-xs text-zinc-100 dark:border-zinc-700 disabled:opacity-75"
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
                 spellCheck={false}
+                disabled={isStreaming}
               />
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => void saveSource()}
-                  disabled={saving || draft === doc.latex}
+                  disabled={saving || draft === doc.latex || isStreaming}
                   className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
                 >
                   {saving ? "Đang lưu & biên dịch..." : "Lưu & biên dịch"}
@@ -225,7 +322,7 @@ export default function DocumentWorkspace({
         <section className="flex min-h-[55vh] flex-col">
           <h2 className="mb-2 text-sm font-semibold">Chat chỉnh sửa</h2>
           <div className="flex-1">
-            <ChatEditor messages={doc.messages} onSend={sendChat} busy={chatBusy} />
+            <ChatEditor messages={doc.messages} onSend={sendChat} busy={chatBusy || isStreaming} />
           </div>
         </section>
       </div>

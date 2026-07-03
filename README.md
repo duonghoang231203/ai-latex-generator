@@ -31,7 +31,7 @@ fs, giới hạn tài nguyên (mem 1g / cpu 1.0 / pids 256), Tectonic `--untrust
 Đặt `SITE_ADDRESS=<domain>` (không kèm scheme) để Caddy tự cấp TLS thật (Let's Encrypt). Healthcheck: `GET /api/health`.
 
 ## Cấu hình (biến môi trường)
-Xem [`.env.example`](./.env.example) và `docs/11-data-model.md` §11.6. Không commit giá trị secret.
+Xem [`.env.example`](./.env.example). Không commit giá trị secret.
 
 ## Kiểm thử
 ```bash
@@ -47,10 +47,10 @@ luận văn, trình chiếu Beamer, thư, CV, đề thi, hóa học) trên nền
 + repair loop + sandbox, **lưu trữ file-based** (`DATA_DIR`) với **CRUD**
 tài liệu và **chat-edit** (chỉnh sửa nội dung bằng ngôn ngữ tự nhiên + sửa mã nguồn thủ công + recompile).
 RAG, Markdown→LaTeX, OCR, đa ngôn ngữ hạng nhất, chỉnh sửa đa file/agentic, auth & DB chia sẻ thuộc
-v1/v2 — xem `docs/08-roadmap.md`.
+v1/v2 — xem `docs/project-roadmap.md`.
 
 ## Kế hoạch phát hành
-Xem [`docs/13-release-plan.md`](./docs/13-release-plan.md) — chia phase để đưa lên staging → production.
+Xem [`docs/feature-tracking.md`](./docs/feature-tracking.md) — chia phase để đưa lên staging → production.
 
 ## License
 [MIT](./LICENSE).

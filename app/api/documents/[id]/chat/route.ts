@@ -61,53 +61,139 @@ export async function POST(request: Request, ctx: Ctx): Promise<Response> {
 
   const userMsg: ChatMessage = newMessage("user", instruction.trim());
 
-  try {
-    const result = await runEdit(
-      {
-        currentLatex: doc.latex,
-        instruction: instruction.trim(),
-        docType: doc.docType,
-        template: doc.template,
+  const wantsStream = request.headers.get("accept") === "text/event-stream";
+  if (wantsStream) {
+    const stream = new ReadableStream({
+      async start(controller) {
+        const encoder = new TextEncoder();
+        const enqueue = (event: string, data: unknown) => {
+          const jsonString = JSON.stringify(data);
+          const lines = jsonString.split("\n");
+          for (const line of lines) {
+            controller.enqueue(
+              encoder.encode(`event: ${event}\ndata: ${line}\n\n`),
+            );
+          }
+        };
+
+        try {
+          const result = await runEdit(
+            {
+              currentLatex: doc.latex,
+              instruction: instruction.trim(),
+              docType: doc.docType,
+              template: doc.template,
+            },
+            buildOrchestratorDeps(),
+            (chunk) => {
+              enqueue("chunk", { text: chunk });
+            },
+            () => {
+              enqueue("status", { status: "compiling" });
+            }
+          );
+
+          const failed = isDocumentError(result);
+          const assistantContent = failed
+            ? `⚠️ Chưa áp dụng được thay đổi: ${result.error}`
+            : `✅ Đã cập nhật tài liệu (số lần thử: ${result.attempts}).`;
+          const assistantMsg = newMessage("assistant", assistantContent);
+
+          const updated = await updateDocument(id, {
+            // Khi lỗi: giữ nguyên latex cũ (không phá tài liệu đang có).
+            latex: failed ? doc.latex : result.latex ?? doc.latex,
+            pdfBase64: failed ? doc.pdfBase64 : result.pdfBase64,
+            log: result.log,
+            error: failed ? result.error : undefined,
+            attempts: result.attempts,
+            messages: [...doc.messages, userMsg, assistantMsg],
+          });
+
+          if (!updated) {
+            enqueue("error", { message: "Không tìm thấy tài liệu" });
+            controller.close();
+            return;
+          }
+          log.info("document.chat_edit", {
+            id,
+            template: doc.template,
+            attempts: result.attempts,
+            ok: !failed,
+          });
+          enqueue("complete", { doc: updated });
+          controller.close();
+        } catch (e) {
+          // Lỗi hạ tầng: vẫn lưu lượt user + một message lỗi để không mất lịch sử.
+          const msg = e instanceof Error ? e.message : "Lỗi không xác định";
+          const errText =
+            e instanceof CompileServiceError
+              ? `Compile service không phản hồi: ${e.message}`
+              : `Lỗi xử lý: ${msg}`;
+          await updateDocument(id, {
+            messages: [...doc.messages, userMsg, newMessage("assistant", `⚠️ ${errText}`)],
+          });
+          enqueue("error", { message: errText });
+          controller.close();
+        }
       },
-      buildOrchestratorDeps(),
-    );
-
-    const failed = isDocumentError(result);
-    const assistantContent = failed
-      ? `⚠️ Chưa áp dụng được thay đổi: ${result.error}`
-      : `✅ Đã cập nhật tài liệu (số lần thử: ${result.attempts}).`;
-    const assistantMsg = newMessage("assistant", assistantContent);
-
-    const updated = await updateDocument(id, {
-      // Khi lỗi: giữ nguyên latex cũ (không phá tài liệu đang có).
-      latex: failed ? doc.latex : result.latex ?? doc.latex,
-      pdfBase64: failed ? doc.pdfBase64 : result.pdfBase64,
-      log: result.log,
-      error: failed ? result.error : undefined,
-      attempts: result.attempts,
-      messages: [...doc.messages, userMsg, assistantMsg],
     });
 
-    if (!updated) {
-      return Response.json({ error: "Không tìm thấy tài liệu" }, { status: 404 });
+    return new Response(stream, {
+      headers: {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        Connection: "keep-alive",
+      },
+    });
+  } else {
+    try {
+      const result = await runEdit(
+        {
+          currentLatex: doc.latex,
+          instruction: instruction.trim(),
+          docType: doc.docType,
+          template: doc.template,
+        },
+        buildOrchestratorDeps(),
+      );
+
+      const failed = isDocumentError(result);
+      const assistantContent = failed
+        ? `⚠️ Chưa áp dụng được thay đổi: ${result.error}`
+        : `✅ Đã cập nhật tài liệu (số lần thử: ${result.attempts}).`;
+      const assistantMsg = newMessage("assistant", assistantContent);
+
+      const updated = await updateDocument(id, {
+        // Khi lỗi: giữ nguyên latex cũ (không phá tài liệu đang có).
+        latex: failed ? doc.latex : result.latex ?? doc.latex,
+        pdfBase64: failed ? doc.pdfBase64 : result.pdfBase64,
+        log: result.log,
+        error: failed ? result.error : undefined,
+        attempts: result.attempts,
+        messages: [...doc.messages, userMsg, assistantMsg],
+      });
+
+      if (!updated) {
+        return Response.json({ error: "Không tìm thấy tài liệu" }, { status: 404 });
+      }
+      log.info("document.chat_edit", {
+        id,
+        template: doc.template,
+        attempts: result.attempts,
+        ok: !failed,
+      });
+      return Response.json(updated, { status: 200 });
+    } catch (e) {
+      // Lỗi hạ tầng: vẫn lưu lượt user + một message lỗi để không mất lịch sử.
+      const msg = e instanceof Error ? e.message : "Lỗi không xác định";
+      const errText =
+        e instanceof CompileServiceError
+          ? `Compile service không phản hồi: ${e.message}`
+          : `Lỗi xử lý: ${msg}`;
+      await updateDocument(id, {
+        messages: [...doc.messages, userMsg, newMessage("assistant", `⚠️ ${errText}`)],
+      });
+      return Response.json({ error: errText }, { status: 502 });
     }
-    log.info("document.chat_edit", {
-      id,
-      template: doc.template,
-      attempts: result.attempts,
-      ok: !failed,
-    });
-    return Response.json(updated, { status: 200 });
-  } catch (e) {
-    // Lỗi hạ tầng: vẫn lưu lượt user + một message lỗi để không mất lịch sử.
-    const msg = e instanceof Error ? e.message : "Lỗi không xác định";
-    const errText =
-      e instanceof CompileServiceError
-        ? `Compile service không phản hồi: ${e.message}`
-        : `Lỗi xử lý: ${msg}`;
-    await updateDocument(id, {
-      messages: [...doc.messages, userMsg, newMessage("assistant", `⚠️ ${errText}`)],
-    });
-    return Response.json({ error: errText }, { status: 502 });
   }
 }

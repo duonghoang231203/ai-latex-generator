@@ -108,7 +108,8 @@ async function runRepairLoop(
 export async function runDocument(
   req: DocumentRequest,
   deps: OrchestratorDeps,
-  onChunk?: (text: string) => void
+  onChunk?: (text: string) => void,
+  onCompileStart?: () => void
 ): Promise<DocumentResult> {
   const initial = (
     await deps.provider.generate({
@@ -119,6 +120,8 @@ export async function runDocument(
       onChunk,
     })
   ).latex;
+
+  onCompileStart?.();
 
   return runRepairLoop(
     initial,
@@ -146,6 +149,8 @@ export async function runDocument(
 export async function runEdit(
   req: EditRequest,
   deps: OrchestratorDeps,
+  onChunk?: (text: string) => void,
+  onCompileStart?: () => void
 ): Promise<DocumentResult> {
   const initial = (
     await deps.provider.generate({
@@ -156,8 +161,11 @@ export async function runEdit(
         currentLatex: req.currentLatex,
         instruction: req.instruction,
       },
+      onChunk,
     })
   ).latex;
+
+  onCompileStart?.();
 
   return runRepairLoop(
     initial,

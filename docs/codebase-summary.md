@@ -13,5 +13,10 @@
 - **`specs/`**: Feature specifications (e.g., `001-latex-document-generation`).
 
 ## 2. Key Workflows
-- **Generation Flow**: UI -> Next.js API -> `lib/orchestrator` -> AI Provider -> `compile-service` -> PDF response.
+- **Generation Flow**: UI -> Next.js API (streaming SSE status) -> `lib/orchestrator` -> AI Provider -> `compile-service` -> PDF response.
 - **Repair Flow**: If `compile-service` returns an error, the orchestrator parses the log and asks the AI to fix the LaTeX source.
+
+## 3. Documentation
+- `docs/feature-tracking.md`: Feature progress tracker.
+- `docs/project-roadmap.md`: Core phases and upcoming features.
+- `docs/project-overview-pdr.md`: Product description and architecture overview.

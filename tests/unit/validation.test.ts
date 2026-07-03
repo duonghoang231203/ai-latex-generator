@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { validateLatex } from "@/lib/validation/validate";
-import { sanitizeLatex, remapFonts } from "@/lib/ai/sanitize";
+import { sanitizeLatex, remapFonts, stripUnresolvableFonts } from "@/lib/ai/sanitize";
 import { validLatex, invalidLatex } from "@/lib/ai/mock";
 
 describe("validateLatex", () => {
@@ -79,5 +79,52 @@ describe("remapFonts", () => {
     expect(r.ok).toBe(true);
     expect(r.latex).toContain("Liberation Serif");
     expect(r.latex).not.toContain("Times New Roman");
+  });
+});
+
+describe("stripUnresolvableFonts (lỗi font khi Tectonic không có fontconfig)", () => {
+  it("bỏ \\babelfont{rm}{Latin Modern Roman} (nguyên nhân lỗi báo cáo)", () => {
+    const out = stripUnresolvableFonts("\\babelfont{rm}{Latin Modern Roman}\n");
+    expect(out).not.toContain("\\babelfont");
+    expect(out).not.toContain("Latin Modern Roman");
+  });
+
+  it("bỏ \\babelfont kèm option ngôn ngữ và features", () => {
+    const out = stripUnresolvableFonts(
+      "\\babelfont[english]{rm}[Scale=1]{TeX Gyre Termes}\n",
+    );
+    expect(out).not.toContain("\\babelfont");
+  });
+
+  it("bỏ \\setmainfont{Latin Modern Roman} (thừa với mặc định)", () => {
+    expect(stripUnresolvableFonts("\\setmainfont{Latin Modern Roman}").trim()).toBe("");
+    expect(stripUnresolvableFonts("\\setmonofont{LMMono}").trim()).toBe("");
+  });
+
+  it("giữ nguyên font khác Latin Modern (Docker có fontconfig)", () => {
+    expect(stripUnresolvableFonts("\\setmainfont{TeX Gyre Termes}")).toBe(
+      "\\setmainfont{TeX Gyre Termes}",
+    );
+  });
+
+  it("sanitizeLatex sửa đúng tài liệu gây lỗi (babel english + babelfont Latin Modern)", () => {
+    const raw = [
+      "\\documentclass{article}",
+      "\\usepackage{geometry}",
+      "\\usepackage{fontspec}",
+      "\\usepackage[english]{babel}",
+      "\\babelfont{rm}{Latin Modern Roman}",
+      "\\begin{document}",
+      "Xin chào",
+      "\\end{document}",
+    ].join("\n");
+    const r = sanitizeLatex(raw);
+    expect(r.ok).toBe(true);
+    expect(r.latex).not.toContain("\\babelfont");
+    expect(r.latex).not.toContain("Latin Modern Roman");
+    // Giữ lại phần còn lại của tài liệu.
+    expect(r.latex).toContain("\\usepackage{fontspec}");
+    expect(r.latex).toContain("\\usepackage[english]{babel}");
+    expect(r.latex).toContain("\\begin{document}");
   });
 });

@@ -14,6 +14,13 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // compile-service là microservice Node (CommonJS) độc lập — lint riêng.
     "compile-service/**",
+    // Thư mục công cụ/agent-skills (script CommonJS, không thuộc mã nguồn app) — lint riêng.
+    ".claude/**",
+    ".agents/**",
+    ".agent/**",
+    ".kiro/**",
+    ".specify/**",
+    "test_fetch.js",
   ]),
 ]);
 

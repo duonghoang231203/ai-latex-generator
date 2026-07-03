@@ -33,6 +33,40 @@ export function remapFonts(latex: string): string {
   );
 }
 
+// Họ font MẶC ĐỊNH của XeLaTeX (Latin Modern). Đặt lại bằng TÊN là thừa (đã là mặc định)
+// và gây lỗi "font cannot be found" khi Tectonic chạy KHÔNG có fontconfig (bản cài cục bộ,
+// Windows/scoop). Latin Modern được Tectonic đóng gói sẵn nên mặc định luôn dùng được.
+const DEFAULT_FONT_FAMILY =
+  /^(?:latin\s*modern|lmodern|lmroman|lmsans|lmmono|computer\s*modern)\b/i;
+
+/**
+ * Loại các khai báo font dễ gây lỗi biên dịch ở môi trường không có fontconfig:
+ *  - Bỏ MỌI \babelfont (babel vẫn chạy bình thường với font mặc định Latin Modern,
+ *    vốn hỗ trợ Unicode/tiếng Việt) — đây là nguyên nhân lỗi "The font ... cannot be found".
+ *  - Bỏ \setmainfont/\setsansfont/\setmonofont trỏ tới họ Latin Modern (thừa với mặc định).
+ * Các font khác (đã remap sang Liberation/TeX Gyre) được giữ nguyên cho môi trường Docker.
+ */
+export function stripUnresolvableFonts(latex: string): string {
+  let out = latex;
+
+  // \babelfont[langs]{family}[features]{Font} → bỏ hẳn.
+  out = out.replace(
+    /\\babelfont\s*(?:\[[^\]]*\])?\s*\{[^{}]*\}\s*(?:\[[^\]]*\])?\s*\{[^{}]*\}/g,
+    "",
+  );
+
+  // \set(main|sans|mono)font[features]{Latin Modern...}[features] → bỏ (đã là mặc định).
+  out = out.replace(
+    /\\set(?:main|sans|mono)font\s*(?:\[[^\]]*\])?\s*\{([^{}]+)\}\s*(?:\[[^\]]*\])?/g,
+    (whole, name: string) => (DEFAULT_FONT_FAMILY.test(name.trim()) ? "" : whole),
+  );
+
+  // Gộp các dòng trắng thừa do việc xoá để lại (>=3 newline → 2).
+  out = out.replace(/(?:[ \t]*\r?\n){3,}/g, "\n\n");
+
+  return out;
+}
+
 export function sanitizeLatex(raw: string): SanitizeResult {
   let text = raw ?? "";
 
@@ -57,6 +91,9 @@ export function sanitizeLatex(raw: string): SanitizeResult {
 
   // Đổi font Windows độc quyền → font Linux tương đương (chống model phớt lờ prompt).
   text = remapFonts(text);
+  // Bỏ \babelfont và font Latin Modern đặt lại (thừa) — nguồn lỗi "font cannot be found"
+  // khi Tectonic chạy không có fontconfig. Dùng font mặc định Latin Modern cho chắc ăn.
+  text = stripUnresolvableFonts(text);
 
   const hasClass = /\\documentclass/.test(text);
   const hasBegin = /\\begin\{document\}/.test(text);

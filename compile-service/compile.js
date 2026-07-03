@@ -29,6 +29,22 @@ async function compile(latex) {
     const pdf = await readFile(path.join(dir, "main.pdf"));
     return { success: true, pdf };
   } catch (err) {
+    if (err && err.code === "ENOENT") {
+      return {
+        success: false,
+        log: [
+          "LỖI: Trình biên dịch Tectonic chưa được cài đặt trên hệ thống (spawn tectonic ENOENT).",
+          "Để khắc phục, vui lòng chọn 1 trong 2 cách sau:",
+          "  Cách 1 (Khuyên dùng): Sử dụng Docker để chạy dịch vụ biên dịch:",
+          "      1. Chạy lệnh: docker compose up -d compile-service",
+          "      2. Khởi chạy Next.js cục bộ: npm run dev:next",
+          "  Cách 2: Cài đặt Tectonic trực tiếp trên máy của bạn:",
+          "      - Windows (qua Scoop): scoop install tectonic",
+          "      - macOS (qua Homebrew): brew install tectonic",
+          "      - Linux: apt install tectonic (hoặc qua cargo)",
+        ].join("\n"),
+      };
+    }
     // Đọc log nếu có, kèm thông điệp lỗi tiến trình.
     let log = err && err.stderr ? String(err.stderr) : "";
     try {
@@ -46,15 +62,38 @@ async function compile(latex) {
 
 function runTectonic(texPath, outdir) {
   return new Promise((resolve, reject) => {
-    // Chế độ untrusted; KHÔNG shell-escape. Không dùng shell (execFile) → tránh injection.
+    // Thử chạy bằng CLI V2 (-X compile --untrusted) trước (an toàn cho production/docker)
     execFile(
       "tectonic",
       ["-X", "compile", "--untrusted", "--outdir", outdir, texPath],
       { timeout: COMPILE_TIMEOUT_MS, maxBuffer: 10 * 1024 * 1024 },
       (error, _stdout, stderr) => {
         if (error) {
-          error.stderr = stderr;
-          reject(error);
+          const errStr = error.message || "";
+          const stderrStr = stderr ? String(stderr) : "";
+          // Nếu phiên bản Tectonic cũ không hỗ trợ `-X`
+          if (
+            error.code !== "ENOENT" &&
+            (errStr.includes("'-X'") || stderrStr.includes("'-X'"))
+          ) {
+            // Fallback sang CLI V1 (tectonic --outdir <outdir> <texPath>)
+            execFile(
+              "tectonic",
+              ["--outdir", outdir, texPath],
+              { timeout: COMPILE_TIMEOUT_MS, maxBuffer: 10 * 1024 * 1024 },
+              (fallbackError, _fallbackStdout, fallbackStderr) => {
+                if (fallbackError) {
+                  fallbackError.stderr = fallbackStderr;
+                  reject(fallbackError);
+                } else {
+                  resolve();
+                }
+              }
+            );
+          } else {
+            error.stderr = stderr;
+            reject(error);
+          }
         } else {
           resolve();
         }
