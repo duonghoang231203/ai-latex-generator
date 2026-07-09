@@ -8,15 +8,23 @@ import type {
   EditRequest,
   TemplateId,
 } from "@/lib/types/document";
+import type { SourceFile, RetrievedChunk } from "@/lib/types/document";
 import type { LatexProvider } from "@/lib/ai/types";
 import { validateLatex, diagnosticsToLog, type ValidationResult } from "@/lib/validation/validate";
 import { truncateLog } from "@/lib/orchestrator/truncateLog";
+import { getTemplate, wrapBodyInTemplate } from "@/lib/templates/registry";
+import { convertMarkdownToLatexBody } from "@/lib/markdown/markdown-to-latex";
 
 export interface OrchestratorDeps {
   provider: LatexProvider;
   compile: (latex: string) => Promise<CompileResult>;
   validate?: (latex: string) => ValidationResult;
   maxAttempts: number;
+  /** RAG (E3, tuỳ chọn): chọn chunk nguồn liên quan trước khi generate. null ⇒ nhồi thẳng sources. */
+  retrieve?: (
+    description: string,
+    sources: SourceFile[],
+  ) => Promise<RetrievedChunk[] | null>;
 }
 
 function toBase64(bytes: Uint8Array): string {
@@ -111,12 +119,21 @@ export async function runDocument(
   onChunk?: (text: string) => void,
   onCompileStart?: () => void
 ): Promise<DocumentResult> {
+  // RAG (E3): chọn chunk nguồn liên quan TRƯỚC khi generate (embedding bất đồng bộ).
+  // Nếu không kích hoạt (nguồn nhỏ / RAG tắt) ⇒ retrievedSources undefined ⇒ nhồi thẳng sources.
+  let retrievedSources: RetrievedChunk[] | undefined;
+  if (deps.retrieve && req.sources && req.sources.length > 0) {
+    const r = await deps.retrieve(req.description, req.sources);
+    if (r && r.length > 0) retrievedSources = r;
+  }
+
   const initial = (
     await deps.provider.generate({
       description: req.description,
       docType: req.docType,
       template: req.template,
       sources: req.sources,
+      retrievedSources,
       onChunk,
     })
   ).latex;
@@ -132,6 +149,7 @@ export async function runDocument(
           docType: req.docType,
           template: req.template,
           sources: req.sources,
+          retrievedSources,
           errorContext: { previousLatex, errorLog },
         })
       ).latex,
@@ -139,6 +157,64 @@ export async function runDocument(
     deps,
     req.template,
   );
+}
+
+/**
+ * E5 — Tạo tài liệu từ MARKDOWN bằng converter TẤT ĐỊNH:
+ * convert (MD→body) → wrap preamble template → AST validate → compile → patch.
+ * Bước sinh ban đầu KHÔNG gọi AI (tất định); repair loop dùng AI CHỈ để sửa lỗi compile
+ * (SYSTEM_PROMPT cấm đổi ý đồ nội dung → không "sáng tác thêm").
+ * `req.markdown` bắt buộc; `req.template` quyết định preamble + heading (chapter/section).
+ */
+export async function runDocumentFromMarkdown(
+  req: DocumentRequest,
+  deps: OrchestratorDeps,
+  onChunk?: (text: string) => void,
+  onCompileStart?: () => void,
+): Promise<DocumentResult> {
+  const template = req.template;
+  const tpl = template ? getTemplate(template) : undefined;
+  const documentClass = tpl?.documentClass ?? "article";
+
+  const { body, requiredPackages, warnings } = convertMarkdownToLatexBody(
+    req.markdown ?? "",
+    { documentClass },
+  );
+  const initial = template
+    ? wrapBodyInTemplate(template, body, requiredPackages)
+    : // Không có template (hiếm): tự bọc article tối thiểu.
+      [
+        "\\documentclass{article}",
+        "\\usepackage{fontspec}",
+        ...requiredPackages.map((p) => `\\usepackage{${p}}`),
+        "\\begin{document}",
+        body,
+        "\\end{document}",
+        "",
+      ].join("\n");
+
+  onCompileStart?.();
+
+  const result = await runRepairLoop(
+    initial,
+    async (previousLatex, errorLog) =>
+      (
+        await deps.provider.generate({
+          description: "",
+          docType: req.docType,
+          template: req.template,
+          errorContext: { previousLatex, errorLog },
+          onChunk,
+        })
+      ).latex,
+    req.docType,
+    deps,
+    req.template,
+  );
+
+  // Đính cảnh báo converter (không chặn) vào kết quả để UI hiển thị.
+  if (warnings.length > 0) result.warnings = warnings;
+  return result;
 }
 
 /**

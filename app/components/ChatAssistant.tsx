@@ -2,9 +2,10 @@
 
 // Trợ lý AI Chat cho trang chủ: soạn yêu cầu bằng ngôn ngữ tự nhiên, chọn dạng
 // tài liệu qua Menubar, và xem hội thoại/stream trong MessageScroller.
-import { Fragment, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { PlusIcon, SendHorizontalIcon, SparklesIcon } from "lucide-react";
+import MarkdownIt from "markdown-it";
 
 import type { TemplateId } from "@/lib/types/document";
 import { getTemplate, listTemplates } from "@/lib/templates/registry";
@@ -54,20 +55,31 @@ function groupedTemplates() {
   return groups;
 }
 
+// Preview MD→HTML ở client (html:false → an toàn, không cho raw HTML nhúng).
+// LƯU Ý: preview HTML KHÁC với kết quả LaTeX cuối (chỉ để soạn thảo).
+const previewMd = new MarkdownIt({ html: false, linkify: false, typographer: false });
+
 export default function ChatAssistant() {
   const router = useRouter();
   const { items, busy, send, reset } = useDocumentGenerationChat();
   const [template, setTemplate] = useState<TemplateId>("general");
   const [text, setText] = useState("");
+  const [markdownMode, setMarkdownMode] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
 
   const groups = groupedTemplates();
   const active = getTemplate(template);
   const canSend = !busy && text.trim().length > 0;
 
+  const previewHtml = useMemo(
+    () => (markdownMode && showPreview ? previewMd.render(text) : ""),
+    [markdownMode, showPreview, text],
+  );
+
   function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!canSend) return;
-    send(text, template);
+    send(text, template, markdownMode ? "markdown" : "natural");
     setText("");
   }
 
@@ -147,13 +159,33 @@ export default function ChatAssistant() {
       </MessageScrollerProvider>
 
       <form onSubmit={submit}>
+        {markdownMode && showPreview && (
+          <div className="mb-2 max-h-48 overflow-auto rounded-lg border bg-background p-3 text-sm">
+            <div className="mb-1 text-xs text-muted-foreground">
+              Xem trước Markdown (chỉ để soạn thảo — kết quả LaTeX có thể khác)
+            </div>
+            {text.trim() ? (
+              <div
+                className="prose prose-sm max-w-none dark:prose-invert"
+                // Nội dung do người dùng nhập; markdown-it cấu hình html:false nên không chèn raw HTML.
+                dangerouslySetInnerHTML={{ __html: previewHtml }}
+              />
+            ) : (
+              <span className="text-muted-foreground">Chưa có nội dung.</span>
+            )}
+          </div>
+        )}
         <InputGroup>
           <InputGroupTextarea
-            aria-label="Mô tả tài liệu"
-            placeholder="Mô tả tài liệu bạn muốn tạo… (Enter để gửi, Shift+Enter xuống dòng)"
+            aria-label={markdownMode ? "Nội dung Markdown" : "Mô tả tài liệu"}
+            placeholder={
+              markdownMode
+                ? "Soạn Markdown (heading, list, bảng, code, $công thức$)… Enter để tạo, Shift+Enter xuống dòng"
+                : "Mô tả tài liệu bạn muốn tạo… (Enter để gửi, Shift+Enter xuống dòng)"
+            }
             value={text}
             disabled={busy}
-            rows={2}
+            rows={markdownMode ? 6 : 2}
             onChange={(e) => setText(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
@@ -164,6 +196,27 @@ export default function ChatAssistant() {
           />
           <InputGroupAddon align="block-end">
             <InputGroupText className="text-xs">{active.label}</InputGroupText>
+            <label className="ml-2 flex items-center gap-1 text-xs text-muted-foreground">
+              <input
+                type="checkbox"
+                aria-label="Chế độ Markdown"
+                checked={markdownMode}
+                disabled={busy}
+                onChange={(e) => setMarkdownMode(e.target.checked)}
+              />
+              Markdown
+            </label>
+            {markdownMode && (
+              <InputGroupButton
+                type="button"
+                size="sm"
+                variant="outline"
+                disabled={busy}
+                onClick={() => setShowPreview((v) => !v)}
+              >
+                {showPreview ? "Ẩn xem trước" : "Xem trước"}
+              </InputGroupButton>
+            )}
             <InputGroupButton
               type="submit"
               size="sm"
@@ -172,7 +225,7 @@ export default function ChatAssistant() {
               className="ml-auto"
             >
               {busy ? <Spinner /> : <SendHorizontalIcon data-icon="inline-start" />}
-              {busy ? "Đang tạo…" : "Gửi"}
+              {busy ? "Đang tạo…" : markdownMode ? "Tạo" : "Gửi"}
             </InputGroupButton>
           </InputGroupAddon>
         </InputGroup>

@@ -45,11 +45,36 @@ export interface SourceFile {
   content: string;
 }
 
+/** Định dạng đầu vào người dùng dùng để tạo tài liệu. */
+export type InputFormat = "natural" | "markdown" | "latex";
+
+export const INPUT_FORMATS: readonly InputFormat[] = [
+  "natural",
+  "markdown",
+  "latex",
+] as const;
+
 export interface DocumentRequest {
   description: string;
   docType: DocType;
   template?: TemplateId; // dạng tài liệu cụ thể (định hình format/layout/gói)
   sources?: SourceFile[];
+  inputFormat?: InputFormat; // thiếu ⇒ "natural" (đường sinh-từ-mô-tả cũ)
+  markdown?: string; // chỉ dùng khi inputFormat === "markdown"
+}
+
+// ---- RAG (E3) ----
+/** Một đoạn (chunk) tách từ tài liệu nguồn, giữ vị trí để trích dẫn/kiểm chứng. */
+export interface Chunk {
+  sourceName: string; // = SourceFile.name
+  startOffset: number; // vị trí bắt đầu trong content gốc
+  text: string;
+}
+
+/** Chunk đã được retrieve (kèm nhãn trích dẫn ổn định + điểm tương đồng). */
+export interface RetrievedChunk extends Chunk {
+  label: string; // "S1", "S2", ... (nhãn trích dẫn)
+  score: number; // cosine similarity (debug/threshold)
 }
 
 export interface DocumentMetadata {
@@ -66,6 +91,7 @@ export interface DocumentResponse {
   attempts: number;
   metadata?: DocumentMetadata;
   log?: string;
+  warnings?: string[]; // cảnh báo không chặn (vd Markdown→LaTeX: ảnh placeholder)
 }
 
 /** Response thất bại nghiệp vụ (repair loop vượt N lần) — vẫn HTTP 200. */
@@ -74,6 +100,7 @@ export interface DocumentError {
   latex?: string;
   log?: string;
   attempts: number;
+  warnings?: string[];
 }
 
 export type DocumentResult = DocumentResponse | DocumentError;
@@ -117,6 +144,8 @@ export interface StoredDocument {
   messages: ChatMessage[];
   createdAt: string; // ISO 8601
   updatedAt: string; // ISO 8601
+  inputFormat?: InputFormat; // định dạng đã dùng để tạo (thiếu ⇒ "natural")
+  sourceMarkdown?: string; // Markdown gốc nếu tạo từ Markdown (để round-trip)
 }
 
 /** Dữ liệu tạo mới tài liệu (id/timestamps/messages sinh tự động). */

@@ -496,3 +496,19 @@ export function templateForDocType(docType: DocType): TemplateId {
 export function renderTemplateLatex(id: TemplateId, description: string): string {
   return TEMPLATES[id].renderMock(description || "(mô tả trống)");
 }
+
+/**
+ * Bọc một THÂN LaTeX tuỳ ý trong preamble của template (documentClass + packages).
+ * Dùng cho E5 (Markdown→LaTeX): converter phát body, hàm này ghép preamble.
+ * ĐÂY LÀ NGUỒN PREAMBLE DUY NHẤT — không hard-code preamble ở nơi khác (tránh drift).
+ * `extraPackages` là gói phát sinh theo nội dung (listings/booktabs/hyperref/amsmath...).
+ */
+export function wrapBodyInTemplate(
+  id: TemplateId,
+  body: string,
+  extraPackages: string[] = [],
+): string {
+  const t = TEMPLATES[id];
+  const packages = [...new Set([...t.packages, ...extraPackages])];
+  return docRaw(t.documentClass, packages, [], [body]);
+}

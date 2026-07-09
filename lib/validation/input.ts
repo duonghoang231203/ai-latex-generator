@@ -1,5 +1,6 @@
 // lib/validation/input.ts
-import { DOC_TYPES, type DocType, type SourceFile, type TemplateId } from "@/lib/types/document";
+import { DOC_TYPES, type DocType, type InputFormat, type SourceFile, type TemplateId } from "@/lib/types/document";
+import { INPUT_FORMATS } from "@/lib/types/document";
 import { TEMPLATES, isTemplateId, templateForDocType, docTypeForClass } from "@/lib/templates/registry";
 
 export interface ValidatedInput {
@@ -7,6 +8,8 @@ export interface ValidatedInput {
   docType: DocType;
   template: TemplateId;
   sources: SourceFile[];
+  inputFormat: InputFormat;
+  markdown?: string;
 }
 
 export interface InputLimits {
@@ -54,12 +57,23 @@ export function validateDocumentInput(
   if (typeof body !== "object" || body === null) {
     return { ok: false, error: "Body không hợp lệ" };
   }
-  const { description, docType, template, sources } = body as {
+  const { description, docType, template, sources, inputFormat, markdown } = body as {
     description?: unknown;
     docType?: unknown;
     template?: unknown;
     sources?: unknown;
+    inputFormat?: unknown;
+    markdown?: unknown;
   };
+
+  // Chuẩn hoá inputFormat (thiếu ⇒ "natural").
+  let fmt: InputFormat = "natural";
+  if (inputFormat !== undefined) {
+    if (typeof inputFormat !== "string" || !INPUT_FORMATS.includes(inputFormat as InputFormat)) {
+      return { ok: false, error: "inputFormat không hợp lệ" };
+    }
+    fmt = inputFormat as InputFormat;
+  }
 
   const parsedSources = parseSources(sources, limits);
   if (!parsedSources.ok) return { ok: false, error: parsedSources.error };
@@ -67,12 +81,24 @@ export function validateDocumentInput(
   const desc = typeof description === "string" ? description : "";
   const hasSources = parsedSources.sources.length > 0;
 
-  // Cho phép mô tả trống NẾU có ít nhất một file nguồn.
-  if (desc.trim().length === 0 && !hasSources) {
-    return { ok: false, error: "Cần nhập mô tả hoặc tải lên ít nhất một file nguồn" };
-  }
-  if (desc.length > limits.maxInputChars) {
-    return { ok: false, error: `Mô tả quá dài (tối đa ${limits.maxInputChars} ký tự)` };
+  // Nhánh MARKDOWN: cần `markdown` non-empty; cho phép mô tả trống.
+  let mdContent: string | undefined;
+  if (fmt === "markdown") {
+    if (typeof markdown !== "string" || markdown.trim().length === 0) {
+      return { ok: false, error: "Cần nhập nội dung Markdown" };
+    }
+    if (markdown.length > limits.maxInputChars) {
+      return { ok: false, error: `Nội dung Markdown quá dài (tối đa ${limits.maxInputChars} ký tự)` };
+    }
+    mdContent = markdown;
+  } else {
+    // Cho phép mô tả trống NẾU có ít nhất một file nguồn.
+    if (desc.trim().length === 0 && !hasSources) {
+      return { ok: false, error: "Cần nhập mô tả hoặc tải lên ít nhất một file nguồn" };
+    }
+    if (desc.length > limits.maxInputChars) {
+      return { ok: false, error: `Mô tả quá dài (tối đa ${limits.maxInputChars} ký tự)` };
+    }
   }
 
   // Ưu tiên `template` (dạng tài liệu cụ thể). Nếu có, docType = lớp nền của template.
@@ -103,6 +129,8 @@ export function validateDocumentInput(
       docType: dt,
       template: tpl,
       sources: parsedSources.sources,
+      inputFormat: fmt,
+      markdown: mdContent,
     },
   };
 }

@@ -18,6 +18,15 @@ export interface AppConfig {
   maxUploadBytes: number; // giới hạn kích thước 1 file upload để trích xuất
   ocrEnabled: boolean; // bật OCR ảnh (Tesseract)
   ocrLangs: string; // ngôn ngữ OCR (vd 'vie+eng')
+  markdownInputEnabled: boolean; // bật chế độ soạn Markdown → LaTeX (E5)
+  ragEnabled: boolean; // bật RAG (retrieval nguồn theo liên quan) — E3
+  embeddingProvider: string; // 'mock' | 'transformers' | 'openai'
+  embeddingModel: string; // model embedding (vd 'Xenova/multilingual-e5-small')
+  embeddingCacheDir: string; // cache vector theo hash nội dung
+  ragActivationChars: number; // tổng ký tự nguồn > ngưỡng mới bật retrieval
+  ragTopK: number; // số chunk lấy
+  ragTokenBudget: number; // ngân sách ký tự nhồi nguồn (tôn trọng trần prompt)
+  ragUseMmr: boolean; // bật MMR giảm trùng lặp
   sotatekGitRemote: string; // cấu hình cho sotatek proxy
 }
 
@@ -45,6 +54,24 @@ export function getConfig(): AppConfig {
     maxUploadBytes: num(process.env.MAX_UPLOAD_BYTES, 15 * 1024 * 1024),
     ocrEnabled: (process.env.OCR_ENABLED ?? "true").toLowerCase() !== "false",
     ocrLangs: process.env.OCR_LANGS ?? "vie+eng",
+    markdownInputEnabled:
+      (process.env.MARKDOWN_INPUT_ENABLED ?? "true").toLowerCase() !== "false",
+    ragEnabled: (process.env.RAG_ENABLED ?? "false").toLowerCase() === "true",
+    embeddingProvider: process.env.EMBEDDING_PROVIDER ?? "mock",
+    embeddingModel: process.env.EMBEDDING_MODEL ?? "Xenova/multilingual-e5-small",
+    embeddingCacheDir:
+      process.env.EMBEDDING_CACHE_DIR ??
+      `${process.env.DATA_DIR ?? ".data"}/rag-cache`,
+    ragActivationChars: num(
+      process.env.RAG_ACTIVATION_CHARS,
+      num(process.env.MAX_PROMPT_SOURCE_CHARS, 12000),
+    ),
+    ragTopK: num(process.env.RAG_TOP_K, 8),
+    ragTokenBudget: num(
+      process.env.RAG_TOKEN_BUDGET,
+      num(process.env.MAX_PROMPT_SOURCE_CHARS, 12000),
+    ),
+    ragUseMmr: (process.env.RAG_USE_MMR ?? "true").toLowerCase() !== "false",
     sotatekGitRemote: process.env.GIT_REMOTE ?? "git@github.com:sota-labs/notex-interface.git",
   };
 }

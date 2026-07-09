@@ -4,7 +4,7 @@
 // stream sinh tài liệu qua endpoint SSE sẵn có POST /api/documents.
 import { useCallback, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { TemplateId } from "@/lib/types/document";
+import type { InputFormat, TemplateId } from "@/lib/types/document";
 
 export type ChatItemStatus = "streaming" | "done" | "error";
 
@@ -56,7 +56,7 @@ export function useDocumentGenerationChat() {
   }, []);
 
   const send = useCallback(
-    async (description: string, template: TemplateId) => {
+    async (description: string, template: TemplateId, inputFormat: InputFormat = "natural") => {
       const prompt = description.trim();
       if (!prompt || busy) return;
 
@@ -82,7 +82,11 @@ export function useDocumentGenerationChat() {
         const res = await fetch("/api/documents", {
           method: "POST",
           headers: { "content-type": "application/json", accept: "text/event-stream" },
-          body: JSON.stringify({ description: prompt, template, sources: [] }),
+          body: JSON.stringify(
+            inputFormat === "markdown"
+              ? { inputFormat, markdown: prompt, template, sources: [] }
+              : { description: prompt, template, sources: [] },
+          ),
           signal: controller.signal,
         });
 
@@ -120,6 +124,9 @@ export function useDocumentGenerationChat() {
               } else if (data.doc) {
                 settled = true;
                 const failed = Boolean(data.doc.error);
+                const warns: string[] = Array.isArray(data.warnings) ? data.warnings : [];
+                const warnNote =
+                  warns.length > 0 ? ` (Lưu ý: ${warns.join(" · ")})` : "";
                 patch({
                   status: "done",
                   streamedLatex: acc,
@@ -127,8 +134,8 @@ export function useDocumentGenerationChat() {
                   hasPdf: Boolean(data.doc.pdfBase64),
                   error: failed ? data.doc.error : undefined,
                   text: failed
-                    ? `Đã tạo tài liệu “${data.doc.title}”, nhưng biên dịch PDF chưa thành công. Bạn có thể mở để xem mã nguồn và nhật ký lỗi.`
-                    : `Đã tạo xong tài liệu “${data.doc.title}”. Nhấn để mở và xem PDF.`,
+                    ? `Đã tạo tài liệu “${data.doc.title}”, nhưng biên dịch PDF chưa thành công. Bạn có thể mở để xem mã nguồn và nhật ký lỗi.${warnNote}`
+                    : `Đã tạo xong tài liệu “${data.doc.title}”. Nhấn để mở và xem PDF.${warnNote}`,
                 });
                 router.refresh();
               } else if (data.message) {

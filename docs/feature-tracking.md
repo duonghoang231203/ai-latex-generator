@@ -20,8 +20,8 @@ Bảng theo dõi tiến độ các tính năng của dự án AI LaTeX Generator
 | Trạng thái | Tính năng | Mô tả chi tiết | Người phụ trách / Ghi chú |
 | :---: | :--- | :--- | :--- |
 | 🔲 | **E1 · Multi-file project support (Core)** | Kiến trúc lưu trữ dạng thư mục (Directory-based storage) phục vụ tài liệu lớn. | Theme: Scale · Ưu tiên **1** (enabler) · Effort L |
-| 🔲 | **E5 · Markdown → LaTeX conversion** | Viết nháp bằng định dạng Markdown, tự động chuyển sang chuẩn LaTeX. | Theme: Authoring speed · Ưu tiên **2** (quick win) · Effort S–M |
-| 🔲 | **E3 · RAG (Retrieval-Augmented Generation)** | Truy hồi tài liệu tham khảo (upload) để AI viết nội dung chính xác, có trích dẫn nguồn. | Theme: Content accuracy · Ưu tiên **3** · Effort M–L |
+| ✅ | **E5 · Markdown → LaTeX conversion** | Viết nháp bằng định dạng Markdown, tự động chuyển sang chuẩn LaTeX. | Theme: Authoring speed · Ưu tiên **2** (quick win) · Effort S–M · **Done** |
+| ✅ | **E3 · RAG (Retrieval-Augmented Generation)** | Truy hồi tài liệu tham khảo (upload) để AI viết nội dung chính xác, có trích dẫn nguồn. | Theme: Content accuracy · Ưu tiên **3** · Effort M–L · **Done** (mặc định tắt: `RAG_ENABLED`) |
 | 🔲 | **E2 · Agentic multi-step document assembly** | Cơ chế tạo dàn ý và tự động viết nội dung theo dạng Checklist (Human-in-the-loop). | Theme: Smart assembly · Ưu tiên **4** (sau E1) · Effort L |
 | 🔲 | **E4 · OCR công thức Toán/Lý/Hóa** | Nhận diện công thức Toán/Lý/Hóa từ hình ảnh thành mã LaTeX. | Theme: Multimodal input · Ưu tiên **5** · Effort M |
 
@@ -51,17 +51,20 @@ Các đầu việc cụ thể được trích xuất từ [`project-roadmap.md`]
 - [ ] Migration: chuyển tài liệu single-file hiện có sang cấu trúc mới.
 
 #### E5 · Markdown → LaTeX conversion — *Authoring speed*
-- [ ] Bộ chuyển Markdown → LaTeX (heading, list, bảng, code, ảnh, công thức `$...$`).
-- [ ] Chế độ soạn nháp bằng Markdown trong UI kèm xem trước.
-- [ ] Ánh xạ cú pháp Markdown sang template LaTeX đang chọn.
-- [ ] Kiểm thử trên các mẫu Markdown phổ biến (đảm bảo compile được).
+> 📄 Nghiên cứu / cách tiếp cận: [`features/e5-markdown-to-latex/research.md`](./features/e5-markdown-to-latex/research.md) · Kế hoạch: [`features/e5-markdown-to-latex/plan.md`](./features/e5-markdown-to-latex/plan.md)
+- [x] Bộ chuyển Markdown → LaTeX (heading, list, bảng, code, ảnh, công thức `$...$`). → `lib/markdown/*` (converter tất định trên markdown-it + rule math giữ raw).
+- [x] Chế độ soạn nháp bằng Markdown trong UI kèm xem trước. → `app/components/ChatAssistant.tsx` (toggle Markdown + preview MD→HTML).
+- [x] Ánh xạ cú pháp Markdown sang template LaTeX đang chọn. → `wrapBodyInTemplate()` trong `registry.ts` + `runDocumentFromMarkdown()` trong orchestrator.
+- [x] Kiểm thử trên các mẫu Markdown phổ biến (đảm bảo compile được). → `tests/unit/markdown-to-latex.test.ts`, `markdown-orchestrator.test.ts`, `input-markdown.test.ts`.
 
 #### E3 · RAG (Retrieval-Augmented Generation) — *Content accuracy*
-- [ ] Ingest tài liệu tham khảo (upload) → tách đoạn (chunking).
-- [ ] Sinh embeddings + lưu vào vector store (đánh giá & chọn giải pháp: local vs. dịch vụ).
-- [ ] Truy hồi (retrieve) đoạn liên quan theo mô tả người dùng, chèn vào prompt trong `lib/ai/prompts.ts`.
-- [ ] Trích dẫn nguồn trong nội dung sinh ra để tăng độ chính xác và khả năng kiểm chứng.
-- [ ] Kiểm soát ngân sách token khi nhồi ngữ cảnh (tránh vượt trần request của model).
+> 📄 Nghiên cứu / cách tiếp cận: [`features/e3-rag/research.md`](./features/e3-rag/research.md) · Kế hoạch: [`features/e3-rag/plan.md`](./features/e3-rag/plan.md)
+- [x] Ingest tài liệu tham khảo (upload) → tách đoạn (chunking). → `lib/rag/chunk-source-text.ts` (tái dùng `lib/extract` sẵn có).
+- [x] Sinh embeddings + lưu vào vector store (đánh giá & chọn giải pháp: local vs. dịch vụ). → `EmbeddingProvider` (mock mặc định + transformers tuỳ chọn) + `InMemoryVectorStore` + cache theo hash.
+- [x] Truy hồi (retrieve) đoạn liên quan theo mô tả người dùng, chèn vào prompt trong `lib/ai/prompts.ts`. → `retrieveRelevantSources` (top-k + MMR) chạy ở orchestrator; `sourcesBlock` nhánh `retrievedSources`.
+- [x] Trích dẫn nguồn trong nội dung sinh ra để tăng độ chính xác và khả năng kiểm chứng. → nhãn `[S#]` + chỉ thị trích dẫn trong prompt.
+- [x] Kiểm soát ngân sách token khi nhồi ngữ cảnh (tránh vượt trần request của model). → `token-budget.ts` + gate `RAG_ACTIVATION_CHARS`. Tests: `tests/unit/rag-chunk.test.ts`, `rag-retrieve.test.ts`.
+> ⚙️ Mặc định `RAG_ENABLED=false` (bật để dùng). Embedding mặc định `mock` (tất định/offline); `transformers` cần cài `@xenova/transformers`.
 
 #### E2 · Agentic multi-step document assembly — *Smart assembly (Human-in-the-loop)*
 - [ ] Bước 1: sinh DÀN Ý (outline) và hiển thị dạng checklist cho người dùng duyệt/sửa.

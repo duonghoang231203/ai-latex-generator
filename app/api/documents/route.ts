@@ -2,16 +2,46 @@
 // CRUD tài liệu: GET (danh sách), POST (tạo mới = generate + lưu trữ).
 import { getConfig } from "@/lib/config";
 import { validateDocumentInput } from "@/lib/validation/input";
-import { runDocument } from "@/lib/orchestrator/document";
+import { runDocument, runDocumentFromMarkdown } from "@/lib/orchestrator/document";
 import { buildOrchestratorDeps, deriveTitle } from "@/lib/orchestrator/deps";
 import { CompileServiceError } from "@/lib/compile/client";
 import { getRateLimiter, clientIp } from "@/lib/ratelimit/tokenBucket";
 import { createDocument, listDocuments } from "@/lib/store/documentStore";
-import { isDocumentError } from "@/lib/types/document";
+import { isDocumentError, type DocumentRequest, type DocumentResult } from "@/lib/types/document";
+import type { OrchestratorDeps } from "@/lib/orchestrator/document";
 import { log } from "@/lib/log";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+
+/** Chọn orchestrator theo inputFormat: markdown → converter tất định, còn lại → generate AI. */
+function runByFormat(
+  req: DocumentRequest,
+  deps: OrchestratorDeps,
+  onChunk?: (text: string) => void,
+  onCompileStart?: () => void,
+): Promise<DocumentResult> {
+  if (req.inputFormat === "markdown") {
+    return runDocumentFromMarkdown(req, deps, onChunk, onCompileStart);
+  }
+  return runDocument(req, deps, onChunk, onCompileStart);
+}
+
+/** Tiêu đề: ưu tiên mô tả; với Markdown lấy dòng đầu (bỏ ký tự '#'). */
+function titleFor(value: {
+  description: string;
+  markdown?: string;
+  sources: { name: string; content: string }[];
+}): string {
+  if (value.description.trim().length > 0 || !value.markdown) {
+    return deriveTitle(value.description, value.sources);
+  }
+  const firstLine = value.markdown
+    .split("\n")
+    .map((l) => l.replace(/^#+\s*/, "").trim())
+    .find((l) => l.length > 0);
+  return deriveTitle(firstLine ?? "", value.sources);
+}
 
 export async function GET(): Promise<Response> {
   const docs = await listDocuments();
@@ -47,6 +77,14 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ error: parsed.error }, { status: 400 });
   }
 
+  // Cổng tính năng: chặn nhánh Markdown khi bị tắt qua cấu hình.
+  if (parsed.value.inputFormat === "markdown" && !cfg.markdownInputEnabled) {
+    return Response.json(
+      { error: "Chế độ soạn Markdown đang tắt (MARKDOWN_INPUT_ENABLED=false)." },
+      { status: 400 },
+    );
+  }
+
   const wantsStream = request.headers.get("accept") === "text/event-stream";
   if (wantsStream) {
     const stream = new ReadableStream({
@@ -63,12 +101,14 @@ export async function POST(request: Request): Promise<Response> {
         };
 
         try {
-          const result = await runDocument(
+          const result = await runByFormat(
             {
               description: parsed.value.description,
               docType: parsed.value.docType,
               template: parsed.value.template,
               sources: parsed.value.sources,
+              inputFormat: parsed.value.inputFormat,
+              markdown: parsed.value.markdown,
             },
             buildOrchestratorDeps(),
             (chunk) => {
@@ -81,7 +121,7 @@ export async function POST(request: Request): Promise<Response> {
 
           const failed = isDocumentError(result);
           const doc = await createDocument({
-            title: deriveTitle(parsed.value.description, parsed.value.sources),
+            title: titleFor(parsed.value),
             docType: parsed.value.docType,
             template: parsed.value.template,
             description: parsed.value.description,
@@ -90,6 +130,8 @@ export async function POST(request: Request): Promise<Response> {
             log: result.log,
             error: failed ? result.error : undefined,
             attempts: result.attempts,
+            inputFormat: parsed.value.inputFormat,
+            sourceMarkdown: parsed.value.markdown,
           });
 
           log.info("document.create", {
@@ -99,9 +141,10 @@ export async function POST(request: Request): Promise<Response> {
             attempts: result.attempts,
             ok: !failed,
             sources: parsed.value.sources.length,
+            inputFormat: parsed.value.inputFormat,
           });
 
-          enqueue("complete", { doc });
+          enqueue("complete", { doc, warnings: result.warnings ?? [] });
           controller.close();
         } catch (e) {
           if (e instanceof CompileServiceError) {
@@ -126,19 +169,21 @@ export async function POST(request: Request): Promise<Response> {
     });
   } else {
     try {
-      const result = await runDocument(
+      const result = await runByFormat(
         {
           description: parsed.value.description,
           docType: parsed.value.docType,
           template: parsed.value.template,
           sources: parsed.value.sources,
+          inputFormat: parsed.value.inputFormat,
+          markdown: parsed.value.markdown,
         },
         buildOrchestratorDeps(),
       );
 
       const failed = isDocumentError(result);
       const doc = await createDocument({
-        title: deriveTitle(parsed.value.description, parsed.value.sources),
+        title: titleFor(parsed.value),
         docType: parsed.value.docType,
         template: parsed.value.template,
         description: parsed.value.description,
@@ -147,6 +192,8 @@ export async function POST(request: Request): Promise<Response> {
         log: result.log,
         error: failed ? result.error : undefined,
         attempts: result.attempts,
+        inputFormat: parsed.value.inputFormat,
+        sourceMarkdown: parsed.value.markdown,
       });
 
       log.info("document.create", {
@@ -156,8 +203,9 @@ export async function POST(request: Request): Promise<Response> {
         attempts: result.attempts,
         ok: !failed,
         sources: parsed.value.sources.length,
+        inputFormat: parsed.value.inputFormat,
       });
-      return Response.json(doc, { status: 201 });
+      return Response.json({ ...doc, warnings: result.warnings ?? [] }, { status: 201 });
     } catch (e) {
       if (e instanceof CompileServiceError) {
         return Response.json(

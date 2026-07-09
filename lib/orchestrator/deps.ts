@@ -5,7 +5,10 @@ import { getConfig } from "@/lib/config";
 import { getProvider } from "@/lib/ai/factory";
 import { compileLatex } from "@/lib/compile/client";
 import type { OrchestratorDeps } from "@/lib/orchestrator/document";
-import type { SourceFile } from "@/lib/types/document";
+import type { RetrievedChunk, SourceFile } from "@/lib/types/document";
+import { getEmbeddingProvider } from "@/lib/ai/embedding-factory";
+import { retrieveRelevantSources } from "@/lib/rag/retrieve-relevant-sources";
+import { FileEmbeddingCache } from "@/lib/rag/embedding-cache";
 
 export function buildOrchestratorDeps(): OrchestratorDeps {
   const cfg = getConfig();
@@ -17,6 +20,26 @@ export function buildOrchestratorDeps(): OrchestratorDeps {
         serviceUrl: cfg.compileServiceUrl,
         timeoutMs: cfg.requestTimeoutMs,
       }),
+    // RAG chỉ bật khi RAG_ENABLED=true (mặc định tắt → hành vi y như trước).
+    retrieve: cfg.ragEnabled
+      ? async (description: string, sources: SourceFile[]): Promise<RetrievedChunk[] | null> => {
+          const { activated, retrieved } = await retrieveRelevantSources(
+            description,
+            sources,
+            {
+              activationChars: cfg.ragActivationChars,
+              topK: cfg.ragTopK,
+              tokenBudget: cfg.ragTokenBudget,
+              useMmr: cfg.ragUseMmr,
+            },
+            {
+              embedder: getEmbeddingProvider(),
+              cache: new FileEmbeddingCache(cfg.embeddingCacheDir),
+            },
+          );
+          return activated ? retrieved : null;
+        }
+      : undefined,
   };
 }
 

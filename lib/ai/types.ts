@@ -1,5 +1,5 @@
 // lib/ai/types.ts
-import type { DocType, SourceFile, TemplateId } from "@/lib/types/document";
+import type { DocType, SourceFile, TemplateId, RetrievedChunk } from "@/lib/types/document";
 
 /** Ngữ cảnh cho lượt SỬA lỗi — đến từ AST validation HOẶC compile. */
 export interface ErrorContext {
@@ -18,6 +18,7 @@ export interface GenerateInput {
   docType: DocType;
   template?: TemplateId; // dạng tài liệu cụ thể (định hình format/gói)
   sources?: SourceFile[]; // tài liệu nguồn người dùng tải lên (dữ liệu tham khảo)
+  retrievedSources?: RetrievedChunk[]; // RAG: chunk liên quan đã retrieve (thay cho sources khi có)
   errorContext?: ErrorContext; // có => lượt sửa lỗi compile/validate
   editContext?: EditContext; // có => lượt chỉnh sửa nội dung theo yêu cầu
   onChunk?: (chunk: string) => void; // callback để stream text/suy luận

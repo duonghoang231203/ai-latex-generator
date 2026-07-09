@@ -76,6 +76,8 @@ async function readDoc(id: string): Promise<StoredDocument | null> {
     if (!Array.isArray(parsed.messages)) parsed.messages = [];
     // Migration nhẹ: tài liệu cũ chưa có template → suy ra từ docType.
     if (!parsed.template) parsed.template = templateForDocType(parsed.docType);
+    // Migration nhẹ: tài liệu cũ chưa có inputFormat → mặc định "natural".
+    if (!parsed.inputFormat) parsed.inputFormat = "natural";
     return parsed;
   } catch {
     return null;
@@ -109,6 +111,8 @@ export async function createDocument(
     messages: input.messages ?? [],
     createdAt: ts,
     updatedAt: ts,
+    inputFormat: input.inputFormat,
+    sourceMarkdown: input.sourceMarkdown,
   };
   await writeDoc(doc);
   return doc;
