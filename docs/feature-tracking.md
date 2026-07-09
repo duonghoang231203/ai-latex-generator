@@ -43,6 +43,7 @@ Các đầu việc cụ thể được trích xuất từ [`project-roadmap.md`]
 ### 🟡 Phase 2 — Advanced Features
 
 #### E1 · Multi-file project support (Core) — *Scale*
+> 📄 Giải thích (thiết kế): [`features/e1-multi-file-project/explainer.md`](./features/e1-multi-file-project/explainer.md) · ⚠️ chưa implement
 - [ ] Thiết kế mô hình lưu trữ dạng thư mục: mỗi tài liệu = 1 folder chứa nhiều file `.tex` + assets (thay cho trường `latex` đơn trong `StoredDocument`).
 - [ ] Cập nhật `lib/store/documentStore.ts` sang cấu trúc directory-based (đọc/ghi/liệt kê nhiều file).
 - [ ] Mở rộng data model `lib/types/document.ts`: danh sách file, file gốc (root/main), quan hệ `\input`/`\include`.
@@ -67,6 +68,7 @@ Các đầu việc cụ thể được trích xuất từ [`project-roadmap.md`]
 > ⚙️ Mặc định `RAG_ENABLED=false` (bật để dùng). Embedding mặc định `mock` (tất định/offline); `transformers` cần cài `@xenova/transformers`.
 
 #### E2 · Agentic multi-step document assembly — *Smart assembly (Human-in-the-loop)*
+> 📄 Giải thích (thiết kế): [`features/e2-agentic-assembly/explainer.md`](./features/e2-agentic-assembly/explainer.md) · ⚠️ chưa implement
 - [ ] Bước 1: sinh DÀN Ý (outline) và hiển thị dạng checklist cho người dùng duyệt/sửa.
 - [ ] Bước 2: tự động viết nội dung theo từng mục trong outline (multi-step), rồi ghép thành tài liệu hoàn chỉnh.
 - [ ] Điểm dừng human-in-the-loop: phê duyệt / điều chỉnh giữa các bước.
@@ -74,6 +76,7 @@ Các đầu việc cụ thể được trích xuất từ [`project-roadmap.md`]
 - [ ] UI: hiển thị tiến trình checklist, chỉnh sửa từng mục (tận dụng `Marker` / chat assistant sẵn có).
 
 #### E4 · OCR công thức Toán/Lý/Hóa — *Multimodal input*
+> 📄 Giải thích (thiết kế): [`features/e4-formula-ocr/explainer.md`](./features/e4-formula-ocr/explainer.md) · ⚠️ chưa implement
 - [ ] Nhận diện CÔNG THỨC (không chỉ text) từ ảnh → mã LaTeX (`amsmath` / `mhchem`).
 - [ ] Đánh giá & tích hợp engine OCR công thức (hiện `tesseract.js` trong `lib/extract` chỉ OCR văn bản).
 - [ ] Mở rộng `lib/extract` + `app/api/extract` để trả về LaTeX công thức.

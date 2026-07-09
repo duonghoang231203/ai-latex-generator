@@ -4,7 +4,7 @@
 // stream sinh tài liệu qua endpoint SSE sẵn có POST /api/documents.
 import { useCallback, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { InputFormat, TemplateId } from "@/lib/types/document";
+import type { InputFormat, SourceFile, TemplateId } from "@/lib/types/document";
 
 export type ChatItemStatus = "streaming" | "done" | "error";
 
@@ -56,16 +56,28 @@ export function useDocumentGenerationChat() {
   }, []);
 
   const send = useCallback(
-    async (description: string, template: TemplateId, inputFormat: InputFormat = "natural") => {
+    async (
+      description: string,
+      template: TemplateId,
+      inputFormat: InputFormat = "natural",
+      sources: SourceFile[] = [],
+    ) => {
       const prompt = description.trim();
-      if (!prompt || busy) return;
+      // Cho phép gửi khi có mô tả HOẶC có tệp nguồn (nhánh natural). Markdown cần nội dung.
+      const hasContent = prompt.length > 0 || (inputFormat !== "markdown" && sources.length > 0);
+      if (!hasContent || busy) return;
 
       const userId = nextId("user");
       const botId = nextId("assistant");
 
+      const userText =
+        prompt.length > 0
+          ? prompt
+          : `📎 Tạo tài liệu từ ${sources.length} tệp đính kèm`;
+
       setItems((prev) => [
         ...prev,
-        { id: userId, role: "user", status: "done", text: prompt },
+        { id: userId, role: "user", status: "done", text: userText },
         { id: botId, role: "assistant", status: "streaming", text: "", streamedLatex: "" },
       ]);
       setBusy(true);
@@ -85,7 +97,7 @@ export function useDocumentGenerationChat() {
           body: JSON.stringify(
             inputFormat === "markdown"
               ? { inputFormat, markdown: prompt, template, sources: [] }
-              : { description: prompt, template, sources: [] },
+              : { description: prompt, template, sources },
           ),
           signal: controller.signal,
         });
