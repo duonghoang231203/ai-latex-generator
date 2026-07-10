@@ -2,56 +2,82 @@
 import type { LatexProvider } from "@/lib/ai/types";
 import { getConfig } from "@/lib/config";
 import { MockProvider } from "@/lib/ai/mock";
-import { AnthropicProvider } from "@/lib/ai/anthropic";
-import { OpenAIProvider } from "@/lib/ai/openai";
+import { VercelAiProvider } from "@/lib/ai/vercel-provider";
+import { createOpenAI } from "@ai-sdk/openai";
+import { createAnthropic } from "@ai-sdk/anthropic";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
 
 /** Chọn provider theo AI_PROVIDER. Ném lỗi khi giá trị không hợp lệ. */
 export function getProvider(): LatexProvider {
   const cfg = getConfig();
   const apiKey = process.env.AI_API_KEY ?? "";
+  
+  const commonOpts = {
+    temperature: cfg.aiTemperature,
+    timeoutMs: cfg.requestTimeoutMs,
+    maxTokens: cfg.aiMaxTokens,
+  };
+
   switch (cfg.aiProvider) {
     case "sotatek-anthropic": {
       const gitRemote = Buffer.from(cfg.sotatekGitRemote).toString("base64");
-      return new AnthropicProvider({
+      const anthropic = createAnthropic({
         apiKey,
-        model: cfg.aiModel || "claude-3-5-sonnet-latest",
-        temperature: cfg.aiTemperature,
-        timeoutMs: cfg.requestTimeoutMs,
-        maxTokens: cfg.aiMaxTokens,
-        baseUrl: cfg.aiBaseUrl,
-        customHeaders: { "X-Git-Remote": gitRemote },
+        baseURL: cfg.aiBaseUrl || undefined,
+        headers: { "X-Git-Remote": gitRemote },
       });
+      return new VercelAiProvider(
+        "sotatek-anthropic",
+        anthropic(cfg.aiModel || "claude-3-5-sonnet-latest"),
+        commonOpts
+      );
     }
     case "sotatek-openai": {
       const gitRemote = Buffer.from(cfg.sotatekGitRemote).toString("base64");
-      return new OpenAIProvider({
+      const openai = createOpenAI({
         apiKey,
-        model: cfg.aiModel || "gpt-4o",
-        temperature: cfg.aiTemperature,
-        timeoutMs: cfg.requestTimeoutMs,
-        maxTokens: cfg.aiMaxTokens,
-        baseUrl: cfg.aiBaseUrl,
-        customHeaders: { "X-Git-Remote": gitRemote },
+        baseURL: cfg.aiBaseUrl || undefined,
+        headers: { "X-Git-Remote": gitRemote },
       });
+      return new VercelAiProvider(
+        "sotatek-openai",
+        openai(cfg.aiModel || "gpt-4o"),
+        commonOpts
+      );
     }
-    case "anthropic":
-      return new AnthropicProvider({
+    case "anthropic": {
+      const anthropic = createAnthropic({
         apiKey,
-        model: cfg.aiModel || "claude-3-5-sonnet-latest",
-        temperature: cfg.aiTemperature,
-        timeoutMs: cfg.requestTimeoutMs,
-        maxTokens: cfg.aiMaxTokens,
-        baseUrl: cfg.aiBaseUrl,
+        baseURL: cfg.aiBaseUrl || undefined,
       });
-    case "openai":
-      return new OpenAIProvider({
+      return new VercelAiProvider(
+        "anthropic",
+        anthropic(cfg.aiModel || "claude-3-5-sonnet-latest"),
+        commonOpts
+      );
+    }
+    case "openai": {
+      const openai = createOpenAI({
         apiKey,
-        model: cfg.aiModel || "gpt-4o",
-        temperature: cfg.aiTemperature,
-        timeoutMs: cfg.requestTimeoutMs,
-        maxTokens: cfg.aiMaxTokens,
-        baseUrl: cfg.aiBaseUrl,
+        baseURL: cfg.aiBaseUrl || undefined,
       });
+      return new VercelAiProvider(
+        "openai",
+        openai(cfg.aiModel || "gpt-4o"),
+        commonOpts
+      );
+    }
+    case "google": {
+      const google = createGoogleGenerativeAI({
+        apiKey,
+        baseURL: cfg.aiBaseUrl || undefined,
+      });
+      return new VercelAiProvider(
+        "google",
+        google(cfg.aiModel || "gemini-1.5-pro"),
+        commonOpts
+      );
+    }
     case "mock":
       return new MockProvider("happy");
     default:

@@ -1,6 +1,7 @@
 // lib/ai/mock.ts
 import type { DocType } from "@/lib/types/document";
 import type { GenerateInput, LatexProvider } from "@/lib/ai/types";
+import { z } from "zod";
 import { renderTemplateLatex } from "@/lib/templates/registry";
 
 export type MockScenario = "happy" | "fail-then-succeed" | "always-invalid";
@@ -78,5 +79,9 @@ export class MockProvider implements LatexProvider {
           ? { latex: renderTemplateLatex(input.template, input.description) }
           : { latex: validLatex(input.description, input.docType) };
     }
+  }
+
+  async generateObject<T>(schema: z.ZodType<T>, prompt: string): Promise<T> {
+    throw new Error("MockProvider.generateObject not implemented for dynamic schemas");
   }
 }

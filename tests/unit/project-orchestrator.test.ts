@@ -36,9 +36,10 @@ describe("runProject (E1 orchestrator wiring)", () => {
     }
     // gọi compileProject với rootFile = main.tex và đủ 2 file
     expect(compileProject).toHaveBeenCalledTimes(1);
-    const [sentFiles, sentRoot] = compileProject.mock.calls[0];
+    const args = compileProject.mock.calls[0] as unknown as [ProjectFile[], string];
+    const [sentFiles, sentRoot] = args;
     expect(sentRoot).toBe("main.tex");
-    expect((sentFiles as ProjectFile[]).map((f) => f.path)).toEqual(["main.tex", "ch1.tex"]);
+    expect(sentFiles.map((f) => f.path)).toEqual(["main.tex", "ch1.tex"]);
   });
 
   it("repair: lỗi lần 1 → AI sửa file gốc → lần 2 thành công (attempts=2)", async () => {

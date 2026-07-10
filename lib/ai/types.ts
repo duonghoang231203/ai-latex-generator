@@ -1,5 +1,5 @@
-// lib/ai/types.ts
 import type { DocType, SourceFile, TemplateId, RetrievedChunk } from "@/lib/types/document";
+import { z } from "zod";
 
 /** Ngữ cảnh cho lượt SỬA lỗi — đến từ AST validation HOẶC compile. */
 export interface ErrorContext {
@@ -28,4 +28,12 @@ export interface GenerateInput {
 export interface LatexProvider {
   readonly name: string;
   generate(input: GenerateInput): Promise<{ latex: string }>;
+  generateObject<T>(schema: z.ZodType<T>, prompt: string): Promise<T>;
+}
+
+export class ProviderError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "ProviderError";
+  }
 }

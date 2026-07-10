@@ -32,7 +32,7 @@ function projectInput() {
     docType: "report" as const,
     template: "thesis" as const,
     description: "mô tả",
-    latex: files[0].content, // quy ước: latex = nội dung file gốc
+    latex: files[0]?.content ?? "", // quy ước: latex = nội dung file gốc
     attempts: 1,
     files,
     rootFile: "main.tex",
