@@ -2,7 +2,7 @@
 // Hiển thị trạng thái đăng nhập ở header: email + nút đăng xuất, hoặc link đăng nhập.
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth/current-user";
-import LogoutButton from "@/app/components/LogoutButton";
+import LogoutButton from "@/components/LogoutButton";
 
 export default async function AuthStatus() {
   const user = await getCurrentUser();

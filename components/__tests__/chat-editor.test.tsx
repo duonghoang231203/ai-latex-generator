@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import ChatEditor from "@/app/components/ChatEditor";
+import ChatEditor from "@/components/ChatEditor";
 import type { ChatMessage } from "@/lib/types/document";
 
 const msgs: ChatMessage[] = [

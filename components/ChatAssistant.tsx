@@ -9,9 +9,9 @@ import MarkdownIt from "markdown-it";
 
 import type { TemplateId } from "@/lib/types/document";
 import { getTemplate, listTemplates } from "@/lib/templates/registry";
-import { useDocumentGenerationChat } from "@/app/components/useDocumentGenerationChat";
-import { SOURCE_ACCEPT, extOf, isTextLike, filesToSources } from "@/app/components/source-upload";
-import ChatMessageItem from "@/app/components/ChatMessageItem";
+import { useDocumentGenerationChat } from "@/components/useDocumentGenerationChat";
+import { SOURCE_ACCEPT, extOf, isTextLike, filesToSources } from "@/components/source-upload";
+import ChatMessageItem from "@/components/ChatMessageItem";
 
 import {
   Menubar,

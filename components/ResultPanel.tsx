@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import PdfPreview from "@/app/components/PdfPreview";
-import LatexSource from "@/app/components/LatexSource";
+import PdfPreview from "@/components/PdfPreview";
+import LatexSource from "@/components/LatexSource";
 
 export interface ResultData {
   latex?: string;

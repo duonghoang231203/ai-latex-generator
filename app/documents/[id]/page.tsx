@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import DocumentWorkspace from "@/app/components/DocumentWorkspace";
+import DocumentWorkspace from "@/components/DocumentWorkspace";
 import { getDocument } from "@/lib/store/documentStore";
 import { getCurrentUserId } from "@/lib/auth/current-user";
 

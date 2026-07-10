@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/message";
 import { Marker, MarkerContent, MarkerIcon } from "@/components/ui/marker";
 import { Spinner } from "@/components/ui/spinner";
-import type { ChatItem } from "@/app/components/useDocumentGenerationChat";
+import type { ChatItem } from "@/components/useDocumentGenerationChat";
 
 export default function ChatMessageItem({
   item,

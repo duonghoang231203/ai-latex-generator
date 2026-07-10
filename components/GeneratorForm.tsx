@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { TemplateId, SourceFile } from "@/lib/types/document";
-import TemplateSelect from "@/app/components/TemplateSelect";
+import TemplateSelect from "@/components/TemplateSelect";
 
 export interface GeneratorFormValues {
   description: string;

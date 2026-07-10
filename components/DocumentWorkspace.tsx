@@ -3,8 +3,8 @@
 import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import PdfPreview from "@/app/components/PdfPreview";
-import ChatEditor from "@/app/components/ChatEditor";
+import PdfPreview from "@/components/PdfPreview";
+import ChatEditor from "@/components/ChatEditor";
 import type { StoredDocument } from "@/lib/types/document";
 import { getTemplate } from "@/lib/templates/registry";
 

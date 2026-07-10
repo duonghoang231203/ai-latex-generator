@@ -1,7 +1,7 @@
 "use client";
 
-import ChatAssistant from "@/app/components/ChatAssistant";
-import DocumentList from "@/app/components/DocumentList";
+import ChatAssistant from "@/components/ChatAssistant";
+import DocumentList from "@/components/DocumentList";
 import type { DocumentSummary } from "@/lib/types/document";
 
 export default function HomeClient({

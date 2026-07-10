@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import HomeClient from "@/app/components/HomeClient";
+import HomeClient from "@/components/HomeClient";
 import { listDocuments } from "@/lib/store/documentStore";
 import { getCurrentUserId } from "@/lib/auth/current-user";
 

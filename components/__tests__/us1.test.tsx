@@ -1,8 +1,8 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import GeneratorForm from "@/app/components/GeneratorForm";
-import ResultPanel from "@/app/components/ResultPanel";
+import GeneratorForm from "@/components/GeneratorForm";
+import ResultPanel from "@/components/ResultPanel";
 
 describe("GeneratorForm (US1)", () => {
   it("submit gọi onSubmit với đúng { description, template }", async () => {

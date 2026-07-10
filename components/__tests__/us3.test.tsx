@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import GeneratorForm from "@/app/components/GeneratorForm";
+import GeneratorForm from "@/components/GeneratorForm";
 
 describe("GeneratorForm (US3) — validate input & trạng thái", () => {
   it("chặn submit khi mô tả rỗng và hiện cảnh báo", async () => {
