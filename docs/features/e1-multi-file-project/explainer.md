@@ -76,11 +76,16 @@ compile-service  →  nhận NHIỀU file: ghi tất cả vào thư mục tạm,
 
 ## 4. Cạm bẫy dự kiến & cách né
 
-- **Path traversal ở tầng file con.** Guard hiện chỉ bảo vệ `id`. Mỗi `ProjectFile.path` do người
-  dùng/AI đặt cũng phải qua kiểm (chống `../`, đường tuyệt đối, null-byte) trước khi ghi vào thư mục.
-- **`\input`/`\include` trong sandbox.** Tectonic `--untrusted` giới hạn đọc file ngoài. **Cần spike
-  xác nhận** Tectonic có cho `\input` các file *cùng thư mục làm việc* dưới chế độ untrusted hay
-  không — nếu hạn chế, phải điều chỉnh cách nạp. (Đây là rủi ro then chốt, phải kiểm trước khi cam kết.)
+- **`\input`/`\include` trong sandbox.** ✅ **Đã spike (2026-07-09) — xem
+  [`spike-tectonic-multifile.md`](./spike-tectonic-multifile.md).** Kết quả: Tectonic `--untrusted`
+  **nạp được** `\input` (sibling + thư mục con), `\include`, và `\includegraphics` asset cục bộ trong
+  thư mục làm việc. NHƯNG `--untrusted` **không** giới hạn đọc file: nó cho cả đường dẫn **tuyệt đối**
+  và **`..` thoát thư mục cha**. → Cô lập filesystem đến từ **container** (read-only fs + tmpfs +
+  non-root), không phải từ `--untrusted`.
+- **[BẮT BUỘC] Path traversal ở tầng file con.** Vì Tectonic không chặn, ta phải tự validate. Guard
+  hiện chỉ bảo vệ `id`. Mỗi `ProjectFile.path` do người dùng/AI đặt cũng phải qua kiểm (chặn `..`,
+  đường tuyệt đối, null-byte) trước khi ghi; cân nhắc quét target `\input`/`\includegraphics` trỏ ra
+  ngoài thư mục dự án.
 - **Assets nhị phân.** Ảnh không nên nhồi base64 vào JSON (phình dung lượng, chậm). Lưu file thật
   trong thư mục tài liệu; manifest chỉ tham chiếu đường dẫn.
 - **Vòng lặp `\input` / file gốc mơ hồ.** Cần xác định rõ **một** rootFile; phát hiện include vòng.
@@ -97,5 +102,7 @@ compile-service  →  nhận NHIỀU file: ghi tất cả vào thư mục tạm,
   doc cũ ⇒ project 1 file `main.tex`.
 - **Quan hệ với v2 (Auth & DB)?** Chuyển store sang thư mục ảnh hưởng lớp `lib/store`; khi lên DB (v2)
   mô hình "project nhiều file" cần map sang bảng/blob — nên thiết kế interface store đủ trừu tượng.
-- **Trạng thái?** Chưa code. Cần *spike* xác nhận hành vi `\input` dưới Tectonic `--untrusted` trước
-  khi chốt kiến trúc.
+- **Trạng thái?** Chưa code. ✅ Spike chặn rủi ro **đã xong** (2026-07-09,
+  [`spike-tectonic-multifile.md`](./spike-tectonic-multifile.md)): `\input`/`\include`/asset chạy dưới
+  Tectonic `--untrusted` → kiến trúc directory-based được mở khóa để cam kết. Hạng mục an ninh mới:
+  **path-guard bắt buộc** (sandbox không chặn đọc file ngoài).

@@ -7,6 +7,7 @@ import { buildOrchestratorDeps, deriveTitle } from "@/lib/orchestrator/deps";
 import { CompileServiceError } from "@/lib/compile/client";
 import { getRateLimiter, clientIp } from "@/lib/ratelimit/tokenBucket";
 import { createDocument, listDocuments } from "@/lib/store/documentStore";
+import { getCurrentUserId } from "@/lib/auth/current-user";
 import { isDocumentError, type DocumentRequest, type DocumentResult } from "@/lib/types/document";
 import type { OrchestratorDeps } from "@/lib/orchestrator/document";
 import { log } from "@/lib/log";
@@ -44,12 +45,21 @@ function titleFor(value: {
 }
 
 export async function GET(): Promise<Response> {
-  const docs = await listDocuments();
+  const userId = await getCurrentUserId();
+  if (!userId) {
+    return Response.json({ error: "Chưa đăng nhập" }, { status: 401 });
+  }
+  const docs = await listDocuments(userId);
   return Response.json({ documents: docs }, { status: 200 });
 }
 
 export async function POST(request: Request): Promise<Response> {
   const cfg = getConfig();
+
+  const userId = await getCurrentUserId();
+  if (!userId) {
+    return Response.json({ error: "Chưa đăng nhập" }, { status: 401 });
+  }
 
   // Rate limit theo IP (tạo mới gọi AI).
   const limiter = getRateLimiter(cfg.rateLimitPerMinute);
@@ -122,6 +132,7 @@ export async function POST(request: Request): Promise<Response> {
           const failed = isDocumentError(result);
           const doc = await createDocument({
             title: titleFor(parsed.value),
+            ownerId: userId,
             docType: parsed.value.docType,
             template: parsed.value.template,
             description: parsed.value.description,
@@ -184,6 +195,7 @@ export async function POST(request: Request): Promise<Response> {
       const failed = isDocumentError(result);
       const doc = await createDocument({
         title: titleFor(parsed.value),
+        ownerId: userId,
         docType: parsed.value.docType,
         template: parsed.value.template,
         description: parsed.value.description,

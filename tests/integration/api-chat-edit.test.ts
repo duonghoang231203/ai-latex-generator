@@ -10,6 +10,12 @@ import { resetRateLimiter } from "@/lib/ratelimit/tokenBucket";
 import { createDocument } from "@/lib/store/documentStore";
 import type { StoredDocument } from "@/lib/types/document";
 
+// Giả lập đã đăng nhập: mọi route thấy user cố định "test-user".
+vi.mock("@/lib/auth/current-user", () => ({
+  getCurrentUser: async () => ({ id: "test-user", email: "test@example.com" }),
+  getCurrentUserId: async () => "test-user",
+}));
+
 let dir: string;
 
 function ctx(id: string) {
@@ -149,6 +155,7 @@ describe("chat-edit API — các trường hợp", () => {
   it("tài liệu chưa có latex → 400", async () => {
     const empty = await createDocument({
       title: "Rỗng",
+      ownerId: "test-user",
       docType: "article",
       template: "general",
       description: "",

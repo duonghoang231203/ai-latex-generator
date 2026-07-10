@@ -132,6 +132,7 @@ export interface ChatMessage {
 /** Tài liệu được lưu trữ (file-based). Nguồn sự thật cho luồng CRUD. */
 export interface StoredDocument {
   id: string;
+  ownerId?: string; // id chủ sở hữu (Supabase user). Tài liệu cũ (trước auth) có thể thiếu.
   title: string;
   docType: DocType;
   template: TemplateId;
@@ -146,6 +147,12 @@ export interface StoredDocument {
   updatedAt: string; // ISO 8601
   inputFormat?: InputFormat; // định dạng đã dùng để tạo (thiếu ⇒ "natural")
   sourceMarkdown?: string; // Markdown gốc nếu tạo từ Markdown (để round-trip)
+  // ---- Multi-file project (E1) ----
+  // Nếu `files` có mặt ⇒ tài liệu là DỰ ÁN nhiều file (text). `rootFile` là file gốc để compile
+  // (mặc định "main.tex"). Quy ước: `latex` giữ nội dung file gốc để tương thích các luồng single-file
+  // (editor/chat-edit đọc `latex`). Tài liệu cũ không có `files` ⇒ single-file như trước.
+  files?: ProjectFile[];
+  rootFile?: string;
 }
 
 /** Dữ liệu tạo mới tài liệu (id/timestamps/messages sinh tự động). */
@@ -158,7 +165,15 @@ export type CreateDocumentInput = Omit<
 export type UpdateDocumentPatch = Partial<
   Pick<
     StoredDocument,
-    "title" | "latex" | "pdfBase64" | "log" | "error" | "attempts" | "messages"
+    | "title"
+    | "latex"
+    | "pdfBase64"
+    | "log"
+    | "error"
+    | "attempts"
+    | "messages"
+    | "files"
+    | "rootFile"
   >
 >;
 
@@ -175,6 +190,16 @@ export interface DocumentSummary {
 }
 
 // ---- Compile ----
+/**
+ * Một file trong dự án multi-file (E1). Dùng cho payload gửi tới compile-service.
+ * Chỉ một trong hai: `content` (text, vd .tex) HOẶC `contentBase64` (nhị phân, vd ảnh).
+ */
+export interface ProjectFile {
+  path: string; // đường dẫn tương đối trong dự án (POSIX, không '..'/tuyệt đối)
+  content?: string; // nội dung text
+  contentBase64?: string; // nội dung nhị phân, mã hoá base64
+}
+
 export interface CompileSuccess {
   success: true;
   pdf: Uint8Array;

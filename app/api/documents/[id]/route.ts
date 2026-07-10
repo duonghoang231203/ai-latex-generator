@@ -10,6 +10,7 @@ import {
   updateDocument,
 } from "@/lib/store/documentStore";
 import type { UpdateDocumentPatch } from "@/lib/types/document";
+import { getCurrentUserId } from "@/lib/auth/current-user";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -18,7 +19,11 @@ type Ctx = { params: Promise<{ id: string }> };
 
 export async function GET(_request: Request, ctx: Ctx): Promise<Response> {
   const { id } = await ctx.params;
-  const doc = await getDocument(id);
+  const userId = await getCurrentUserId();
+  if (!userId) {
+    return Response.json({ error: "Chưa đăng nhập" }, { status: 401 });
+  }
+  const doc = await getDocument(id, userId);
   if (!doc) {
     return Response.json({ error: "Không tìm thấy tài liệu" }, { status: 404 });
   }
@@ -27,7 +32,11 @@ export async function GET(_request: Request, ctx: Ctx): Promise<Response> {
 
 export async function DELETE(_request: Request, ctx: Ctx): Promise<Response> {
   const { id } = await ctx.params;
-  const ok = await deleteDocument(id);
+  const userId = await getCurrentUserId();
+  if (!userId) {
+    return Response.json({ error: "Chưa đăng nhập" }, { status: 401 });
+  }
+  const ok = await deleteDocument(id, userId);
   if (!ok) {
     return Response.json({ error: "Không tìm thấy tài liệu" }, { status: 404 });
   }
@@ -43,7 +52,12 @@ export async function PATCH(request: Request, ctx: Ctx): Promise<Response> {
   const { id } = await ctx.params;
   const cfg = getConfig();
 
-  const existing = await getDocument(id);
+  const userId = await getCurrentUserId();
+  if (!userId) {
+    return Response.json({ error: "Chưa đăng nhập" }, { status: 401 });
+  }
+
+  const existing = await getDocument(id, userId);
   if (!existing) {
     return Response.json({ error: "Không tìm thấy tài liệu" }, { status: 404 });
   }
@@ -114,7 +128,7 @@ export async function PATCH(request: Request, ctx: Ctx): Promise<Response> {
     return Response.json({ error: "Không có trường nào để cập nhật" }, { status: 400 });
   }
 
-  const updated = await updateDocument(id, patch);
+  const updated = await updateDocument(id, patch, userId);
   if (!updated) {
     return Response.json({ error: "Không tìm thấy tài liệu" }, { status: 404 });
   }

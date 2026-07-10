@@ -8,16 +8,22 @@ import type {
   EditRequest,
   TemplateId,
 } from "@/lib/types/document";
-import type { SourceFile, RetrievedChunk } from "@/lib/types/document";
+import type { SourceFile, RetrievedChunk, ProjectFile } from "@/lib/types/document";
 import type { LatexProvider } from "@/lib/ai/types";
 import { validateLatex, diagnosticsToLog, type ValidationResult } from "@/lib/validation/validate";
 import { truncateLog } from "@/lib/orchestrator/truncateLog";
 import { getTemplate, wrapBodyInTemplate } from "@/lib/templates/registry";
 import { convertMarkdownToLatexBody } from "@/lib/markdown/markdown-to-latex";
+import { validateProject } from "@/lib/store/project-document";
 
 export interface OrchestratorDeps {
   provider: LatexProvider;
   compile: (latex: string) => Promise<CompileResult>;
+  /** Compile dự án multi-file (E1). Bắt buộc cho runProject; không cần cho luồng single-file. */
+  compileProject?: (
+    files: ProjectFile[],
+    rootFile: string,
+  ) => Promise<CompileResult>;
   validate?: (latex: string) => ValidationResult;
   maxAttempts: number;
   /** RAG (E3, tuỳ chọn): chọn chunk nguồn liên quan trước khi generate. null ⇒ nhồi thẳng sources. */
@@ -65,8 +71,10 @@ async function runRepairLoop(
   docType: DocType,
   deps: OrchestratorDeps,
   templateId?: TemplateId,
+  compileFn?: (latex: string) => Promise<CompileResult>,
 ): Promise<DocumentResult> {
   const validate = deps.validate ?? validateLatex;
+  const compile = compileFn ?? deps.compile;
   const maxAttempts = Math.max(1, deps.maxAttempts);
 
   let attempts = 1;
@@ -80,7 +88,7 @@ async function runRepairLoop(
       lastLog = diagnosticsToLog(v.diagnostics);
     } else {
       // 2) Compile (nguồn sự thật cuối).
-      const c = await deps.compile(latex);
+      const c = await compile(latex);
       if (c.success) {
         return {
           latex,
@@ -215,6 +223,65 @@ export async function runDocumentFromMarkdown(
   // Đính cảnh báo converter (không chặn) vào kết quả để UI hiển thị.
   if (warnings.length > 0) result.warnings = warnings;
   return result;
+}
+
+/**
+ * E1 — Compile & sửa lỗi một DỰ ÁN multi-file.
+ * Kiểm path an toàn (`validateProject`) → compile CẢ dự án (`deps.compileProject`) → nếu lỗi, AI sửa
+ * FILE GỐC (các file phụ giữ nguyên). GIỚI HẠN v1: repair chỉ nhắm file gốc; lỗi nằm trong file phụ
+ * phải sửa thủ công. Yêu cầu `deps.compileProject`.
+ */
+export async function runProject(
+  req: {
+    files: ProjectFile[];
+    rootFile: string;
+    docType: DocType;
+    template?: TemplateId;
+  },
+  deps: OrchestratorDeps,
+  onChunk?: (text: string) => void,
+  onCompileStart?: () => void,
+): Promise<DocumentResult> {
+  if (!deps.compileProject) {
+    throw new Error("runProject cần deps.compileProject");
+  }
+  const compileProjectDep = deps.compileProject;
+
+  // Chống path traversal + chuẩn hoá (sandbox compile KHÔNG tự chặn — xem spike E1).
+  const validation = validateProject(req.files, req.rootFile);
+  if (!validation.ok) {
+    return { error: validation.error, attempts: 1 };
+  }
+  const { files, rootFile } = validation;
+  const rootLatex = files.find((f) => f.path === rootFile)?.content ?? "";
+
+  // Đơn vị "thay đổi" trong repair loop là nội dung FILE GỐC; các file phụ giữ nguyên.
+  const compileFn = (latex: string): Promise<CompileResult> => {
+    const projectFiles = files.map((f) =>
+      f.path === rootFile ? { ...f, content: latex } : f,
+    );
+    return compileProjectDep(projectFiles, rootFile);
+  };
+
+  onCompileStart?.();
+
+  return runRepairLoop(
+    rootLatex,
+    async (previousLatex, errorLog) =>
+      (
+        await deps.provider.generate({
+          description: "",
+          docType: req.docType,
+          template: req.template,
+          errorContext: { previousLatex, errorLog },
+          onChunk,
+        })
+      ).latex,
+    req.docType,
+    deps,
+    req.template,
+    compileFn,
+  );
 }
 
 /**

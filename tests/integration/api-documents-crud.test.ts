@@ -13,6 +13,12 @@ import { POST as chatPOST } from "@/app/api/documents/[id]/chat/route";
 import { resetRateLimiter } from "@/lib/ratelimit/tokenBucket";
 import type { StoredDocument, DocumentSummary } from "@/lib/types/document";
 
+// Giả lập đã đăng nhập: mọi route thấy user cố định "test-user".
+vi.mock("@/lib/auth/current-user", () => ({
+  getCurrentUser: async () => ({ id: "test-user", email: "test@example.com" }),
+  getCurrentUserId: async () => "test-user",
+}));
+
 let dir: string;
 
 function ctx(id: string) {

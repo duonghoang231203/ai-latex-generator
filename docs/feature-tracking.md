@@ -44,12 +44,14 @@ Các đầu việc cụ thể được trích xuất từ [`project-roadmap.md`]
 
 #### E1 · Multi-file project support (Core) — *Scale*
 > 📄 Giải thích (thiết kế): [`features/e1-multi-file-project/explainer.md`](./features/e1-multi-file-project/explainer.md) · ⚠️ chưa implement
-- [ ] Thiết kế mô hình lưu trữ dạng thư mục: mỗi tài liệu = 1 folder chứa nhiều file `.tex` + assets (thay cho trường `latex` đơn trong `StoredDocument`).
-- [ ] Cập nhật `lib/store/documentStore.ts` sang cấu trúc directory-based (đọc/ghi/liệt kê nhiều file).
-- [ ] Mở rộng data model `lib/types/document.ts`: danh sách file, file gốc (root/main), quan hệ `\input`/`\include`.
-- [ ] Cập nhật `compile-service` để nhận nhiều file (main + phụ) và biên dịch từ file gốc.
+> 🧪 Spike (đã xong 2026-07-09): [`features/e1-multi-file-project/spike-tectonic-multifile.md`](./features/e1-multi-file-project/spike-tectonic-multifile.md) — `\input`/`\include`/asset chạy được dưới Tectonic `--untrusted`; **path-guard bắt buộc**.
+- [ ] Thiết kế mô hình lưu trữ dạng thư mục: mỗi tài liệu = 1 folder chứa nhiều file `.tex` + assets (thay cho trường `latex` đơn trong `StoredDocument`). → *increment 1: đã hỗ trợ dự án multi-file **text** trong layout JSON hiện tại (`files[]`); layout thư mục cho **asset nhị phân** hoãn lại.*
+- [ ] Cập nhật `lib/store/documentStore.ts` sang cấu trúc directory-based (đọc/ghi/liệt kê nhiều file). → *đã: lưu/đọc `files[]`+`rootFile` trong JSON (migration-on-read: thiếu `rootFile` ⇒ file đầu). Directory-based vật lý (asset nhị phân) hoãn.*
+- [x] Mở rộng data model `lib/types/document.ts`: danh sách file, file gốc (root/main), quan hệ `\input`/`\include`. → `ProjectFile`, `StoredDocument.files?/rootFile?`, `UpdateDocumentPatch` cho phép `files/rootFile`. Cầu nối single↔multi: `lib/store/project-document.ts` (`getProjectFiles`/`getRootFile`/`validateProject`, tái dùng path-guard). Tests: `tests/unit/{project-document,store-project}.test.ts`.
+- [x] Cập nhật `compile-service` để nhận nhiều file (main + phụ) và biên dịch từ file gốc. → `compileProject(files, rootFile)` + `/compile` nhận `{files,rootFile}` (tương thích ngược `{latex}`) + **path-guard** `safeProjectPath` (chặn traversal — spike cho thấy `--untrusted` không tự chặn). Client: `lib/compile/{project-path,client}.ts`. Tests: `compile-service/test/project.test.js`, `tests/unit/{project-path,compile-client-project}.test.ts`.
 - [ ] UI: cây thư mục / tab file, chọn file gốc để biên dịch.
-- [ ] Migration: chuyển tài liệu single-file hiện có sang cấu trúc mới.
+- [ ] Wiring orchestrator: dùng `compileProject(getProjectFiles(doc), getRootFile(doc))` cho tài liệu multi-file (hiện `runDocument*` vẫn single-file). → *đã: `runProject()` (validate→compile cả dự án→repair file gốc, giới hạn v1) + `OrchestratorDeps.compileProject` + `/api/compile` nhận `{files,rootFile}`. Tests: `tests/unit/project-orchestrator.test.ts`, `tests/integration/api-compile-project.test.ts`. Còn: móc vào luồng TẠO tài liệu (chờ UI/E2 sinh multi-file) + rebuild image compile-service để HTTP e2e dùng code mới.*
+- [ ] Migration: chuyển tài liệu single-file hiện có sang cấu trúc mới. → *một phần: đọc tương thích đã có; chưa cần chuyển đổi vật lý vì vẫn dùng JSON.*
 
 #### E5 · Markdown → LaTeX conversion — *Authoring speed*
 > 📄 Nghiên cứu / cách tiếp cận: [`features/e5-markdown-to-latex/research.md`](./features/e5-markdown-to-latex/research.md) · Kế hoạch: [`features/e5-markdown-to-latex/plan.md`](./features/e5-markdown-to-latex/plan.md)

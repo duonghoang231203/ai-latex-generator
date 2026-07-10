@@ -6,6 +6,7 @@ import { buildOrchestratorDeps } from "@/lib/orchestrator/deps";
 import { CompileServiceError } from "@/lib/compile/client";
 import { getRateLimiter, clientIp } from "@/lib/ratelimit/tokenBucket";
 import { getDocument, newMessage, updateDocument } from "@/lib/store/documentStore";
+import { getCurrentUserId } from "@/lib/auth/current-user";
 import { isDocumentError, type ChatMessage } from "@/lib/types/document";
 import { log } from "@/lib/log";
 
@@ -20,6 +21,11 @@ export async function POST(request: Request, ctx: Ctx): Promise<Response> {
   const { id } = await ctx.params;
   const cfg = getConfig();
 
+  const userId = await getCurrentUserId();
+  if (!userId) {
+    return Response.json({ error: "Chưa đăng nhập" }, { status: 401 });
+  }
+
   // Rate limit theo IP (mỗi lượt chat gọi AI).
   const limiter = getRateLimiter(cfg.rateLimitPerMinute);
   const ip = clientIp(request.headers);
@@ -30,7 +36,7 @@ export async function POST(request: Request, ctx: Ctx): Promise<Response> {
     );
   }
 
-  const doc = await getDocument(id);
+  const doc = await getDocument(id, userId);
   if (!doc) {
     return Response.json({ error: "Không tìm thấy tài liệu" }, { status: 404 });
   }
@@ -107,7 +113,7 @@ export async function POST(request: Request, ctx: Ctx): Promise<Response> {
             error: failed ? result.error : undefined,
             attempts: result.attempts,
             messages: [...doc.messages, userMsg, assistantMsg],
-          });
+          }, userId);
 
           if (!updated) {
             enqueue("error", { message: "Không tìm thấy tài liệu" });
@@ -131,7 +137,7 @@ export async function POST(request: Request, ctx: Ctx): Promise<Response> {
               : `Lỗi xử lý: ${msg}`;
           await updateDocument(id, {
             messages: [...doc.messages, userMsg, newMessage("assistant", `⚠️ ${errText}`)],
-          });
+          }, userId);
           enqueue("error", { message: errText });
           controller.close();
         }
@@ -171,7 +177,7 @@ export async function POST(request: Request, ctx: Ctx): Promise<Response> {
         error: failed ? result.error : undefined,
         attempts: result.attempts,
         messages: [...doc.messages, userMsg, assistantMsg],
-      });
+      }, userId);
 
       if (!updated) {
         return Response.json({ error: "Không tìm thấy tài liệu" }, { status: 404 });
@@ -192,7 +198,7 @@ export async function POST(request: Request, ctx: Ctx): Promise<Response> {
           : `Lỗi xử lý: ${msg}`;
       await updateDocument(id, {
         messages: [...doc.messages, userMsg, newMessage("assistant", `⚠️ ${errText}`)],
-      });
+      }, userId);
       return Response.json({ error: errText }, { status: 502 });
     }
   }

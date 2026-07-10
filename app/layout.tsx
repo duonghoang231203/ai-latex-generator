@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
+import AuthStatus from "@/app/components/AuthStatus";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -43,7 +44,10 @@ export default function RootLayout({
             <Link href="/" className="text-sm font-semibold">
               AI LaTeX Generator
             </Link>
-            <ThemeToggle />
+            <div className="flex items-center gap-4">
+              <AuthStatus />
+              <ThemeToggle />
+            </div>
           </header>
           {children}
         </ThemeProvider>

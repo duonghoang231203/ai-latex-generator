@@ -3,9 +3,9 @@
 
 import { getConfig } from "@/lib/config";
 import { getProvider } from "@/lib/ai/factory";
-import { compileLatex } from "@/lib/compile/client";
+import { compileLatex, compileProject } from "@/lib/compile/client";
 import type { OrchestratorDeps } from "@/lib/orchestrator/document";
-import type { RetrievedChunk, SourceFile } from "@/lib/types/document";
+import type { ProjectFile, RetrievedChunk, SourceFile } from "@/lib/types/document";
 import { getEmbeddingProvider } from "@/lib/ai/embedding-factory";
 import { retrieveRelevantSources } from "@/lib/rag/retrieve-relevant-sources";
 import { FileEmbeddingCache } from "@/lib/rag/embedding-cache";
@@ -17,6 +17,12 @@ export function buildOrchestratorDeps(): OrchestratorDeps {
     maxAttempts: cfg.maxRepairAttempts,
     compile: (latex) =>
       compileLatex(latex, {
+        serviceUrl: cfg.compileServiceUrl,
+        timeoutMs: cfg.requestTimeoutMs,
+      }),
+    // Multi-file (E1): compile cả dự án từ file gốc (path-guard trong client + compile-service).
+    compileProject: (files: ProjectFile[], rootFile: string) =>
+      compileProject(files, rootFile, {
         serviceUrl: cfg.compileServiceUrl,
         timeoutMs: cfg.requestTimeoutMs,
       }),

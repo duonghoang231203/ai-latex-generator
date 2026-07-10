@@ -20,7 +20,12 @@ services:
         condition: service_healthy
 
   next-app:
-    build: .
+    build:
+      context: .
+      # NEXT_PUBLIC_* phải có mặt lúc `next build` để inline vào bundle client (trang login).
+      args:
+        - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
+        - NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY}
     restart: unless-stopped
     # KHÔNG expose ra host — chỉ Caddy trong mạng nội bộ compose gọi tới.
     expose:
@@ -28,6 +33,10 @@ services:
     environment:
       - HOSTNAME=0.0.0.0
       - PORT=3000
+      # Supabase auth: middleware gọi getUser() mỗi request nên bắt buộc có ở runtime.
+      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
+      - NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY}
+      - STORE_BACKEND=${STORE_BACKEND:-file}
       - AI_PROVIDER=${AI_PROVIDER:-mock}
       - AI_API_KEY=${AI_API_KEY:-}
       - AI_MODEL=${AI_MODEL:-}
