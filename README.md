@@ -44,9 +44,11 @@ Test-case đánh giá: `docs/testcases/testcases.json` (MVP: TC-01/02/05), chạ
 ## Trạng thái
 MVP: **nhiều template theo dạng tài liệu** (thuần văn bản, học thuật, toán học, vật lý, kỹ thuật,
 luận văn, trình chiếu Beamer, thư, CV, đề thi, hóa học) trên nền `article`/`report`/`beamer`/`exam`/`letter`
-+ repair loop + sandbox, **lưu trữ file-based** (`DATA_DIR`) với **CRUD**
-tài liệu và **chat-edit** (chỉnh sửa nội dung bằng ngôn ngữ tự nhiên + sửa mã nguồn thủ công + recompile).
-RAG, Markdown→LaTeX, OCR, đa ngôn ngữ hạng nhất, chỉnh sửa đa file/agentic, auth & DB chia sẻ thuộc
++ repair loop (validate cấu trúc → compile → tự sửa) + sandbox, **lưu trữ theo cấu hình
+`STORE_BACKEND`** (file-based mặc định qua `DATA_DIR`, hoặc Supabase Postgres + RLS) với **CRUD**
+tài liệu, **chat-edit** (chỉnh sửa nội dung bằng ngôn ngữ tự nhiên + sửa mã nguồn thủ công +
+recompile), và **auth qua Supabase** (`app/login/`, `app/auth/callback/`).
+RAG, Markdown→LaTeX, OCR, đa ngôn ngữ hạng nhất, chỉnh sửa đa file/agentic thuộc
 v1/v2 — xem `docs/project-roadmap.md`.
 
 ## Kế hoạch phát hành
