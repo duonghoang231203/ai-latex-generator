@@ -13,7 +13,7 @@ import type {
   RetrievedChunk,
   ProjectFile,
 } from "@/lib/types/document";
-import type { LatexProvider } from "@/lib/ai/types";
+import type { GenerateInput, GenerateOutcome, LatexProvider } from "@/lib/ai/types";
 import {
   validateLatex,
   diagnosticsToLog,
@@ -45,6 +45,64 @@ export interface OrchestratorDeps {
 
 function toBase64(bytes: Uint8Array): string {
   return Buffer.from(bytes).toString("base64");
+}
+
+/**
+ * Số lần retry tối đa khi generation bị CẮT CỤT (finishReason:"length") — KHÔNG liên quan tới
+ * maxAttempts của runRepairLoop (đó là số lần thử SỬA LỖI COMPILE của một document HOÀN CHỈNH).
+ * Truncation nghĩa là chưa có document hoàn chỉnh để mà compile/repair — phải xử lý TRƯỚC.
+ */
+const MAX_TRUNCATION_RETRIES = 2;
+
+/** Hệ số tăng maxOutputTokens mỗi lần retry do bị cắt cụt (Strategy A — "increase budget adaptively"). */
+const TRUNCATION_TOKEN_MULTIPLIER = 1.5;
+
+/**
+ * Base token budget khi không biết cấu hình thật của provider (orchestrator không phụ thuộc
+ * trực tiếp vào lib/config — nhận mọi thứ qua OrchestratorDeps, đúng nguyên tắc DI hiện có).
+ * Giá trị này chỉ là ĐIỂM KHỞI ĐẦU cho multiplier — không cần khớp chính xác AI_MAX_TOKENS thật,
+ * vì retry sẽ tự tăng dần nếu vẫn bị cắt. Khớp với default trong vercel-provider.ts/mock.ts.
+ */
+const DEFAULT_BASE_MAX_TOKENS = 8192;
+
+/**
+ * Gọi provider.generate() với TRUNCATION RECOVERY — tách biệt hoàn toàn khỏi runRepairLoop.
+ *
+ * Lý do tách riêng (không đưa vào runRepairLoop):
+ *   - Compile error = "document HOÀN CHỈNH nhưng compile thất bại" → cần diagnose + minimal patch.
+ *   - Truncation    = "generation CHƯA HOÀN THÀNH" → không nên compile/validate một document chưa
+ *     đầy đủ (chắc chắn thiếu \end{document}, dễ gây validate/compile error KHÔNG PHẢI lỗi thật của
+ *     nội dung — chỉ là hệ quả của việc bị cắt giữa đường).
+ *
+ * Strategy áp dụng (theo thứ tự, xem changelog.md E6): tăng token budget có kiểm soát trước
+ * (Strategy A) — KHÔNG tự động chuyển sang section-by-section generation ở đây (đó là Strategy B,
+ * cần Request Understanding/E1 multi-file, chưa làm) — continuation ghép nối (Strategy C) cũng
+ * KHÔNG làm ở đây vì rủi ro duplicate/broken context với LaTeX đã được nêu trong phân tích.
+ *
+ * finishReason khác "stop"/"length" (content-filter, tool-calls, error, other) KHÔNG được retry mù
+ * quáng ở đây — trả nguyên outcome để lớp gọi (runDocument/...) quyết định (hiện tại: coi như "stop"
+ * và để runRepairLoop xử lý qua validate/compile như bình thường, vì các finishReason này hiếm gặp
+ * trong luồng generate LaTeX thuần và không có chiến lược đặc thù đã được thiết kế).
+ */
+export async function generateWithTruncationRecovery(
+  provider: LatexProvider,
+  baseInput: GenerateInput,
+  baseMaxTokens: number = DEFAULT_BASE_MAX_TOKENS,
+): Promise<GenerateOutcome> {
+  let currentMaxTokens = baseMaxTokens;
+  let outcome = await provider.generate(baseInput);
+
+  let retries = 0;
+  while (outcome.finishReason === "length" && retries < MAX_TRUNCATION_RETRIES) {
+    retries += 1;
+    currentMaxTokens = Math.round(currentMaxTokens * TRUNCATION_TOKEN_MULTIPLIER);
+    outcome = await provider.generate({
+      ...baseInput,
+      maxTokensOverride: currentMaxTokens,
+    });
+  }
+
+  return outcome;
 }
 
 function extractPackages(latex: string): string[] {
@@ -158,7 +216,7 @@ export async function runDocument(
   const templateRepairHints = tpl?.repairHints;
 
   const initial = (
-    await deps.provider.generate({
+    await generateWithTruncationRecovery(deps.provider, {
       description: req.description,
       docType: req.docType,
       template: req.template,
@@ -174,7 +232,7 @@ export async function runDocument(
     initial,
     async (previousLatex, errorLog) =>
       (
-        await deps.provider.generate({
+        await generateWithTruncationRecovery(deps.provider, {
           description: req.description,
           docType: req.docType,
           template: req.template,
@@ -230,7 +288,7 @@ export async function runDocumentFromMarkdown(
     initial,
     async (previousLatex, errorLog) =>
       (
-        await deps.provider.generate({
+        await generateWithTruncationRecovery(deps.provider, {
           description: "",
           docType: req.docType,
           template: req.template,
@@ -292,7 +350,7 @@ export async function runProject(
     rootLatex,
     async (previousLatex, errorLog) =>
       (
-        await deps.provider.generate({
+        await generateWithTruncationRecovery(deps.provider, {
           description: "",
           docType: req.docType,
           template: req.template,
@@ -323,7 +381,7 @@ export async function runEdit(
   const templateRepairHints = tpl?.repairHints;
 
   const initial = (
-    await deps.provider.generate({
+    await generateWithTruncationRecovery(deps.provider, {
       description: "",
       docType: req.docType,
       template: req.template,
@@ -341,7 +399,7 @@ export async function runEdit(
     initial,
     async (previousLatex, errorLog) =>
       (
-        await deps.provider.generate({
+        await generateWithTruncationRecovery(deps.provider, {
           description: "",
           docType: req.docType,
           template: req.template,

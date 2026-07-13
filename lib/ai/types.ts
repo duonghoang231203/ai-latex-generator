@@ -24,12 +24,49 @@ export interface GenerateInput {
   onChunk?: (chunk: string) => void; // callback để stream text/suy luận
   /** Template-specific repair hints forwarded to buildRepairPrompt(). Set by orchestrator. */
   templateRepairHints?: Array<{ errorPattern: string; action: string }>;
+  /** Override maxOutputTokens cho lượt gọi này (dùng bởi truncation-recovery retry). */
+  maxTokensOverride?: number;
+}
+
+/**
+ * Unified finish reason — mirror Vercel AI SDK's FinishReason (ai@7.x), nhưng khai báo riêng
+ * ở đây để LatexProvider KHÔNG phụ thuộc trực tiếp vào type nội bộ của 'ai' package
+ * (Nguyên tắc V — provider-agnostic; MockProvider không import 'ai').
+ *
+ *   "stop"           — model tự kết thúc, output hoàn chỉnh.
+ *   "length"          — BỊ CẮT vì đạt maxOutputTokens. KHÔNG coi là compile error — xử lý bằng
+ *                       truncation-recovery (tăng token/regenerate ngắn hơn), KHÔNG đi qua
+ *                       runRepairLoop (đó là dành cho lỗi compile của một document HOÀN CHỈNH).
+ *   "content-filter"  — bị chặn bởi content policy của provider — không nên retry mù quáng.
+ *   "tool-calls"      — model gọi tool (không dùng trong luồng generate LaTeX hiện tại).
+ *   "error"           — lỗi phía provider trong lúc generate.
+ *   "other"           — giá trị không map được vào các loại trên.
+ */
+export type FinishReason =
+  | "stop"
+  | "length"
+  | "content-filter"
+  | "tool-calls"
+  | "error"
+  | "other";
+
+/** Kết quả một lượt generate — kèm tín hiệu finishReason để orchestrator quyết định đúng nhánh xử lý. */
+export interface GenerateOutcome {
+  latex: string;
+  finishReason: FinishReason;
+  /** Giá trị gốc từ provider trước khi map — dùng để debug/log, không dùng để quyết định logic. */
+  rawFinishReason?: string;
+  usage?: {
+    inputTokens?: number;
+    outputTokens?: number;
+    totalTokens?: number;
+  };
 }
 
 /** Interface duy nhất code nghiệp vụ phụ thuộc (Nguyên tắc V — provider-agnostic). */
 export interface LatexProvider {
   readonly name: string;
-  generate(input: GenerateInput): Promise<{ latex: string }>;
+  generate(input: GenerateInput): Promise<GenerateOutcome>;
   generateObject<T>(schema: z.ZodType<T>, prompt: string): Promise<T>;
 }
 

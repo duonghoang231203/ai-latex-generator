@@ -1,0 +1,28 @@
+# lib/prompt-eval/promptfooconfig.real-ai.yaml
+# Config chạy AI THẬT (sotatek-anthropic, đọc từ .env qua getProvider() factory) — TÁCH RIÊNG
+# khỏi promptfooconfig.yaml chính (dùng MockProvider, tất định, $0 chi phí, dùng cho CI/regression).
+# Chỉ chạy file này khi cần xem AI thật sinh nội dung gì — tốn API quota thật mỗi lần.
+#
+# Chạy: npx promptfoo eval -c lib/prompt-eval/promptfooconfig.real-ai.yaml -o <output>.json
+description: "E6 Giai đoạn 3 — Math Template, AI THẬT (sotatek-anthropic) trên dataset math/"
+
+prompts:
+  - "{{description}}"
+
+providers:
+  - id: file://./providers/math-real-ai-provider.ts
+    label: math-real-ai
+
+tests:
+  - file://./datasets/math/cases.yaml
+
+defaultTest:
+  assert:
+    - type: contains
+      value: "\\documentclass"
+    - type: contains
+      value: "\\begin{document}"
+    - type: contains
+      value: "\\end{document}"
+    - type: javascript
+      value: file://./scorers/validate-latex.ts

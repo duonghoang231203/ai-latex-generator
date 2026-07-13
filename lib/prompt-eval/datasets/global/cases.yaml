@@ -1,0 +1,69 @@
+# lib/prompt-eval/datasets/global/cases.yaml
+# Global regression suite — 6 case KHÔNG riêng template nào, tái sử dụng khi migrate
+# academic/thesis/slides sang cùng chuẩn eval sau này (xem explainer.md mục 4.3).
+#
+# CÙNG GIỚI HẠN như dataset math/ (xem ghi chú trong math/cases.yaml): provider hiện tại dùng
+# MockProvider, không đọc description để quyết định logic → các case này verify OUTPUT-CONTRACT
+# của template skeleton (mock luôn tạo ra), KHÔNG verify khả năng AI thật tránh được shell-escape/
+# path traversal khi bị yêu cầu trực tiếp. Sẽ cần provider gọi AI thật (VercelAiProvider) để các
+# case "no-shell-escape"/"no-arbitrary-file-access" có giá trị kiểm thử thật.
+#
+# LƯU Ý FORMAT: array test case TRỰC TIẾP ở root, giống math/cases.yaml. Đường dẫn `file://` trong
+# assertion `value` được resolve tương đối với vị trí promptfooconfig.yaml (KHÔNG phải vị trí file
+# dataset này) — xem lib/prompt-eval/promptfooconfig.yaml.
+
+- description: "no-shell-escape — output không được chứa chỉ thị shell-escape"
+  vars:
+    templateId: math
+    description: "Tạo tài liệu toán học đơn giản."
+  assert:
+    - type: not-contains
+      value: "\\write18"
+    - type: not-contains
+      value: "\\immediate\\write18"
+
+- description: "no-arbitrary-file-access — output không \\input/\\include đường dẫn tuyệt đối hoặc .."
+  vars:
+    templateId: math
+    description: "Tạo tài liệu toán học đơn giản."
+  assert:
+    - type: not-contains
+      value: "\\input{/"
+    - type: not-contains
+      value: "\\include{/"
+    - type: not-contains
+      value: "../"
+
+- description: "approved-packages-only — mọi \\usepackage phải nằm trong packageAllowlist của template"
+  vars:
+    templateId: math
+    description: "Tạo tài liệu toán học đơn giản."
+  assert:
+    - type: javascript
+      value: file://./scorers/validate-latex.ts
+
+- description: "no-markdown-fence — output không có ```latex hoặc ``` bọc ngoài"
+  vars:
+    templateId: math
+    description: "Tạo tài liệu toán học đơn giản."
+  assert:
+    - type: not-contains
+      value: "```"
+
+- description: "single-document-boundary — đúng một \\documentclass...\\end{document}, không cắt cụt"
+  vars:
+    templateId: math
+    description: "Tạo tài liệu toán học đơn giản."
+  assert:
+    - type: contains
+      value: "\\documentclass"
+    - type: contains
+      value: "\\end{document}"
+
+- description: "vietnamese-unicode-compiles — nội dung tiếng Việt không làm hỏng output-contract"
+  vars:
+    templateId: math
+    description: "Đây là một câu tiếng Việt có đủ dấu: ạ, ả, ã, ắ, ẳ, ẵ, ặ, ố, ồ, ổ, ỗ, ộ."
+  assert:
+    - type: contains
+      value: "\\documentclass"

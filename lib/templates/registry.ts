@@ -370,6 +370,14 @@ export const TEMPLATES: Record<TemplateId, DocumentTemplate> = {
       "\\leq/\\geq/\\subset/\\forall/\\exists), amsthm (theorem environments),",
       "mathtools (\\coloneqq/\\underbracket/\\prescript).",
 
+      // ── Cross-references & diagrams (POSITIVE alternatives — this template's allowlist has
+      //    no hyperref/tikz; state what TO DO instead of only what is forbidden) ──
+      "Cross-references: use plain \\label{} + \\ref{}/\\eqref{} — no hyperref needed.",
+      "Numbers resolve correctly without clickable links; this is standard and expected output.",
+      "Diagrams: this template has no TikZ. Represent mathematical relationships with equation,",
+      "cases, pmatrix/bmatrix/vmatrix, or a table (tabular, already available via base LaTeX) —",
+      "whichever preserves the mathematical meaning best. Do not attempt to draw a picture.",
+
       // ── Forbidden ──
       "FORBIDDEN: $$ ... $$ display math — use \\[ ... \\] instead.",
       "FORBIDDEN: \\newtheorem{} in the document body — all environments are pre-declared.",

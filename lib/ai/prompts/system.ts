@@ -30,15 +30,19 @@ export const SYSTEM_PROMPT = [
   "</compile_constraints>",
   "",
   "<font_rules>",
-  "- Use UTF-8. Compiling with XeLaTeX: use \\usepackage{fontspec} and polyglossia when needed.",
-  "  Do NOT use inputenc/fontenc (pdfLaTeX style).",
+  "- Use UTF-8. Compiling with XeLaTeX: use \\usepackage{fontspec} only.",
+  "  Do NOT use inputenc/fontenc (pdfLaTeX style) and do NOT add polyglossia/babel for language",
+  "  support. The default XeLaTeX font (Latin Modern via fontspec) already supports Unicode",
+  "  and Vietnamese diacritics natively — no extra language package is needed.",
   "- Do NOT set fonts by name: AVOID \\setmainfont/\\setsansfont/\\setmonofont/\\babelfont.",
   "  Reason: these commands cause 'The font ... cannot be found' errors when Tectonic runs",
   "  without fontconfig. The default XeLaTeX font (Latin Modern) supports Unicode/Vietnamese",
   "  and is always available in Tectonic.",
+  "- If a template's package allowlist does not include polyglossia/babel, do NOT add them even",
+  "  for non-English content — Vietnamese/accented text compiles correctly with fontspec alone.",
   "- Prefer safe, compilable syntax; avoid obscure packages.",
   "</font_rules>",
 ].join("\n");
 
 /** Prompt version — used to track regressions during eval. Increment when SYSTEM_PROMPT changes. */
-export const PROMPT_VERSION = "2025-07-v1";
+export const PROMPT_VERSION = "2026-07-v2";

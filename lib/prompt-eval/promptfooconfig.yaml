@@ -1,0 +1,45 @@
+# lib/prompt-eval/promptfooconfig.yaml
+# Config chính thức Giai đoạn 3 (E6 · Prompt Engineering) — so sánh Math Template v1 (git baseline
+# commit 2bc62faa1) vs v2 (hiện tại) trên cùng dataset (global/ + math/).
+#
+# Chạy từ ROOT của project (không phải từ trong lib/prompt-eval/) vì Node TS loader cần đọc đúng
+# tsconfig.json gốc (paths: {"@/*": ["./*"]}) — đã verify ở spike, xem spike-promptfoo-integration.md:
+#
+#   npx promptfoo eval -c lib/prompt-eval/promptfooconfig.yaml
+#
+# Mọi đường dẫn file:// trong file này được resolve tương đối với VỊ TRÍ FILE NÀY
+# (lib/prompt-eval/promptfooconfig.yaml), không phải working directory khi chạy lệnh.
+description: "E6 Giai đoạn 3 — Math Template v1 vs v2 (global + math dataset)"
+
+prompts:
+  - "{{description}}"
+
+providers:
+  - id: file://./providers/math-provider.ts
+    label: math-v1
+    config:
+      version: v1
+  - id: file://./providers/math-provider.ts
+    label: math-v2
+    config:
+      version: v2
+
+tests:
+  - file://./datasets/global/cases.yaml
+  - file://./datasets/math/cases.yaml
+
+# Assertion chung cho MỌI case — output-contract cơ bản + validate-latex scorer (tái dùng
+# validateLatex() thật, tự lấy đúng packageAllowlist/knownTheoremEnvironments theo vars.templateId).
+# defaultTest.vars không set gì — mỗi test case tự khai báo vars.templateId riêng (xem dataset).
+defaultTest:
+  assert:
+    - type: contains
+      value: "\\documentclass"
+    - type: contains
+      value: "\\begin{document}"
+    - type: contains
+      value: "\\end{document}"
+    - type: javascript
+      value: file://./scorers/validate-latex.ts
+    - type: javascript
+      value: file://./scorers/theorem-env-coverage.ts

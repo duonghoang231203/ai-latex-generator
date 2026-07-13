@@ -173,3 +173,14 @@ luôn trả `true` (rủi ro phổ biến khi viết scorer giả để "làm ch
   regex/AST như "requirement coverage") — chưa spike riêng, cần thử khi build metric đó thật.
 - Có cần `Promptfoo Cloud`/`promptfoo view` cho report visualization hay tự parse JSON output đủ dùng
   cho phase 1 (chỉ eval `math`) — quyết định khi có nhiều hơn vài chục case, hiện 2 case chưa cần.
+
+
+---
+
+## Update — đã migrate sang cấu trúc chính thức (2026-07-13)
+
+File spike (`lib/prompt-eval/spike/*.ts`, `promptfooconfig.spike.yaml` ở root) đã được **xoá** sau
+khi migrate xong sang `lib/prompt-eval/` chính thức (`providers/`, `scorers/`, `datasets/global/`,
+`datasets/math/`, `promptfooconfig.yaml`). Kết quả baseline thật đầu tiên (v1 git baseline vs v2
+hiện tại, 40 test case) — xem
+[`changelog.md`](./changelog.md).

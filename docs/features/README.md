@@ -52,7 +52,7 @@ Mỗi folder feature có tối đa ba tài liệu, đọc theo nhu cầu:
 | **E3 · RAG** | Content accuracy | 3 | ✅ Đã code | [`explainer.md`](./e3-rag/explainer.md) | [`research.md`](./e3-rag/research.md) | [`plan.md`](./e3-rag/plan.md) |
 | **E2 · Agentic assembly** | Smart assembly | 4 (sau E1) | 🔲 Thiết kế | [`explainer.md`](./e2-agentic-assembly/explainer.md) | — | — |
 | **E4 · OCR công thức** | Multimodal input | 5 | 🔲 Thiết kế | [`explainer.md`](./e4-formula-ocr/explainer.md) | — | — |
-| **E6 · Prompt Engineering** | Output quality | 3 (cross-cutting) | 🔄 Đang code (Giai đoạn 1–2) | [`explainer.md`](./e6-prompt-engineering/explainer.md) | — | — |
+| **E6 · Prompt Engineering** | Output quality | 3 (cross-cutting) | 🔄 Đang code (Giai đoạn 1–2 ✅, Giai đoạn 3 🔄 baseline eval đã chạy) | [`explainer.md`](./e6-prompt-engineering/explainer.md) | — | — |
 | **E7 · Clarification Layer** | Request understanding | 6 (sau E6, cần eval data) | 🔲 Thiết kế | [`explainer.md`](./e7-clarification-layer/explainer.md) | — | — |
 
 > **Trạng thái:** **E5** và **E3** đã được **implement** — `explainer.md` của chúng mô tả code *thực

@@ -2,8 +2,9 @@
 
 > **Theme:** Output quality · **Ưu tiên:** 3 (song song E1/E2/E3) · **Effort:** M (incremental)
 > **Outcome:** O2 (compile success rate ↑) · O1 (activation ↑)
-> **Trạng thái:** Giai đoạn 1 ✅ · Giai đoạn 2 (một phần) ✅ · Giai đoạn 3 🔲 **(P0 — làm tiếp theo,
-> stack đã verify bằng spike — xem [`spike-promptfoo-integration.md`](./spike-promptfoo-integration.md))**
+> **Trạng thái:** Giai đoạn 1 ✅ · Giai đoạn 2 (một phần) ✅ · Giai đoạn 3 🔄 **(baseline đầu tiên đã
+> chạy 2026-07-13 — xem [`changelog.md`](./changelog.md); cần thêm dataset "khác biệt có chủ đích"
+> ở lần đo tiếp theo)**
 >
 > **Sequencing với E7:** Giai đoạn 3 (Eval + Versioning) của epic này nên hoàn thành **trước** khi
 > bắt đầu E7 (Clarification Layer). Lý do: E7 cần đo "% tài liệu cần sửa lại do sai ý định" như một
