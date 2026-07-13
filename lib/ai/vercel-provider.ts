@@ -1,5 +1,11 @@
 // lib/ai/vercel-provider.ts
-import { generateText, streamText, generateObject, APICallError, type LanguageModel } from "ai";
+import {
+  generateText,
+  streamText,
+  generateObject,
+  APICallError,
+  type LanguageModel,
+} from "ai";
 import { z } from "zod";
 import type { GenerateInput, LatexProvider } from "@/lib/ai/types";
 import { SYSTEM_PROMPT, buildUserPrompt } from "@/lib/ai/prompts";
@@ -14,7 +20,7 @@ export class VercelAiProvider implements LatexProvider {
       temperature?: number;
       maxTokens?: number;
       timeoutMs?: number;
-    }
+    },
   ) {}
 
   async generate(input: GenerateInput): Promise<{ latex: string }> {
@@ -60,19 +66,19 @@ export class VercelAiProvider implements LatexProvider {
       if (APICallError.isInstance(e)) {
         if (e.statusCode === 413) {
           throw new ProviderError(
-             "Nội dung gửi tới AI quá lớn (413). Hãy giảm bớt/nhỏ file nguồn, hoặc giảm MAX_PROMPT_SOURCE_CHARS, hoặc dùng model có context lớn hơn."
+            "Nội dung gửi tới AI quá lớn (413). Hãy giảm bớt/nhỏ file nguồn, hoặc giảm MAX_PROMPT_SOURCE_CHARS, hoặc dùng model có context lớn hơn.",
           );
         }
         if (e.statusCode === 429) {
           throw new ProviderError(
-             "Vượt giới hạn tần suất của nhà cung cấp AI (429). Vui lòng thử lại sau ít phút."
+            "Vượt giới hạn tần suất của nhà cung cấp AI (429). Vui lòng thử lại sau ít phút.",
           );
         }
       }
       if (e instanceof ProviderError) throw e;
-      
+
       throw new ProviderError(
-        e instanceof Error ? e.message : "Lỗi gọi Vercel AI SDK"
+        e instanceof Error ? e.message : "Lỗi gọi Vercel AI SDK",
       );
     } finally {
       if (timer) clearTimeout(timer);
@@ -97,10 +103,14 @@ export class VercelAiProvider implements LatexProvider {
       return result.object;
     } catch (e: unknown) {
       if (APICallError.isInstance(e) && e.statusCode === 429) {
-         throw new ProviderError("Vượt giới hạn tần suất của nhà cung cấp AI (429).");
+        throw new ProviderError(
+          "Vượt giới hạn tần suất của nhà cung cấp AI (429).",
+        );
       }
       if (e instanceof ProviderError) throw e;
-      throw new ProviderError(e instanceof Error ? e.message : "Lỗi gọi Vercel AI SDK generateObject");
+      throw new ProviderError(
+        e instanceof Error ? e.message : "Lỗi gọi Vercel AI SDK generateObject",
+      );
     } finally {
       if (timer) clearTimeout(timer);
     }

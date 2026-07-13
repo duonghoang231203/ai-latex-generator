@@ -7,7 +7,6 @@ import { POST as createPOST, GET as listGET } from "@/app/api/documents/route";
 import { resetRateLimiter } from "@/lib/ratelimit/tokenBucket";
 import type { StoredDocument, DocumentSummary } from "@/lib/types/document";
 
-// Giả lập đã đăng nhập: mọi route thấy user cố định "test-user".
 vi.mock("@/lib/auth/current-user", () => ({
   getCurrentUser: async () => ({ id: "test-user", email: "test@example.com" }),
   getCurrentUserId: async () => "test-user",
@@ -44,18 +43,28 @@ afterEach(async () => {
 });
 
 describe("tạo tài liệu theo template", () => {
-  it("physics: lưu template=physics, docType=article, latex có tikz + PDF", async () => {
-    const res = await createPOST(req({ description: "Báo cáo vật lý", template: "physics" }));
+  it("academic: stores template=academic, docType=article, latex has abstract + biblio", async () => {
+    const res = await createPOST(req({ description: "Research on AI", template: "academic" }));
     expect(res.status).toBe(201);
     const doc = (await res.json()) as StoredDocument;
-    expect(doc.template).toBe("physics");
+    expect(doc.template).toBe("academic");
     expect(doc.docType).toBe("article");
-    expect(doc.latex).toContain("tikzpicture");
-    expect(doc.latex).toContain("Báo cáo vật lý");
+    expect(doc.latex).toContain("\\begin{abstract}");
+    expect(doc.latex).toContain("\\begin{thebibliography}");
     expect(doc.pdfBase64 && doc.pdfBase64.length).toBeGreaterThan(0);
   });
 
-  it("thesis: docType suy ra = report, latex có tableofcontents + chapter", async () => {
+  it("math: latex has theorem environments + proof + equation", async () => {
+    const res = await createPOST(req({ description: "Ghi chú toán", template: "math" }));
+    const doc = (await res.json()) as StoredDocument;
+    expect(doc.template).toBe("math");
+    expect(doc.docType).toBe("article");
+    expect(doc.latex).toContain("\\begin{proof}");
+    expect(doc.latex).toContain("\\begin{equation}");
+    expect(doc.latex).toContain("\\newtheorem{theorem}");
+  });
+
+  it("thesis: docType inferred = report, latex has tableofcontents + chapters", async () => {
     const res = await createPOST(req({ description: "Luận văn X", template: "thesis" }));
     const doc = (await res.json()) as StoredDocument;
     expect(doc.template).toBe("thesis");
@@ -65,20 +74,32 @@ describe("tạo tài liệu theo template", () => {
     expect(doc.latex).toContain("\\chapter{");
   });
 
-  it("math: latex có môi trường proof + equation", async () => {
-    const res = await createPOST(req({ description: "Ghi chú toán", template: "math" }));
+  it("slides (beamer): docType=article, latex has beamer class + frames + titlepage", async () => {
+    const res = await createPOST(req({ description: "Bài thuyết trình", template: "slides" }));
     const doc = (await res.json()) as StoredDocument;
-    expect(doc.template).toBe("math");
-    expect(doc.latex).toContain("\\begin{proof}");
-    expect(doc.latex).toContain("\\begin{equation}");
+    expect(doc.template).toBe("slides");
+    expect(doc.docType).toBe("article");
+    expect(doc.latex).toContain("\\documentclass{beamer}");
+    expect(doc.latex).toContain("\\begin{frame}");
+    expect(doc.latex).toContain("\\titlepage");
   });
 
-  it("template không hợp lệ → 400", async () => {
+  it("removed template (physics) → 400", async () => {
+    const res = await createPOST(req({ description: "x", template: "physics" }));
+    expect(res.status).toBe(400);
+  });
+
+  it("removed template (general) → 400", async () => {
+    const res = await createPOST(req({ description: "x", template: "general" }));
+    expect(res.status).toBe(400);
+  });
+
+  it("invalid template string → 400", async () => {
     const res = await createPOST(req({ description: "x", template: "invalid-xyz" }));
     expect(res.status).toBe(400);
   });
 
-  it("legacy doc:'report' (không template) → template mặc định thesis, vẫn tạo được", async () => {
+  it("legacy doc:'report' (no template) → defaults to thesis, still creates successfully", async () => {
     const res = await createPOST(req({ description: "Báo cáo cũ", docType: "report" }));
     expect(res.status).toBe(201);
     const doc = (await res.json()) as StoredDocument;
@@ -86,41 +107,18 @@ describe("tạo tài liệu theo template", () => {
     expect(doc.docType).toBe("report");
   });
 
-  it("danh sách trả kèm template", async () => {
-    await createPOST(req({ description: "A", template: "academic" }));
+  it("legacy doc:'article' (no template) → defaults to academic", async () => {
+    const res = await createPOST(req({ description: "Bài viết cũ", docType: "article" }));
+    expect(res.status).toBe(201);
+    const doc = (await res.json()) as StoredDocument;
+    expect(doc.template).toBe("academic");
+    expect(doc.docType).toBe("article");
+  });
+
+  it("list returns stored template field", async () => {
+    await createPOST(req({ description: "A", template: "math" }));
     const res = await listGET();
     const data = (await res.json()) as { documents: DocumentSummary[] };
-    expect(data.documents[0].template).toBe("academic");
-  });
-
-  it("slides (beamer): docType=article, latex có documentclass beamer + frame", async () => {
-    const res = await createPOST(req({ description: "Bài thuyết trình", template: "slides" }));
-    const doc = (await res.json()) as StoredDocument;
-    expect(doc.template).toBe("slides");
-    expect(doc.docType).toBe("article");
-    expect(doc.latex).toContain("\\documentclass{beamer}");
-    expect(doc.latex).toContain("\\begin{frame}");
-  });
-
-  it("exam: latex dùng class exam + questions", async () => {
-    const res = await createPOST(req({ description: "Đề kiểm tra", template: "exam" }));
-    const doc = (await res.json()) as StoredDocument;
-    expect(doc.latex).toContain("\\documentclass{exam}");
-    expect(doc.latex).toContain("\\begin{questions}");
-  });
-
-  it("letter: class letter, có begin{letter}, không maketitle", async () => {
-    const res = await createPOST(req({ description: "Thư mời", template: "letter" }));
-    const doc = (await res.json()) as StoredDocument;
-    expect(doc.docType).toBe("article");
-    expect(doc.latex).toContain("\\documentclass{letter}");
-    expect(doc.latex).toContain("\\begin{letter}");
-    expect(doc.latex).not.toContain("\\maketitle");
-  });
-
-  it("chemistry: latex dùng mhchem \\ce", async () => {
-    const res = await createPOST(req({ description: "Phản ứng oxi hoá", template: "chemistry" }));
-    const doc = (await res.json()) as StoredDocument;
-    expect(doc.latex).toContain("\\ce{");
+    expect(data.documents[0].template).toBe("math");
   });
 });

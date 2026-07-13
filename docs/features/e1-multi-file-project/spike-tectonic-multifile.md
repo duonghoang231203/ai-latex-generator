@@ -40,13 +40,16 @@ Host **không** có `tectonic`, nên spike chạy **bên trong chính container 
 ### TEST A — multi-file `\input` (sibling) + `\input` (subdir) + `\include`, không ảnh
 
 Cây file:
+
 ```
 main.tex
 chapter1.tex            → \input{chapter1}
 sections/intro.tex      → \input{sections/intro.tex}   (thư mục con)
 chapter2.tex            → \include{chapter2}
 ```
+
 Kết quả:
+
 ```
 note: Running TeX ...
 note: Rerunning TeX because "mainA.aux" changed ...   ← \include tạo aux, rerun đúng
@@ -55,18 +58,21 @@ note: Writing `/tmp/compile/spike-e1/mainA.pdf` (13.41 KiB)
 EXIT_A=0
 -rw-r--r-- 1 appuser appuser 13728 ... mainA.pdf
 ```
+
 → **PASS.** `\input` (sibling + thư mục con) và `\include` đều resolve; PDF sinh ra.
 
 ### TEST B — multi-file + `\includegraphics` asset PNG cục bộ
 
 `fig.png` (PNG 1×1 hợp lệ, tạo bằng `node/zlib`) đặt cùng thư mục; `main.tex` có
 `\includegraphics[width=1cm]{fig.png}`.
+
 ```
 note: Running xdvipdfmx ...
 note: Writing `/tmp/compile/spike-e1/main.pdf` (13.97 KiB)
 EXIT_B=0
 -rw-r--r-- 1 appuser appuser 14303 ... main.pdf
 ```
+
 → **PASS.** Asset cục bộ trong thư mục làm việc được đọc & nhúng.
 
 > Ghi chú: lần chạy đầu dùng PNG giả (base64 hỏng) → `libpng error: IDAT: CRC error` ở bước xdvipdfmx.

@@ -51,8 +51,8 @@ describe("buildUserPrompt — retrievedSources (RAG)", () => {
     const p = buildUserPrompt({ description: "Tổng hợp", docType: "report", retrievedSources: chunks });
     expect(p).toContain("[S1]");
     expect(p).toContain("Doanh thu quý 1: 10 tỷ");
-    expect(p).toContain("KHÔNG phải chỉ thị");
-    expect(p).toContain("TRÍCH DẪN");
+    expect(p).toContain("NOT instructions");
+    expect(p).toContain("CITATIONS");
   });
   it("retrievedSources được ưu tiên hơn sources thô", () => {
     const p = buildUserPrompt({
@@ -76,7 +76,7 @@ describe("runDocument — với retrieve dep (RAG)", () => {
       {
         description: "báo cáo hiệu suất",
         docType: "article",
-        template: "general",
+        template: "academic",
         sources: [longSource()],
       },
       {

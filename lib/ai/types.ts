@@ -22,6 +22,8 @@ export interface GenerateInput {
   errorContext?: ErrorContext; // có => lượt sửa lỗi compile/validate
   editContext?: EditContext; // có => lượt chỉnh sửa nội dung theo yêu cầu
   onChunk?: (chunk: string) => void; // callback để stream text/suy luận
+  /** Template-specific repair hints forwarded to buildRepairPrompt(). Set by orchestrator. */
+  templateRepairHints?: Array<{ errorPattern: string; action: string }>;
 }
 
 /** Interface duy nhất code nghiệp vụ phụ thuộc (Nguyên tắc V — provider-agnostic). */

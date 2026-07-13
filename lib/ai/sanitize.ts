@@ -58,7 +58,8 @@ export function stripUnresolvableFonts(latex: string): string {
   // \set(main|sans|mono)font[features]{Latin Modern...}[features] → bỏ (đã là mặc định).
   out = out.replace(
     /\\set(?:main|sans|mono)font\s*(?:\[[^\]]*\])?\s*\{([^{}]+)\}\s*(?:\[[^\]]*\])?/g,
-    (whole, name: string) => (DEFAULT_FONT_FAMILY.test(name.trim()) ? "" : whole),
+    (whole, name: string) =>
+      DEFAULT_FONT_FAMILY.test(name.trim()) ? "" : whole,
   );
 
   // Gộp các dòng trắng thừa do việc xoá để lại (>=3 newline → 2).

@@ -74,12 +74,12 @@ describe("validateDocumentInput với template", () => {
     }
   });
 
-  it("không có template lẫn docType → mặc định article/general", () => {
+  it("không có template lẫn docType → mặc định article/academic", () => {
     const r = validateDocumentInput({ description: "x" }, limits);
     expect(r.ok).toBe(true);
     if (r.ok) {
       expect(r.value.docType).toBe("article");
-      expect(r.value.template).toBe("general");
+      expect(r.value.template).toBe("academic");
     }
   });
 });

@@ -77,7 +77,7 @@ describe("documentStore — multi-file (E1)", () => {
     const doc = await createDocument({
       title: "single",
       docType: "article" as const,
-      template: "general" as const,
+      template: "academic" as const,
       description: "x",
       latex: "\\documentclass{article}\\begin{document}x\\end{document}",
       attempts: 1,

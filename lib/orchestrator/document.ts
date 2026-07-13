@@ -8,9 +8,18 @@ import type {
   EditRequest,
   TemplateId,
 } from "@/lib/types/document";
-import type { SourceFile, RetrievedChunk, ProjectFile } from "@/lib/types/document";
+import type {
+  SourceFile,
+  RetrievedChunk,
+  ProjectFile,
+} from "@/lib/types/document";
 import type { LatexProvider } from "@/lib/ai/types";
-import { validateLatex, diagnosticsToLog, type ValidationResult } from "@/lib/validation/validate";
+import {
+  validateLatex,
+  diagnosticsToLog,
+  type ValidationResult,
+  type ValidateOptions,
+} from "@/lib/validation/validate";
 import { truncateLog } from "@/lib/orchestrator/truncateLog";
 import { getTemplate, wrapBodyInTemplate } from "@/lib/templates/registry";
 import { convertMarkdownToLatexBody } from "@/lib/markdown/markdown-to-latex";
@@ -24,7 +33,8 @@ export interface OrchestratorDeps {
     files: ProjectFile[],
     rootFile: string,
   ) => Promise<CompileResult>;
-  validate?: (latex: string) => ValidationResult;
+  /** Optional custom validator — receives same options as validateLatex(). */
+  validate?: (latex: string, options?: ValidateOptions) => ValidationResult;
   maxAttempts: number;
   /** RAG (E3, tuỳ chọn): chọn chunk nguồn liên quan trước khi generate. null ⇒ nhồi thẳng sources. */
   retrieve?: (
@@ -64,6 +74,10 @@ function metadataFor(
  * Vòng lặp validate → compile → patch DÙNG CHUNG cho cả generate và edit.
  * `initialLatex` là LaTeX xuất phát; `regenerate(prev, log)` được gọi để sửa lỗi.
  * `attempts` = số lần sinh/sửa LaTeX. Bị chặn cứng bởi maxAttempts (không vô hạn).
+ *
+ * Template integration:
+ *   - packageAllowlist: passed to validateLatex() — rejects unapproved packages before Tectonic.
+ *   - templateRepairHints: forwarded to regenerate() → buildRepairPrompt() via GenerateInput.
  */
 async function runRepairLoop(
   initialLatex: string,
@@ -73,7 +87,13 @@ async function runRepairLoop(
   templateId?: TemplateId,
   compileFn?: (latex: string) => Promise<CompileResult>,
 ): Promise<DocumentResult> {
-  const validate = deps.validate ?? validateLatex;
+  const tpl = templateId ? getTemplate(templateId) : undefined;
+  const validateOpts = {
+    packageAllowlist: tpl?.packageAllowlist,
+    knownTheoremEnvironments: tpl?.knownTheoremEnvironments,
+  };
+  const validate = (latex: string) =>
+    (deps.validate ?? validateLatex)(latex, validateOpts);
   const compile = compileFn ?? deps.compile;
   const maxAttempts = Math.max(1, deps.maxAttempts);
 
@@ -82,12 +102,12 @@ async function runRepairLoop(
   let lastLog = "";
 
   for (;;) {
-    // 1) AST validation (rẻ) trước compile.
+    // 1) AST validation + package allowlist check (cheap) before Tectonic.
     const v = validate(latex);
     if (!v.ok) {
       lastLog = diagnosticsToLog(v.diagnostics);
     } else {
-      // 2) Compile (nguồn sự thật cuối).
+      // 2) Compile (final source of truth).
       const c = await compile(latex);
       if (c.success) {
         return {
@@ -100,7 +120,7 @@ async function runRepairLoop(
       lastLog = truncateLog(c.log);
     }
 
-    // Hết lượt → thất bại nghiệp vụ (HTTP 200 ở route).
+    // Out of attempts → business failure (HTTP 200 at route).
     if (attempts >= maxAttempts) {
       return {
         error:
@@ -111,7 +131,7 @@ async function runRepairLoop(
       };
     }
 
-    // 3) Patch: đưa log/diagnostics cho provider sửa.
+    // 3) Patch: send log/diagnostics to provider for repair.
     attempts += 1;
     latex = await regenerate(latex, lastLog);
   }
@@ -125,15 +145,17 @@ export async function runDocument(
   req: DocumentRequest,
   deps: OrchestratorDeps,
   onChunk?: (text: string) => void,
-  onCompileStart?: () => void
+  onCompileStart?: () => void,
 ): Promise<DocumentResult> {
   // RAG (E3): chọn chunk nguồn liên quan TRƯỚC khi generate (embedding bất đồng bộ).
-  // Nếu không kích hoạt (nguồn nhỏ / RAG tắt) ⇒ retrievedSources undefined ⇒ nhồi thẳng sources.
   let retrievedSources: RetrievedChunk[] | undefined;
   if (deps.retrieve && req.sources && req.sources.length > 0) {
     const r = await deps.retrieve(req.description, req.sources);
     if (r && r.length > 0) retrievedSources = r;
   }
+
+  const tpl = req.template ? getTemplate(req.template) : undefined;
+  const templateRepairHints = tpl?.repairHints;
 
   const initial = (
     await deps.provider.generate({
@@ -159,6 +181,7 @@ export async function runDocument(
           sources: req.sources,
           retrievedSources,
           errorContext: { previousLatex, errorLog },
+          templateRepairHints,
         })
       ).latex,
     req.docType,
@@ -183,6 +206,7 @@ export async function runDocumentFromMarkdown(
   const template = req.template;
   const tpl = template ? getTemplate(template) : undefined;
   const documentClass = tpl?.documentClass ?? "article";
+  const templateRepairHints = tpl?.repairHints;
 
   const { body, requiredPackages, warnings } = convertMarkdownToLatexBody(
     req.markdown ?? "",
@@ -190,8 +214,7 @@ export async function runDocumentFromMarkdown(
   );
   const initial = template
     ? wrapBodyInTemplate(template, body, requiredPackages)
-    : // Không có template (hiếm): tự bọc article tối thiểu.
-      [
+    : [
         "\\documentclass{article}",
         "\\usepackage{fontspec}",
         ...requiredPackages.map((p) => `\\usepackage{${p}}`),
@@ -212,6 +235,7 @@ export async function runDocumentFromMarkdown(
           docType: req.docType,
           template: req.template,
           errorContext: { previousLatex, errorLog },
+          templateRepairHints,
           onChunk,
         })
       ).latex,
@@ -220,7 +244,6 @@ export async function runDocumentFromMarkdown(
     req.template,
   );
 
-  // Đính cảnh báo converter (không chặn) vào kết quả để UI hiển thị.
   if (warnings.length > 0) result.warnings = warnings;
   return result;
 }
@@ -247,15 +270,15 @@ export async function runProject(
   }
   const compileProjectDep = deps.compileProject;
 
-  // Chống path traversal + chuẩn hoá (sandbox compile KHÔNG tự chặn — xem spike E1).
   const validation = validateProject(req.files, req.rootFile);
   if (!validation.ok) {
     return { error: validation.error, attempts: 1 };
   }
   const { files, rootFile } = validation;
   const rootLatex = files.find((f) => f.path === rootFile)?.content ?? "";
+  const tpl = req.template ? getTemplate(req.template) : undefined;
+  const templateRepairHints = tpl?.repairHints;
 
-  // Đơn vị "thay đổi" trong repair loop là nội dung FILE GỐC; các file phụ giữ nguyên.
   const compileFn = (latex: string): Promise<CompileResult> => {
     const projectFiles = files.map((f) =>
       f.path === rootFile ? { ...f, content: latex } : f,
@@ -274,6 +297,7 @@ export async function runProject(
           docType: req.docType,
           template: req.template,
           errorContext: { previousLatex, errorLog },
+          templateRepairHints,
           onChunk,
         })
       ).latex,
@@ -293,8 +317,11 @@ export async function runEdit(
   req: EditRequest,
   deps: OrchestratorDeps,
   onChunk?: (text: string) => void,
-  onCompileStart?: () => void
+  onCompileStart?: () => void,
 ): Promise<DocumentResult> {
+  const tpl = req.template ? getTemplate(req.template) : undefined;
+  const templateRepairHints = tpl?.repairHints;
+
   const initial = (
     await deps.provider.generate({
       description: "",
@@ -319,6 +346,7 @@ export async function runEdit(
           docType: req.docType,
           template: req.template,
           errorContext: { previousLatex, errorLog },
+          templateRepairHints,
         })
       ).latex,
     req.docType,
@@ -326,4 +354,3 @@ export async function runEdit(
     req.template,
   );
 }
-

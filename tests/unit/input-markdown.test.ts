@@ -5,7 +5,7 @@ const limits = { maxInputChars: 1000, maxSourceFiles: 5, maxSourceChars: 5000 };
 
 describe("validateDocumentInput — inputFormat/markdown (E5)", () => {
   it("mặc định inputFormat = 'natural' khi không truyền", () => {
-    const r = validateDocumentInput({ description: "xin chào", template: "general" }, limits);
+    const r = validateDocumentInput({ description: "xin chào", template: "academic" }, limits);
     expect(r.ok).toBe(true);
     if (r.ok) {
       expect(r.value.inputFormat).toBe("natural");
@@ -15,7 +15,7 @@ describe("validateDocumentInput — inputFormat/markdown (E5)", () => {
 
   it("markdown hợp lệ: cho phép mô tả trống, trả về markdown", () => {
     const r = validateDocumentInput(
-      { inputFormat: "markdown", markdown: "# Tiêu đề\n\nnội dung", template: "general" },
+      { inputFormat: "markdown", markdown: "# Tiêu đề\n\nnội dung", template: "academic" },
       limits,
     );
     expect(r.ok).toBe(true);

@@ -21,9 +21,15 @@ export function getProvider(): LatexProvider {
   switch (cfg.aiProvider) {
     case "sotatek-anthropic": {
       const gitRemote = Buffer.from(cfg.sotatekGitRemote).toString("base64");
+      
+      let baseUrl = cfg.aiBaseUrl || undefined;
+      if (baseUrl && !baseUrl.match(/\/v1\/?$/)) {
+        baseUrl = baseUrl.replace(/\/$/, "") + "/v1";
+      }
+
       const anthropic = createAnthropic({
         apiKey,
-        baseURL: cfg.aiBaseUrl || undefined,
+        baseURL: baseUrl,
         headers: { "X-Git-Remote": gitRemote },
       });
       return new VercelAiProvider(
@@ -46,9 +52,14 @@ export function getProvider(): LatexProvider {
       );
     }
     case "anthropic": {
+      let baseUrl = cfg.aiBaseUrl || undefined;
+      if (baseUrl && !baseUrl.match(/\/v1\/?$/)) {
+        baseUrl = baseUrl.replace(/\/$/, "") + "/v1";
+      }
+
       const anthropic = createAnthropic({
         apiKey,
-        baseURL: cfg.aiBaseUrl || undefined,
+        baseURL: baseUrl,
       });
       return new VercelAiProvider(
         "anthropic",

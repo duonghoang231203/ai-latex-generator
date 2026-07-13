@@ -63,7 +63,7 @@ const previewMd = new MarkdownIt({ html: false, linkify: false, typographer: fal
 export default function ChatAssistant() {
   const router = useRouter();
   const { items, busy, send, reset } = useDocumentGenerationChat();
-  const [template, setTemplate] = useState<TemplateId>("general");
+  const [template, setTemplate] = useState<TemplateId>("academic");
   const [text, setText] = useState("");
   const [markdownMode, setMarkdownMode] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
@@ -174,8 +174,8 @@ export default function ChatAssistant() {
           </MenubarMenu>
         </Menubar>
 
-        <span className="truncate text-xs text-muted-foreground" title={active.description}>
-          Đang chọn: <span className="font-medium text-foreground">{active.label}</span>
+        <span className="truncate text-xs text-muted-foreground" title={active?.description ?? ""}>
+          Đang chọn: <span className="font-medium text-foreground">{active?.label ?? ""}</span>
         </span>
       </header>
 

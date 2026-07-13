@@ -11,32 +11,26 @@ export type LatexClass = "article" | "report" | "beamer" | "exam" | "letter";
 /**
  * Template cụ thể người dùng chọn để định hình format/layout/gói LaTeX.
  * `docType` (article|report) là LỚP nền coarse; `TemplateId` là DẠNG tài liệu cụ thể.
+ *
+ * Core set (4 templates):
+ *   academic — bài báo học thuật (article)
+ *   math     — toán học/định lý (article)
+ *   thesis   — luận văn/báo cáo dài (report)
+ *   slides   — trình chiếu Beamer (beamer)
+ *
+ * Để thêm template mới: dùng factory `defineTemplate()` trong registry.ts.
  */
 export type TemplateId =
-  | "general" // Báo cáo thường — thuần văn bản
-  | "academic" // Bài báo học thuật — abstract + tài liệu tham khảo
-  | "math" // Tài liệu Toán học — định lý, chứng minh, công thức
-  | "physics" // Tài liệu Vật lý — công thức, đơn vị SI, hình minh hoạ
-  | "technical" // Báo cáo kỹ thuật — bảng, sơ đồ, hình
-  | "thesis" // Luận văn/Báo cáo dài — nhiều chương, mục lục
-  | "slides" // Trình chiếu Beamer
-  | "letter" // Thư trang trọng
-  | "cv" // Sơ yếu lý lịch / CV
-  | "exam" // Đề thi / bài kiểm tra
-  | "chemistry"; // Hóa học — phương trình phản ứng (mhchem)
+  | "academic" // Bài báo học thuật — abstract, cite, sections chuẩn
+  | "math"     // Tài liệu Toán học — theorem, proof, equation
+  | "thesis"   // Luận văn/Báo cáo dài — chapter hierarchy, TOC
+  | "slides";  // Trình chiếu Beamer — frames, blocks, wow factor
 
 export const TEMPLATE_IDS: readonly TemplateId[] = [
-  "general",
   "academic",
   "math",
-  "physics",
-  "technical",
   "thesis",
   "slides",
-  "letter",
-  "cv",
-  "exam",
-  "chemistry",
 ] as const;
 
 /** File nguồn người dùng tải lên (đã đọc thành text ở client). */

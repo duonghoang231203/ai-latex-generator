@@ -26,7 +26,7 @@ export default function TemplateSelect({
   onChange: (v: TemplateId) => void;
   disabled?: boolean;
 }) {
-  const desc = getTemplate(value).description;
+  const desc = getTemplate(value)?.description ?? "";
   return (
     <label className="flex flex-col gap-1 text-sm">
       <span className="font-medium">Dạng tài liệu (template)</span>

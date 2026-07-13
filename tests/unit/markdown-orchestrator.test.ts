@@ -10,10 +10,10 @@ const compileOk = async (): Promise<CompileResult> => ({ success: true, pdf: fak
 
 describe("wrapBodyInTemplate", () => {
   it("bọc body trong documentClass + gói của template, có fontspec", () => {
-    const latex = wrapBodyInTemplate("general", "\\section{X}\nNội dung.", ["listings"]);
+    const latex = wrapBodyInTemplate("academic", "\\section{X}\nNội dung.", ["listings"]);
     expect(latex).toContain("\\documentclass{article}");
     expect(latex).toContain("\\usepackage{fontspec}");
-    expect(latex).toContain("\\usepackage{geometry}"); // gói của general
+    expect(latex).toContain("\\usepackage{geometry}"); // gói của academic
     expect(latex).toContain("\\usepackage{listings}"); // gói phát sinh
     expect(latex).toContain("\\begin{document}");
     expect(latex).toContain("\\section{X}");
@@ -41,7 +41,7 @@ describe("runDocumentFromMarkdown", () => {
       {
         description: "",
         docType: "article",
-        template: "general",
+        template: "academic",
         inputFormat: "markdown",
         markdown: "# Tiêu đề\n\nĐoạn văn **quan trọng**.\n\n- Ý 1\n- Ý 2",
       },
@@ -62,7 +62,7 @@ describe("runDocumentFromMarkdown", () => {
       {
         description: "",
         docType: "article",
-        template: "general",
+        template: "academic",
         inputFormat: "markdown",
         markdown: "![sơ đồ](https://x/y.png)\n\nnội dung",
       },

@@ -75,7 +75,7 @@ export default function DocumentList({
             >
               <span className="truncate font-medium">{d.title}</span>
               <span className="text-xs text-zinc-500" suppressHydrationWarning>
-                {getTemplate(d.template).label} · {d.hasPdf ? "có PDF" : "chưa có PDF"} ·{" "}
+                {getTemplate(d.template)?.label ?? d.template} · {d.hasPdf ? "có PDF" : "chưa có PDF"} ·{" "}
                 {new Date(d.updatedAt).toLocaleString()}
               </span>
             </Link>

@@ -128,3 +128,200 @@ describe("stripUnresolvableFonts (lỗi font khi Tectonic không có fontconfig)
     expect(r.latex).toContain("\\begin{document}");
   });
 });
+
+
+// ─── packageAllowlist ─────────────────────────────────────────────────────
+
+describe("validateLatex — packageAllowlist", () => {
+  const allowlist = ["geometry", "amsmath"];
+
+  it("passes when all packages are in the allowlist", () => {
+    const latex = [
+      "\\documentclass{article}",
+      "\\usepackage{geometry}",
+      "\\usepackage{amsmath}",
+      "\\begin{document}x\\end{document}",
+    ].join("\n");
+    const r = validateLatex(latex, { packageAllowlist: allowlist });
+    expect(r.ok).toBe(true);
+  });
+
+  it("fontspec is always allowed even if not in allowlist", () => {
+    const latex = [
+      "\\documentclass{article}",
+      "\\usepackage{fontspec}",
+      "\\usepackage{geometry}",
+      "\\begin{document}x\\end{document}",
+    ].join("\n");
+    const r = validateLatex(latex, { packageAllowlist: allowlist });
+    expect(r.ok).toBe(true);
+  });
+
+  it("flags a package outside the allowlist", () => {
+    const latex = [
+      "\\documentclass{article}",
+      "\\usepackage{geometry}",
+      "\\usepackage{tikz}",
+      "\\begin{document}x\\end{document}",
+    ].join("\n");
+    const r = validateLatex(latex, { packageAllowlist: allowlist });
+    expect(r.ok).toBe(false);
+    expect(r.diagnostics.some((d) => d.message.includes("tikz"))).toBe(true);
+  });
+
+  it("handles multi-package {a,b,c} syntax", () => {
+    const latex = [
+      "\\documentclass{article}",
+      "\\usepackage{geometry,amsmath,tikz}",
+      "\\begin{document}x\\end{document}",
+    ].join("\n");
+    const r = validateLatex(latex, { packageAllowlist: allowlist });
+    expect(r.ok).toBe(false);
+    expect(r.diagnostics.some((d) => d.message.includes("tikz"))).toBe(true);
+  });
+
+  it("no allowlist → no package check", () => {
+    const latex = [
+      "\\documentclass{article}",
+      "\\usepackage{anypackage}",
+      "\\begin{document}x\\end{document}",
+    ].join("\n");
+    const r = validateLatex(latex);
+    // Only environment/syntax checks run — no package error
+    expect(r.diagnostics.every((d) => !d.message.includes("allowlist"))).toBe(true);
+  });
+});
+
+// ─── Math-specific checks ─────────────────────────────────────────────────
+
+const MATH_ENVS = ["theorem", "lemma", "corollary", "proposition", "definition", "example", "remark", "proof"];
+
+describe("validateLatex — undefined theorem environments", () => {
+  it("passes for all known math environments", () => {
+    const latex = [
+      "\\documentclass{article}",
+      "\\usepackage{amsthm}",
+      "\\newtheorem{theorem}{Theorem}",
+      "\\begin{document}",
+      "\\begin{theorem} A statement. \\end{theorem}",
+      "\\begin{proof} Proof. \\end{proof}",
+      "\\end{document}",
+    ].join("\n");
+    const r = validateLatex(latex, { knownTheoremEnvironments: MATH_ENVS });
+    // Only check there is no "Undefined environment" diagnostic
+    expect(r.diagnostics.filter((d) => d.message.startsWith("Undefined environment"))).toHaveLength(0);
+  });
+
+  it("flags an environment not in the known list", () => {
+    const latex = [
+      "\\documentclass{article}",
+      "\\begin{document}",
+      "\\begin{mythm} A statement. \\end{mythm}",
+      "\\end{document}",
+    ].join("\n");
+    const r = validateLatex(latex, { knownTheoremEnvironments: MATH_ENVS });
+    expect(r.ok).toBe(false);
+    expect(r.diagnostics.some((d) => d.message.includes("mythm"))).toBe(true);
+  });
+
+  it("structural environments (equation, align, itemize, ...) are always allowed", () => {
+    const latex = [
+      "\\documentclass{article}",
+      "\\begin{document}",
+      "\\begin{equation} x = 1 \\end{equation}",
+      "\\begin{align} y &= 2 \\end{align}",
+      "\\begin{itemize}\\item A\\end{itemize}",
+      "\\end{document}",
+    ].join("\n");
+    const r = validateLatex(latex, { knownTheoremEnvironments: MATH_ENVS });
+    expect(r.diagnostics.filter((d) => d.message.startsWith("Undefined environment"))).toHaveLength(0);
+  });
+
+  it("does not run when knownTheoremEnvironments is not set", () => {
+    const latex = [
+      "\\documentclass{article}",
+      "\\begin{document}",
+      "\\begin{myenv} x \\end{myenv}",
+      "\\end{document}",
+    ].join("\n");
+    // Without knownTheoremEnvironments, no undefined-env check
+    const r = validateLatex(latex);
+    expect(r.diagnostics.filter((d) => d.message.startsWith("Undefined environment"))).toHaveLength(0);
+  });
+});
+
+describe("validateLatex — duplicate labels", () => {
+  it("passes when all labels are unique", () => {
+    const latex = [
+      "\\documentclass{article}",
+      "\\begin{document}",
+      "\\begin{equation}\\label{eq:one} x=1 \\end{equation}",
+      "\\begin{equation}\\label{eq:two} y=2 \\end{equation}",
+      "\\end{document}",
+    ].join("\n");
+    const r = validateLatex(latex, { knownTheoremEnvironments: MATH_ENVS });
+    expect(r.diagnostics.filter((d) => d.message.includes("Duplicate label"))).toHaveLength(0);
+  });
+
+  it("flags a label defined twice", () => {
+    const latex = [
+      "\\documentclass{article}",
+      "\\begin{document}",
+      "\\begin{equation}\\label{eq:main} x=1 \\end{equation}",
+      "\\begin{equation}\\label{eq:main} y=2 \\end{equation}",
+      "\\end{document}",
+    ].join("\n");
+    const r = validateLatex(latex, { knownTheoremEnvironments: MATH_ENVS });
+    expect(r.ok).toBe(false);
+    expect(r.diagnostics.some((d) => d.message.includes("Duplicate label") && d.message.includes("eq:main"))).toBe(true);
+  });
+});
+
+describe("validateLatex — broken references", () => {
+  it("passes when all \\ref point to existing labels", () => {
+    const latex = [
+      "\\documentclass{article}",
+      "\\begin{document}",
+      "\\begin{equation}\\label{eq:one} x=1 \\end{equation}",
+      "See Equation~\\eqref{eq:one}.",
+      "\\end{document}",
+    ].join("\n");
+    const r = validateLatex(latex, { knownTheoremEnvironments: MATH_ENVS });
+    expect(r.diagnostics.filter((d) => d.message.includes("Broken reference"))).toHaveLength(0);
+  });
+
+  it("flags \\eqref pointing to a non-existent label", () => {
+    const latex = [
+      "\\documentclass{article}",
+      "\\begin{document}",
+      "See Equation~\\eqref{eq:missing}.",
+      "\\end{document}",
+    ].join("\n");
+    const r = validateLatex(latex, { knownTheoremEnvironments: MATH_ENVS });
+    expect(r.ok).toBe(false);
+    expect(r.diagnostics.some((d) => d.message.includes("eq:missing"))).toBe(true);
+  });
+
+  it("flags \\ref pointing to a non-existent label", () => {
+    const latex = [
+      "\\documentclass{article}",
+      "\\begin{document}",
+      "See Theorem~\\ref{thm:missing}.",
+      "\\end{document}",
+    ].join("\n");
+    const r = validateLatex(latex, { knownTheoremEnvironments: MATH_ENVS });
+    expect(r.ok).toBe(false);
+    expect(r.diagnostics.some((d) => d.message.includes("thm:missing"))).toBe(true);
+  });
+
+  it("does not run broken-ref check when knownTheoremEnvironments is not set", () => {
+    const latex = [
+      "\\documentclass{article}",
+      "\\begin{document}",
+      "See~\\ref{nonexistent}.",
+      "\\end{document}",
+    ].join("\n");
+    const r = validateLatex(latex);
+    expect(r.diagnostics.filter((d) => d.message.includes("Broken reference"))).toHaveLength(0);
+  });
+});

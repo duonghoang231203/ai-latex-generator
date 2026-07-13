@@ -49,7 +49,7 @@ export default function GeneratorForm({
   busy?: boolean;
 }) {
   const [description, setDescription] = useState("");
-  const [template, setTemplate] = useState<TemplateId>("general");
+  const [template, setTemplate] = useState<TemplateId>("academic");
   const [files, setFiles] = useState<File[]>([]);
   const [touched, setTouched] = useState(false);
   const [preparing, setPreparing] = useState(false);

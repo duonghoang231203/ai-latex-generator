@@ -52,11 +52,15 @@ Mỗi folder feature có tối đa ba tài liệu, đọc theo nhu cầu:
 | **E3 · RAG** | Content accuracy | 3 | ✅ Đã code | [`explainer.md`](./e3-rag/explainer.md) | [`research.md`](./e3-rag/research.md) | [`plan.md`](./e3-rag/plan.md) |
 | **E2 · Agentic assembly** | Smart assembly | 4 (sau E1) | 🔲 Thiết kế | [`explainer.md`](./e2-agentic-assembly/explainer.md) | — | — |
 | **E4 · OCR công thức** | Multimodal input | 5 | 🔲 Thiết kế | [`explainer.md`](./e4-formula-ocr/explainer.md) | — | — |
+| **E6 · Prompt Engineering** | Output quality | 3 (cross-cutting) | 🔄 Đang code (Giai đoạn 1–2) | [`explainer.md`](./e6-prompt-engineering/explainer.md) | — | — |
+| **E7 · Clarification Layer** | Request understanding | 6 (sau E6, cần eval data) | 🔲 Thiết kế | [`explainer.md`](./e7-clarification-layer/explainer.md) | — | — |
 
 > **Trạng thái:** **E5** và **E3** đã được **implement** — `explainer.md` của chúng mô tả code *thực
 > tế đang chạy* (`lib/markdown/`, `lib/rag/`, `lib/ai/embedding-*`) và có kèm `research.md`/`plan.md`.
-> **E1, E2, E4** đang ở **giai đoạn thiết kế** (chưa code) — `explainer.md` mô tả *hướng thiết kế dự
-> kiến*, bám vào điểm chạm code hiện tại + giả thuyết roadmap, và **ghi rõ banner "CHƯA IMPLEMENT"**.
+> **E1, E2, E4, E7** đang ở **giai đoạn thiết kế** (chưa code) — `explainer.md` mô tả *hướng thiết kế
+> dự kiến*, bám vào điểm chạm code hiện tại + giả thuyết roadmap, và **ghi rõ banner "CHƯA IMPLEMENT"**.
+> **E6** đang **code một phần** (Giai đoạn 1–2 đã xong, Giai đoạn 3 — Evaluation — còn 🔲; xem chi tiết
+> [`feature-tracking.md`](../feature-tracking.md)).
 > Phase 3 (Auth & DB, deployment) là initiative nền tảng, độ tin cậy thấp — sẽ được tài liệu hoá khi
 > chuyển từ *Later* sang *Next*.
 

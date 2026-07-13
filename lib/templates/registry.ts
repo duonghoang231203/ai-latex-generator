@@ -1,35 +1,101 @@
 // lib/templates/registry.ts
-// Danh mục TEMPLATE cụ thể để chọn khi generate. Mỗi template định hình:
-// - documentClass nền (article|report),
-// - gói LaTeX gợi ý,
-// - hướng dẫn cấu trúc/format đưa vào prompt (promptGuidance),
-// - khung LaTeX mẫu hợp lệ cho MockProvider/dev offline (renderMock).
+// Core template registry — 4 templates targeting students & researchers.
 //
-// Nguyên tắc an toàn compile (Tectonic --untrusted, XeLaTeX):
-// - KHÔNG \includegraphics file ngoài (không tồn tại trong sandbox) → minh hoạ bằng
-//   TikZ hoặc hộp placeholder.
-// - Chỉ gói phổ biến trên CTAN; dùng fontspec (không inputenc/fontenc).
+// Design principles:
+//   - Each template is a compile contract: documentClass + packages + AI guidance + mock skeleton.
+//   - promptGuidance follows a fixed 5-field schema (see DocumentTemplate below).
+//   - Use defineTemplate() to add new templates — do not extend TEMPLATES directly.
+//   - Safety (Tectonic --untrusted, XeLaTeX): NO \includegraphics external files → TikZ or placeholder.
+//     Only CTAN-common packages; fontspec instead of inputenc/fontenc.
 
 import type { DocType, LatexClass, TemplateId } from "@/lib/types/document";
 import { TEMPLATE_IDS } from "@/lib/types/document";
 
+// ─── Types ────────────────────────────────────────────────────────────────
+
+/**
+ * Declared capabilities for a template.
+ * Single source of truth used by:
+ *   - promptGuidance (what the AI is allowed to use)
+ *   - packageAllowlist enforcement (pre-compile validation)
+ *   - repair hints (tell the AI what it can/cannot fix toward)
+ */
+export interface TemplateCapabilities {
+  headings: boolean;             // \section / \subsection / \subsubsection
+  lists: boolean;                // itemize / enumerate
+  tables: boolean;               // tabular / booktabs
+  basicMath: boolean;            // inline $ ... $ and \[ ... \]
+  advancedMath: boolean;         // amsmath: align / gather / cases / multline
+  theoremEnvironments: boolean;  // amsthm: theorem / lemma / proof / corollary
+  tikzDiagrams: boolean;         // tikz / pgfplots
+  citations: boolean;            // \cite{} + \begin{thebibliography}
+  codeListings: boolean;         // listings: lstlisting
+  abstract: boolean;             // \begin{abstract}
+  beamerFrames: boolean;         // \begin{frame} — Beamer only
+}
+
+/**
+ * Per-template repair hint.
+ * Injected into buildRepairPrompt() when the error pattern matches.
+ * Keeps repair guidance co-located with the template that defines the constraints.
+ */
+export interface TemplateRepairHint {
+  /** Matches against ErrorType string (e.g. "PACKAGE_ERROR") or substring of Tectonic log. */
+  errorPattern: string;
+  /** Concrete action injected into the repair prompt for this template. */
+  action: string;
+}
+
 export interface DocumentTemplate {
   id: TemplateId;
-  label: string; // nhãn tiếng Việt cho UI
-  category: string; // nhóm hiển thị
-  description: string; // mô tả ngắn
-  documentClass: LatexClass; // documentClass LaTeX thực tế
-  packages: string[]; // gói gợi ý (đưa vào prompt + preamble mock)
-  promptGuidance: string; // hướng dẫn cấu trúc/format cho AI
-  renderMock: (description: string) => string; // khung LaTeX hợp lệ (mock/dev)
+  label: string;           // display name for UI (Vietnamese)
+  category: string;        // display group for UI
+  description: string;     // short description shown in UI
+  documentClass: LatexClass;
+  packages: string[];      // suggested packages (injected into prompt + mock preamble)
+  /**
+   * Structured AI guidance — 5 fixed fields, always in this order:
+   *
+   *   TYPE:      one-line document type description
+   *   Structure: skeleton — which environments/commands must appear and in what order
+   *   Required:  key packages + their specific use (not just names)
+   *   FORBIDDEN: what the AI must NEVER do for this template
+   *   EXAMPLE:   1–3 line LaTeX snippet illustrating the template's most distinctive feature
+   */
+  promptGuidance: string;
+  renderMock: (description: string) => string; // valid LaTeX skeleton for MockProvider/dev
+
+  /**
+   * Declared feature capabilities for this template.
+   * Used to enforce package allowlist and guide repair prompts.
+   */
+  capabilities?: TemplateCapabilities;
+
+  /**
+   * Explicit package allowlist for pre-compile validation.
+   * Any \usepackage{} not in this list triggers a validation error before Tectonic runs.
+   * fontspec is always implicitly allowed (added by wrapBodyInTemplate).
+   */
+  packageAllowlist?: string[];
+
+  /**
+   * Template-specific repair hints injected into buildRepairPrompt()
+   * when the error pattern matches. Complement the generic detectErrorType() hints.
+   */
+  repairHints?: TemplateRepairHint[];
+
+  /**
+   * Known theorem-like environments declared in this template's preamble.
+   * When set, validateLatex() will flag any \begin{env} not in this list
+   * (or in the built-in structural environment set) as an error — before Tectonic runs.
+   * Only templates that use amsthm and own their preamble should set this.
+   */
+  knownTheoremEnvironments?: string[];
 }
 
-/** documentClass → DocType coarse (dùng cho metadata/tương thích). */
-export function docTypeForClass(cls: LatexClass): DocType {
-  return cls === "report" ? "report" : "article";
-}
+// ─── Internal helpers ─────────────────────────────────────────────────────
 
-/** Tài liệu hoàn chỉnh, KHÔNG tự thêm title/maketitle — template tự kiểm soát body. */
+/** Complete document — template controls the entire body (no auto \maketitle). */
 function docRaw(
   documentClass: LatexClass,
   packages: string[],
@@ -48,7 +114,7 @@ function docRaw(
   ].join("\n");
 }
 
-/** Tài liệu có \title/\author + \maketitle (cho class hỗ trợ: article/report/beamer/exam). */
+/** Document with \title/\author + \maketitle (article / report / beamer). */
 function wrap(
   documentClass: LatexClass,
   packages: string[],
@@ -58,59 +124,96 @@ function wrap(
   return docRaw(
     documentClass,
     packages,
-    [...preambleExtra, "\\title{Tài liệu mẫu}", "\\author{AI LaTeX Generator}"],
+    [...preambleExtra, "\\title{Sample Document}", "\\author{AI LaTeX Generator}"],
     ["\\maketitle", ...body],
   );
 }
 
-export const TEMPLATES: Record<TemplateId, DocumentTemplate> = {
-  general: {
-    id: "general",
-    label: "Báo cáo thường (thuần văn bản)",
-    category: "Cơ bản",
-    description:
-      "Văn bản/báo cáo thuần chữ: tiêu đề, các mục, đoạn văn, danh sách. Không công thức phức tạp.",
-    documentClass: "article",
-    packages: ["geometry"],
-    promptGuidance: [
-      "DẠNG: Báo cáo thường, thuần văn bản.",
-      "Cấu trúc: tiêu đề + (tuỳ chọn) tóm tắt ngắn, nhiều \\section (Giới thiệu, các phần nội dung,",
-      "Kết luận) và \\subsection khi hợp lý. Dùng đoạn văn mạch lạc, danh sách (itemize/enumerate)",
-      "và bảng đơn giản khi cần. TRÁNH công thức toán nặng, TRÁNH hình ảnh ngoài.",
-    ].join(" "),
-    renderMock: (d) =>
-      wrap(
-        "article",
-        ["geometry"],
-        [],
-        [
-          "\\section{Giới thiệu}",
-          `Nội dung: ${d}`,
-          "\\section{Nội dung chính}",
-          "\\begin{itemize}",
-          "\\item Ý thứ nhất.",
-          "\\item Ý thứ hai.",
-          "\\end{itemize}",
-          "\\section{Kết luận}",
-          "Tổng kết.",
-        ],
-      ),
-  },
+// ─── Factory ──────────────────────────────────────────────────────────────
 
-  academic: {
+/**
+ * defineTemplate — type-safe factory for creating a DocumentTemplate.
+ * Use this when adding new templates to ensure all required fields are present
+ * and the promptGuidance schema is followed.
+ *
+ * @example
+ * const myTemplate = defineTemplate({
+ *   id: "my-id",
+ *   label: "My Template",
+ *   ...
+ * });
+ * // Then add to TEMPLATES and TEMPLATE_IDS in document.ts.
+ */
+export function defineTemplate(t: DocumentTemplate): DocumentTemplate {
+  return t;
+}
+
+// ─── Core templates ───────────────────────────────────────────────────────
+
+export const TEMPLATES: Record<TemplateId, DocumentTemplate> = {
+
+  // ── 1. Academic paper ──────────────────────────────────────────────────
+  academic: defineTemplate({
     id: "academic",
-    label: "Bài báo học thuật",
-    category: "Học thuật",
+    label: "Academic Paper",
+    category: "Academic",
     description:
-      "Bài báo khoa học: abstract, các mục chuẩn, hình/bảng, và danh mục tài liệu tham khảo.",
+      "Scientific paper: abstract, standard sections, citations, and bibliography.",
     documentClass: "article",
     packages: ["geometry", "amsmath", "graphicx", "hyperref"],
+
+    capabilities: {
+      headings: true,
+      lists: true,
+      tables: true,
+      basicMath: true,
+      advancedMath: true,           // equations in methodology/results
+      theoremEnvironments: false,   // use academic sections, not theorem envs
+      tikzDiagrams: true,           // figures drawn with TikZ
+      citations: true,              // \cite + thebibliography — core feature
+      codeListings: false,
+      abstract: true,               // required section
+      beamerFrames: false,
+    },
+
+    packageAllowlist: ["geometry", "amsmath", "graphicx", "hyperref", "tikz", "pgfplots", "booktabs", "xcolor"],
+
+    repairHints: [
+      {
+        errorPattern: "PACKAGE_ERROR",
+        action:
+          "If the error is a missing bibliography file, replace \\bibliography{...}/\\bibliographystyle{...} " +
+          "with \\begin{thebibliography}{99}...\\end{thebibliography} inline. " +
+          "If a package is not found, remove it — only geometry/amsmath/graphicx/hyperref/tikz/booktabs are allowed.",
+      },
+      {
+        errorPattern: "bibliography",
+        action:
+          "Replace \\bibliography{} and \\bibliographystyle{} with an inline thebibliography environment. " +
+          "BibTeX .bib files do not exist in the sandbox.",
+      },
+    ],
     promptGuidance: [
-      "DẠNG: Bài báo học thuật.",
-      "Cấu trúc: \\title, \\author, \\begin{abstract}...\\end{abstract}, rồi các mục:",
-      "Giới thiệu, Công trình liên quan, Phương pháp, Kết quả, Thảo luận, Kết luận.",
-      "Được dùng công thức (amsmath) và hình minh hoạ (bằng TikZ hoặc placeholder, KHÔNG file ngoài).",
-      "Kết thúc bằng \\begin{thebibliography}{9} ... \\bibitem ... với vài tham khảo minh hoạ.",
+      "TYPE: Academic research paper (article class).",
+
+      "Structure: \\title{} \\author{} \\date{} → \\maketitle → \\begin{abstract}...\\end{abstract}",
+      "→ \\section{Introduction} → \\section{Related Work} → \\section{Methodology}",
+      "→ \\section{Results} → \\section{Discussion} → \\section{Conclusion}",
+      "→ \\begin{thebibliography}{99} ... \\end{thebibliography}.",
+      "Each section needs multiple substantive paragraphs — not single-sentence placeholders.",
+
+      "Required packages: geometry (margins), amsmath (equations: align/equation/gather),",
+      "graphicx (figure environments — draw with TikZ instead of \\includegraphics),",
+      "hyperref (\\cite{key} links). Citations: \\cite{key} inline,",
+      "\\bibitem{key} Author. \\textit{Title}. Journal, Year. in thebibliography.",
+
+      "FORBIDDEN: \\bibliography or \\bibliographystyle (use thebibliography directly).",
+      "FORBIDDEN: \\includegraphics with external file paths (sandbox has no files).",
+      "FORBIDDEN: \\setmainfont or \\babelfont (font errors under Tectonic without fontconfig).",
+
+      "EXAMPLE: \\begin{equation} \\label{eq:main} E = mc^2 \\end{equation}",
+      "As shown in~\\cite{einstein1905}, Equation~\\ref{eq:main} demonstrates...",
+      "\\bibitem{einstein1905} A. Einstein. \\textit{On the electrodynamics}. Ann. Phys., 1905.",
     ].join(" "),
     renderMock: (d) =>
       wrap(
@@ -119,160 +222,308 @@ export const TEMPLATES: Record<TemplateId, DocumentTemplate> = {
         [],
         [
           "\\begin{abstract}",
-          `Tóm tắt: ${d}`,
+          `${d}`,
           "\\end{abstract}",
-          "\\section{Giới thiệu}",
-          "Bối cảnh và động lực nghiên cứu.",
-          "\\section{Phương pháp}",
-          "Phương trình minh hoạ: \\( E = mc^2 \\).",
-          "\\section{Kết quả}",
-          "Kết quả chính.",
-          "\\section{Kết luận}",
-          "Kết luận và hướng phát triển.",
+          "\\section{Introduction}",
+          "Background and motivation for this research.",
+          "\\section{Methodology}",
+          "We apply the following approach. Key equation:",
+          "\\begin{equation}",
+          "E = mc^2.",
+          "\\end{equation}",
+          "\\section{Results}",
+          "Main findings of the study.",
+          "\\section{Conclusion}",
+          "Summary and future directions.",
           "\\begin{thebibliography}{9}",
-          "\\bibitem{ref1} Tác giả A. \\textit{Tiêu đề}. Nhà xuất bản, 2020.",
+          "\\bibitem{ref1} A. Author. \\textit{Title of Work}. Publisher, 2020.",
           "\\end{thebibliography}",
         ],
       ),
-  },
+  }),
 
-  math: {
+  // ── 2. Mathematics ────────────────────────────────────────────────────
+  math: defineTemplate({
     id: "math",
-    label: "Tài liệu Toán học",
-    category: "Khoa học",
+    label: "Mathematics",
+    category: "Science",
     description:
-      "Định lý/bổ đề/chứng minh, công thức đánh số, hệ phương trình, ký hiệu toán.",
+      "Theorems, lemmas, proofs, numbered equations, and formal mathematical exposition.",
     documentClass: "article",
     packages: ["geometry", "amsmath", "amssymb", "amsthm", "mathtools"],
+
+    capabilities: {
+      headings: true,
+      lists: true,
+      tables: false,              // math docs rarely need data tables
+      basicMath: true,
+      advancedMath: true,         // core: align / gather / cases / multline
+      theoremEnvironments: true,  // core: theorem / lemma / proof / corollary
+      tikzDiagrams: false,
+      citations: false,
+      codeListings: false,
+      abstract: false,
+      beamerFrames: false,
+    },
+
+    packageAllowlist: ["geometry", "amsmath", "amssymb", "amsthm", "mathtools", "xcolor"],
+
+    repairHints: [
+      // Align / display math errors
+      {
+        errorPattern: "MATH_ERROR",
+        action:
+          "Check $ ... $ and \\[ ... \\] boundaries. " +
+          "Use \\[ ... \\] for display math — NEVER $$ ... $$. " +
+          "In align environments: every row except the last must end with \\\\; " +
+          "alignment column must be marked with exactly one & per row. " +
+          "Do NOT place align inside equation.",
+      },
+      // Theorem environment errors — most common math-specific failure
+      {
+        errorPattern: "ENVIRONMENT_ERROR",
+        action:
+          "Use ONLY these theorem environments (already declared by the template): " +
+          "theorem, lemma, corollary, proposition, definition, example, remark, proof. " +
+          "Do NOT define new \\newtheorem{} environments — the template owns the preamble. " +
+          "Every \\begin{theorem}/\\begin{proof}/... must have a matching \\end{}.",
+      },
+      // Undefined control sequence — usually a missing macro or wrong env name
+      {
+        errorPattern: "SYNTAX_ERROR",
+        action:
+          "Check for undefined commands. Common causes in math docs: " +
+          "\\operatorname{} for custom operators instead of undefined macros; " +
+          "\\text{} inside math mode for words; " +
+          "\\mathbb{} for blackboard bold (requires amssymb). " +
+          "Do NOT add undeclared packages to fix this — use supported equivalents.",
+      },
+      // Package errors
+      {
+        errorPattern: "PACKAGE_ERROR",
+        action:
+          "Only amsmath/amssymb/amsthm/mathtools/geometry/xcolor are allowed. " +
+          "Remove any other package. " +
+          "Do NOT add tikz, hyperref, listings, or physics packages.",
+      },
+      // Label / reference errors — common in theorem-heavy documents
+      {
+        errorPattern: "label",
+        action:
+          "Every \\ref{} and \\eqref{} must point to an existing \\label{}. " +
+          "Remove or correct any reference to a label that does not exist in the document. " +
+          "Do NOT duplicate \\label{} values — each label must be unique.",
+      },
+    ],
+
+    // The math template owns its preamble — these environments are pre-declared.
+    // validateLatex() will catch any \begin{env} not in this list before Tectonic runs.
+    knownTheoremEnvironments: [
+      "theorem", "lemma", "corollary", "proposition",
+      "definition", "example",
+      "remark",
+      "proof",
+    ],
+
     promptGuidance: [
-      "DẠNG: Tài liệu Toán học.",
-      "Khai báo môi trường định lý trong preamble: \\newtheorem{theorem}{Định lý},",
-      "\\newtheorem{lemma}{Bổ đề}, \\theoremstyle{definition}\\newtheorem{definition}{Định nghĩa}.",
-      "Dùng amsmath/amssymb/mathtools. Trình bày định nghĩa, định lý kèm \\begin{proof}...\\end{proof},",
-      "công thức đánh số bằng equation/align, hệ phương trình bằng cases. Giải thích bằng văn xuôi xen kẽ.",
+      "TYPE: Mathematics document — theorems, proofs, and formal mathematical exposition (article class).",
+
+      // ── Preamble contract ──
+      "Preamble contract: The following theorem environments are PRE-DECLARED by the template.",
+      "Use them directly — do NOT add \\newtheorem{} in the generated document:",
+      "  theorem, lemma, corollary, proposition (share counter),",
+      "  definition, example (definition style),",
+      "  remark (unnumbered, remark style),",
+      "  proof (from amsthm — always ends with \\qed automatically).",
+
+      // ── Document structure ──
+      "Structure: \\maketitle → \\section{} → definitions → lemmas → main theorems",
+      "→ \\begin{proof}...\\end{proof} → corollaries → \\section{} for new topic.",
+      "Interleave explanatory prose between formal statements.",
+
+      // ── Math environment selection ──
+      "Environment selection rules:",
+      "  inline $...$: short expressions embedded in prose.",
+      "  \\[ ... \\]: standalone important expression (no number needed).",
+      "  equation: single expression that will be referenced with \\eqref{}.",
+      "  align: multi-step derivation — align around = or \\iff; each row except last ends with \\\\.",
+      "  gather: multiple related expressions not needing alignment.",
+      "  cases: piecewise definitions — one \\\\-terminated row per case.",
+      "  pmatrix/bmatrix/vmatrix: matrices — choose delimiter by mathematical meaning.",
+
+      // ── Label / reference discipline ──
+      "Label discipline:",
+      "  Use \\label{eq:name} on equations only when they will be referenced with \\eqref{}.",
+      "  Use \\label{thm:name} on theorems only when referenced with \\ref{}.",
+      "  Every \\ref{} and \\eqref{} MUST resolve to an existing \\label{}.",
+      "  Do NOT duplicate label values anywhere in the document.",
+
+      // ── Proof quality ──
+      "Proof quality:",
+      "  State all necessary assumptions before the proof begins.",
+      "  Maintain logical order — do not skip steps without explanation.",
+      "  Do NOT use 'obviously', 'clearly', or 'trivially' for non-trivial steps.",
+      "  End proofs inside \\begin{proof}...\\end{proof} — \\qed is automatic.",
+
+      // ── Required packages ──
+      "Required packages: amsmath (align/gather/cases/multline), amssymb (\\mathbb{}/\\mathcal{}/",
+      "\\leq/\\geq/\\subset/\\forall/\\exists), amsthm (theorem environments),",
+      "mathtools (\\coloneqq/\\underbracket/\\prescript).",
+
+      // ── Forbidden ──
+      "FORBIDDEN: $$ ... $$ display math — use \\[ ... \\] instead.",
+      "FORBIDDEN: \\newtheorem{} in the document body — all environments are pre-declared.",
+      "FORBIDDEN: \\begin{proof} without a preceding theorem/lemma/proposition.",
+      "FORBIDDEN: \\ref{} or \\eqref{} pointing to a label not defined in the document.",
+      "FORBIDDEN: packages outside the allowlist (no tikz, hyperref, listings).",
+      "FORBIDDEN: \\setmainfont or \\babelfont.",
+
+      // ── Canonical examples ──
+      "EXAMPLE (theorem + labeled equation + proof):",
+      "\\begin{theorem}\\label{thm:ftc}",
+      "For $f \\in C^1([a,b])$, $\\int_a^b f'(x)\\,dx = f(b)-f(a)$.",
+      "\\end{theorem}",
+      "\\begin{proof}",
+      "By the definition of the Riemann integral and continuity of $f'$. \\end{proof}",
+      "",
+      "EXAMPLE (align derivation):",
+      "\\begin{align}",
+      "(x+1)^2 &= x^2 + 2x + 1 \\\\",
+      "         &= x(x+2) + 1.",
+      "\\end{align}",
+      "",
+      "EXAMPLE (piecewise / cases):",
+      "\\[ f(x) = \\begin{cases} x^2 & x \\ge 0, \\\\ -x & x < 0. \\end{cases} \\]",
     ].join(" "),
+
     renderMock: (d) =>
-      wrap(
+      // Template owns the preamble — AI uses these environments without re-declaring them.
+      docRaw(
         "article",
         ["geometry", "amsmath", "amssymb", "amsthm", "mathtools"],
         [
-          "\\newtheorem{theorem}{Định lý}",
-          "\\newtheorem{lemma}{Bổ đề}",
+          // Standardized preamble — single source of truth for all math documents.
+          // AI MUST use these names as-is; do not redefine or alias them.
+          "\\newtheorem{theorem}{Theorem}[section]",
+          "\\newtheorem{lemma}[theorem]{Lemma}",
+          "\\newtheorem{corollary}[theorem]{Corollary}",
+          "\\newtheorem{proposition}[theorem]{Proposition}",
           "\\theoremstyle{definition}",
-          "\\newtheorem{definition}{Định nghĩa}",
+          "\\newtheorem{definition}[theorem]{Definition}",
+          "\\newtheorem{example}[theorem]{Example}",
+          "\\theoremstyle{remark}",
+          "\\newtheorem*{remark}{Remark}",
+          "\\title{Mathematical Notes}",
+          "\\author{AI LaTeX Generator}",
         ],
         [
-          "\\section{Đặt vấn đề}",
-          `Nội dung: ${d}`,
-          "\\begin{definition}",
-          "Cho $f:\\mathbb{R}\\to\\mathbb{R}$ khả vi.",
+          "\\maketitle",
+          "\\section{Preliminaries}",
+          `${d}`,
+          "\\begin{definition}\\label{def:cont}",
+          "Let $f : \\mathbb{R} \\to \\mathbb{R}$. We say $f$ is \\emph{continuous} at $a$ if",
+          "\\[",
+          "  \\lim_{x \\to a} f(x) = f(a).",
+          "\\]",
           "\\end{definition}",
-          "\\begin{theorem}",
-          "Với mọi $x$, ta có đẳng thức sau.",
+          "\\section{Main Results}",
+          "\\begin{theorem}\\label{thm:main}",
+          "For all $x \\in [0,1]$, the following holds:",
+          "\\begin{equation}\\label{eq:integral}",
+          "  \\int_0^1 x^2 \\, dx = \\frac{1}{3}.",
+          "\\end{equation}",
           "\\end{theorem}",
-          "\\begin{equation}",
-          "\\int_0^1 x^2 \\, dx = \\frac{1}{3}.",
-          "\\end{equation}",
           "\\begin{proof}",
-          "Suy trực tiếp từ định nghĩa tích phân.",
+          "By direct computation using Definition~\\ref{def:cont} and Equation~\\eqref{eq:integral}.",
           "\\end{proof}",
+          "\\begin{corollary}",
+          "An immediate consequence of Theorem~\\ref{thm:main}.",
+          "\\end{corollary}",
+          "\\section{Example}",
+          "\\begin{example}",
+          "Consider the piecewise function",
+          "\\[",
+          "  f(x) = \\begin{cases} x^2 & x \\ge 0, \\\\ -x & x < 0. \\end{cases}",
+          "\\]",
+          "\\end{example}",
         ],
       ),
-  },
+  }),
 
-  physics: {
-    id: "physics",
-    label: "Tài liệu Vật lý",
-    category: "Khoa học",
-    description:
-      "Công thức vật lý, đơn vị SI (siunitx), hình minh hoạ bằng TikZ, bảng số liệu.",
-    documentClass: "article",
-    packages: ["geometry", "amsmath", "amssymb", "siunitx", "graphicx", "tikz"],
-    promptGuidance: [
-      "DẠNG: Tài liệu Vật lý.",
-      "Dùng amsmath cho công thức, siunitx cho đại lượng/đơn vị (vd \\SI{9.81}{m/s^2}, \\si{\\newton}).",
-      "Hình minh hoạ vẽ bằng TikZ (\\begin{tikzpicture}...\\end{tikzpicture}) trong môi trường figure,",
-      "KHÔNG \\includegraphics file ngoài. Bảng số liệu bằng tabular. Trình bày định luật, dẫn dắt công thức,",
-      "và ví dụ tính toán có đơn vị.",
-    ].join(" "),
-    renderMock: (d) =>
-      wrap(
-        "article",
-        ["geometry", "amsmath", "amssymb", "siunitx", "graphicx", "tikz"],
-        [],
-        [
-          "\\section{Cơ sở lý thuyết}",
-          `Nội dung: ${d}`,
-          "Định luật II Newton: \\( F = ma \\).",
-          "\\begin{equation}",
-          "F = m a, \\quad g = \\SI{9.81}{m/s^2}.",
-          "\\end{equation}",
-          "\\begin{figure}[h]",
-          "\\centering",
-          "\\begin{tikzpicture}",
-          "\\draw[->] (0,0) -- (2,0) node[right] {$x$};",
-          "\\draw[->] (0,0) -- (0,2) node[above] {$y$};",
-          "\\draw[thick] (0,0) -- (1.5,1.5);",
-          "\\end{tikzpicture}",
-          "\\caption{Sơ đồ minh hoạ (vẽ bằng TikZ).}",
-          "\\end{figure}",
-        ],
-      ),
-  },
-
-  technical: {
-    id: "technical",
-    label: "Báo cáo kỹ thuật",
-    category: "Kỹ thuật",
-    description:
-      "Báo cáo kỹ thuật: bảng đẹp (booktabs), sơ đồ TikZ, đoạn mã, hình minh hoạ.",
-    documentClass: "article",
-    packages: ["geometry", "amsmath", "graphicx", "booktabs", "tikz", "listings"],
-    promptGuidance: [
-      "DẠNG: Báo cáo kỹ thuật.",
-      "Cấu trúc: Tổng quan, Kiến trúc/Thiết kế, Triển khai, Đánh giá, Kết luận.",
-      "Dùng booktabs cho bảng (\\toprule/\\midrule/\\bottomrule), TikZ cho sơ đồ khối,",
-      "listings cho đoạn mã (\\begin{lstlisting}...\\end{lstlisting}). Hình vẽ bằng TikZ, KHÔNG file ngoài.",
-    ].join(" "),
-    renderMock: (d) =>
-      wrap(
-        "article",
-        ["geometry", "amsmath", "graphicx", "booktabs", "tikz", "listings"],
-        [],
-        [
-          "\\section{Tổng quan}",
-          `Nội dung: ${d}`,
-          "\\section{Kết quả đo}",
-          "\\begin{tabular}{lr}",
-          "\\toprule",
-          "Chỉ số & Giá trị \\\\",
-          "\\midrule",
-          "Thông lượng & 120 \\\\",
-          "Độ trễ & 8 \\\\",
-          "\\bottomrule",
-          "\\end{tabular}",
-          "\\section{Sơ đồ khối}",
-          "\\begin{tikzpicture}",
-          "\\node[draw] (a) {Input}; \\node[draw,right=of a] (b) {Xử lý};",
-          "\\draw[->] (a) -- (b);",
-          "\\end{tikzpicture}",
-        ],
-      ),
-  },
-
-  thesis: {
+  // ── 3. Thesis / Long report ───────────────────────────────────────────
+  thesis: defineTemplate({
     id: "thesis",
-    label: "Luận văn / Báo cáo dài",
-    category: "Học thuật",
+    label: "Thesis / Long Report",
+    category: "Academic",
     description:
-      "Tài liệu dài nhiều chương: trang tiêu đề, mục lục, các \\chapter, mở đầu → kết luận.",
+      "Long multi-chapter document: title page, TOC, chapters, appendix, bibliography.",
     documentClass: "report",
     packages: ["geometry", "amsmath", "graphicx", "hyperref"],
+
+    capabilities: {
+      headings: true,             // \chapter / \section / \subsection
+      lists: true,
+      tables: true,
+      basicMath: true,
+      advancedMath: true,
+      theoremEnvironments: false, // thesis uses sections, not theorem environments typically
+      tikzDiagrams: true,         // figures / diagrams in chapters
+      citations: true,            // bibliography at end
+      codeListings: false,        // can be added via extraPackages if needed
+      abstract: false,            // thesis uses Introduction chapter, not abstract env
+      beamerFrames: false,
+    },
+
+    packageAllowlist: ["geometry", "amsmath", "graphicx", "hyperref", "tikz", "pgfplots", "booktabs", "xcolor", "listings"],
+
+    repairHints: [
+      {
+        errorPattern: "PACKAGE_ERROR",
+        action:
+          "Only geometry/amsmath/graphicx/hyperref/tikz/booktabs/listings are allowed. " +
+          "Remove any other package, especially moderncv, fancyhdr, or titlesec.",
+      },
+      {
+        errorPattern: "SYNTAX_ERROR",
+        action:
+          "Check for \\section{} used at the top level — report class requires \\chapter{} first. " +
+          "\\section may only appear inside a \\chapter.",
+      },
+      {
+        errorPattern: "bibliography",
+        action:
+          "Replace \\bibliography{}/\\bibliographystyle{} with \\begin{thebibliography}{99}...\\end{thebibliography}. " +
+          "BibTeX .bib files do not exist in the sandbox.",
+      },
+    ],
     promptGuidance: [
-      "DẠNG: Luận văn/Báo cáo dài (documentclass report).",
-      "Cấu trúc: trang tiêu đề (\\maketitle), \\tableofcontents, rồi nhiều \\chapter:",
-      "Mở đầu/Giới thiệu, các chương nội dung chính, Kết luận & Khuyến nghị.",
-      "Mỗi \\chapter chia thành \\section/\\subsection với nội dung thực chất.",
+      "TYPE: Thesis or long report (report class — uses \\chapter{} not \\section{} at top level).",
+
+      "Structure: \\maketitle → \\tableofcontents (→ optionally \\listoffigures, \\listoftables)",
+      "→ \\chapter{Introduction} (background, motivation, objectives, scope)",
+      "→ \\chapter{Literature Review} or \\chapter{Theoretical Background}",
+      "→ \\chapter{Methodology} (detailed approach, models, data)",
+      "→ \\chapter{Results and Discussion}",
+      "→ \\chapter{Conclusion} (summary, contributions, future work)",
+      "→ (optionally) \\appendix \\chapter{Appendix A: ...}",
+      "→ \\begin{thebibliography}{99} ... \\end{thebibliography}.",
+      "Each \\chapter breaks into \\section/\\subsection/\\subsubsection with substantial content.",
+
+      "Required packages: geometry (page layout), amsmath (equations),",
+      "graphicx (figure environments — use TikZ for diagrams, NO external \\includegraphics),",
+      "hyperref (\\ref, \\label, \\cite linking). Use \\label{} + \\ref{} throughout for cross-references.",
+      "Citations: \\cite{key} inline, \\bibitem{key} in thebibliography.",
+
+      "FORBIDDEN: \\section{} at the top level — report class uses \\chapter{} first.",
+      "FORBIDDEN: \\bibliography or \\bibliographystyle (use thebibliography directly).",
+      "FORBIDDEN: \\includegraphics with external file paths.",
+      "FORBIDDEN: \\setmainfont or \\babelfont.",
+
+      "EXAMPLE: \\chapter{Introduction}",
+      "\\section{Background}",
+      "This thesis investigates ... \\cite{source2024}.",
+      "\\section{Research Objectives}",
+      "The main objectives are: (1) ...; (2) ...; (3) ...",
     ].join(" "),
     renderMock: (d) =>
       wrap(
@@ -281,198 +532,161 @@ export const TEMPLATES: Record<TemplateId, DocumentTemplate> = {
         [],
         [
           "\\tableofcontents",
-          "\\chapter{Giới thiệu}",
-          `Nội dung: ${d}`,
-          "\\section{Bối cảnh}",
-          "Chi tiết bối cảnh.",
-          "\\chapter{Nội dung chính}",
-          "\\section{Phần 1}",
-          "Chi tiết.",
-          "\\chapter{Kết luận}",
-          "Tổng kết và khuyến nghị.",
+          "\\chapter{Introduction}",
+          `${d}`,
+          "\\section{Background}",
+          "Context and motivation for this research.",
+          "\\section{Research Objectives}",
+          "The main objectives of this work.",
+          "\\chapter{Literature Review}",
+          "\\section{Existing Approaches}",
+          "Overview of related work.",
+          "\\chapter{Methodology}",
+          "\\section{Proposed Approach}",
+          "Detailed description of the method.",
+          "\\chapter{Results and Discussion}",
+          "\\section{Experimental Results}",
+          "Analysis of findings.",
+          "\\chapter{Conclusion}",
+          "Summary and future directions.",
+          "\\begin{thebibliography}{9}",
+          "\\bibitem{ref1} A. Author. \\textit{Title}. Publisher, 2020.",
+          "\\end{thebibliography}",
         ],
       ),
-  },
+  }),
 
-  slides: {
+  // ── 4. Beamer slides ─────────────────────────────────────────────────
+  slides: defineTemplate({
     id: "slides",
-    label: "Trình chiếu (Beamer)",
-    category: "Trình chiếu",
+    label: "Presentation (Beamer)",
+    category: "Presentation",
     description:
-      "Slide thuyết trình Beamer: trang tiêu đề, các frame, danh sách, block, công thức.",
+      "Beamer slide deck: title frame, content frames, blocks, equations, lists.",
     documentClass: "beamer",
     packages: ["amsmath"],
+
+    capabilities: {
+      headings: false,          // Beamer uses \section to group frames, not for content heading
+      lists: true,              // itemize/enumerate inside frames
+      tables: true,             // tabular inside frames
+      basicMath: true,
+      advancedMath: true,       // equations in frames
+      theoremEnvironments: false,
+      tikzDiagrams: true,       // diagrams inside frames
+      citations: false,         // presentations rarely have formal citations
+      codeListings: false,
+      abstract: false,
+      beamerFrames: true,       // core feature: \begin{frame}...\end{frame}
+    },
+
+    packageAllowlist: ["amsmath", "tikz", "pgfplots", "xcolor", "booktabs"],
+
+    repairHints: [
+      {
+        errorPattern: "ENVIRONMENT_ERROR",
+        action:
+          "Every \\begin{frame} must have a matching \\end{frame}. " +
+          "\\maketitle must be inside a frame: \\begin{frame}[plain] \\titlepage \\end{frame}. " +
+          "Do not use \\chapter or \\section as content headings inside frames.",
+      },
+      {
+        errorPattern: "PACKAGE_ERROR",
+        action:
+          "Only amsmath/tikz/xcolor/booktabs are allowed in Beamer. " +
+          "Do not add geometry (Beamer controls its own page size). " +
+          "Do not add hyperref (Beamer loads it automatically).",
+      },
+      {
+        errorPattern: "FONT_ERROR",
+        action:
+          "Do not use \\setbeamerfont with external font names. " +
+          "Remove \\setmainfont/\\setsansfont/\\babelfont. Use Beamer's default fonts.",
+      },
+    ],
     promptGuidance: [
-      "DẠNG: Trình chiếu Beamer (\\documentclass{beamer}).",
-      "Bắt đầu bằng \\title/\\author và \\maketitle (frame tiêu đề). Mỗi slide là",
-      "\\begin{frame}{Tiêu đề slide} ... \\end{frame}. Dùng itemize/enumerate, \\begin{block}{...},",
-      "và công thức khi cần. Giữ mỗi frame NGẮN GỌN (vài ý). Có thể \\section để chia phần.",
-      "TRÁNH \\includegraphics file ngoài; nếu cần hình thì vẽ bằng TikZ.",
+      "TYPE: Beamer presentation (\\documentclass{beamer}) — NOT article or report.",
+
+      "Structure: In the preamble: \\usetheme{Madrid} (or default/Singapore/CambridgeUS/AnnArbor),",
+      "\\usecolortheme{default}, \\title{}, \\author{}, \\institute{}, \\date{}.",
+      "Then: \\begin{frame}[plain] \\titlepage \\end{frame}",
+      "→ optional \\begin{frame}{Outline} \\tableofcontents \\end{frame}",
+      "→ \\section{} followed by content frames",
+      "→ \\begin{frame}{Conclusion} ... \\end{frame}.",
+      "Each \\begin{frame}{Title} ... \\end{frame} should be SHORT (3–5 bullet points max).",
+      "Use \\pause between steps to reveal content progressively.",
+
+      "Required packages: amsmath (equations in frames — use \\[ \\] or equation env).",
+      "Blocks: \\begin{block}{Title}...\\end{block},",
+      "\\begin{alertblock}{Warning}...\\end{alertblock},",
+      "\\begin{exampleblock}{Example}...\\end{exampleblock}.",
+      "Lists: \\begin{itemize} \\item ... \\end{itemize} inside frames.",
+
+      "FORBIDDEN: \\includegraphics with external file paths — use TikZ for diagrams.",
+      "FORBIDDEN: \\maketitle outside a frame — always wrap in \\begin{frame}...\\end{frame}.",
+      "FORBIDDEN: \\chapter or \\section outside the preamble area (use \\section before frames).",
+      "FORBIDDEN: \\setmainfont or \\babelfont.",
+
+      "EXAMPLE: \\begin{frame}{Key Result}",
+      "\\begin{theorem} $\\sum_{n=1}^{\\infty} \\frac{1}{n^2} = \\frac{\\pi^2}{6}$ \\end{theorem}",
+      "\\pause",
+      "\\begin{block}{Implication} This has applications in number theory. \\end{block}",
+      "\\end{frame}",
     ].join(" "),
     renderMock: (d) =>
-      wrap(
+      docRaw(
         "beamer",
         ["amsmath"],
-        [],
         [
-          "\\begin{frame}{Giới thiệu}",
+          "\\usetheme{Madrid}",
+          "\\title{Sample Presentation}",
+          "\\author{AI LaTeX Generator}",
+          "\\date{\\today}",
+        ],
+        [
+          "\\begin{frame}[plain]",
+          "\\titlepage",
+          "\\end{frame}",
+          "",
+          "\\section{Introduction}",
+          "\\begin{frame}{Introduction}",
           `${d}`,
           "\\begin{itemize}",
-          "\\item Ý chính thứ nhất.",
-          "\\item Ý chính thứ hai.",
+          "\\item First key point.",
+          "\\item Second key point.",
+          "\\item Third key point.",
           "\\end{itemize}",
           "\\end{frame}",
-          "\\begin{frame}{Kết luận}",
-          "\\begin{block}{Tóm lại}",
-          "Thông điệp chính.",
+          "",
+          "\\section{Main Content}",
+          "\\begin{frame}{Key Result}",
+          "\\begin{block}{Theorem}",
+          "An important result follows.",
           "\\end{block}",
+          "\\pause",
+          "\\begin{alertblock}{Note}",
+          "Pay attention to this implication.",
+          "\\end{alertblock}",
+          "\\end{frame}",
+          "",
+          "\\section{Conclusion}",
+          "\\begin{frame}{Conclusion}",
+          "\\begin{itemize}",
+          "\\item Summary of contributions.",
+          "\\item Directions for future work.",
+          "\\end{itemize}",
           "\\end{frame}",
         ],
       ),
-  },
-
-  letter: {
-    id: "letter",
-    label: "Thư trang trọng",
-    category: "Thư tín & Hồ sơ",
-    description:
-      "Thư trang trọng: địa chỉ người gửi/nhận, lời mở đầu, nội dung, lời kết và chữ ký.",
-    documentClass: "letter",
-    packages: [],
-    promptGuidance: [
-      "DẠNG: Thư trang trọng (\\documentclass{letter}).",
-      "Preamble: \\address{Người gửi\\\\Địa chỉ}, \\signature{Tên người gửi}.",
-      "Thân: \\begin{letter}{Người nhận\\\\Địa chỉ} \\opening{Kính gửi ...,} <các đoạn nội dung>",
-      "\\closing{Trân trọng,} \\end{letter}. KHÔNG dùng \\maketitle (class letter không có).",
-    ].join(" "),
-    renderMock: (d) =>
-      docRaw(
-        "letter",
-        [],
-        ["\\address{Người gửi\\\\Địa chỉ người gửi}", "\\signature{Người gửi}"],
-        [
-          "\\begin{letter}{Người nhận\\\\Địa chỉ người nhận}",
-          "\\opening{Kính gửi Quý vị,}",
-          `${d}`,
-          "Rất mong nhận được phản hồi từ Quý vị.",
-          "\\closing{Trân trọng,}",
-          "\\end{letter}",
-        ],
-      ),
-  },
-
-  cv: {
-    id: "cv",
-    label: "Sơ yếu lý lịch / CV",
-    category: "Thư tín & Hồ sơ",
-    description:
-      "CV một trang: tiêu đề tên + liên hệ, các mục Mục tiêu, Kinh nghiệm, Học vấn, Kỹ năng.",
-    documentClass: "article",
-    packages: ["geometry", "hyperref", "enumitem"],
-    promptGuidance: [
-      "DẠNG: Sơ yếu lý lịch / CV (documentclass article, gọn 1–2 trang).",
-      "Đầu trang: tên (cỡ lớn, in đậm) + thông tin liên hệ (email, điện thoại) căn giữa.",
-      "Các mục dùng \\section*{...}: Mục tiêu, Kinh nghiệm, Học vấn, Kỹ năng.",
-      "Trình bày mục kinh nghiệm/học vấn theo dòng: đơn vị — vai trò (thời gian), rồi mô tả.",
-      "KHÔNG dùng class moderncv (dễ lỗi tải); chỉ dùng gói phổ biến. Không hình ngoài.",
-    ].join(" "),
-    renderMock: (d) =>
-      docRaw(
-        "article",
-        ["geometry", "hyperref", "enumitem"],
-        [],
-        [
-          "\\begin{center}",
-          "{\\LARGE \\textbf{Nguyễn Văn A}}\\\\[2pt]",
-          "email@example.com \\quad 0123 456 789",
-          "\\end{center}",
-          "\\section*{Mục tiêu}",
-          `${d}`,
-          "\\section*{Kinh nghiệm}",
-          "\\textbf{Công ty X} — Kỹ sư phần mềm (2020--2023)\\\\",
-          "Phát triển và bảo trì hệ thống.",
-          "\\section*{Học vấn}",
-          "Đại học Y — Cử nhân CNTT (2016--2020).",
-          "\\section*{Kỹ năng}",
-          "\\begin{itemize}[nosep]",
-          "\\item Ngôn ngữ: TypeScript, Python.",
-          "\\item Công cụ: Git, Docker.",
-          "\\end{itemize}",
-        ],
-      ),
-  },
-
-  exam: {
-    id: "exam",
-    label: "Đề thi / Bài kiểm tra",
-    category: "Giáo dục",
-    description:
-      "Đề thi dùng class exam: danh sách câu hỏi, câu hỏi con (parts), điểm số.",
-    documentClass: "exam",
-    packages: ["amsmath"],
-    promptGuidance: [
-      "DẠNG: Đề thi/bài kiểm tra (\\documentclass{exam}).",
-      "Dùng môi trường \\begin{questions} ... \\end{questions} với mỗi câu là \\question[điểm].",
-      "Câu hỏi con dùng \\begin{parts}\\part ...\\end{parts}. Có thể chèn công thức (amsmath).",
-      "Có thể thêm phần hướng dẫn/đầu đề ngắn trước danh sách câu hỏi.",
-    ].join(" "),
-    renderMock: (d) =>
-      wrap(
-        "exam",
-        ["amsmath"],
-        [],
-        [
-          `Hướng dẫn: ${d}`,
-          "\\begin{questions}",
-          "\\question[2] Tính đạo hàm của $f(x) = x^2$.",
-          "\\begin{parts}",
-          "\\part Nêu công thức đạo hàm.",
-          "\\part Áp dụng cho $f(x)=x^2$.",
-          "\\end{parts}",
-          "\\question[3] Giải phương trình $x + 1 = 0$.",
-          "\\end{questions}",
-        ],
-      ),
-  },
-
-  chemistry: {
-    id: "chemistry",
-    label: "Tài liệu Hóa học",
-    category: "Khoa học",
-    description:
-      "Hóa học: phương trình phản ứng bằng mhchem (\\ce), công thức, bảng số liệu.",
-    documentClass: "article",
-    packages: ["geometry", "amsmath", "mhchem"],
-    promptGuidance: [
-      "DẠNG: Tài liệu Hóa học.",
-      "Dùng gói mhchem: viết phản ứng/công thức bằng \\ce{...} (vd \\ce{2 H2 + O2 -> 2 H2O},",
-      "\\ce{H2SO4}). Phương trình phản ứng quan trọng đặt trong equation. Bảng số liệu bằng tabular.",
-      "Trình bày lý thuyết, phương trình phản ứng, và ví dụ tính toán (mol, khối lượng).",
-    ].join(" "),
-    renderMock: (d) =>
-      wrap(
-        "article",
-        ["geometry", "amsmath", "mhchem"],
-        [],
-        [
-          "\\section{Phản ứng}",
-          `${d}`,
-          "Phản ứng đốt cháy khí hydro:",
-          "\\begin{equation}",
-          "\\ce{2 H2 + O2 -> 2 H2O}",
-          "\\end{equation}",
-          "\\section{Bảng dữ liệu}",
-          "\\begin{tabular}{lr}",
-          "Chất & Khối lượng mol (g/mol) \\\\",
-          "\\ce{H2} & 2 \\\\",
-          "\\ce{O2} & 32 \\\\",
-          "\\end{tabular}",
-        ],
-      ),
-  },
+  }),
 };
 
-export const DEFAULT_TEMPLATE: TemplateId = "general";
+// ─── Registry utilities ───────────────────────────────────────────────────
+
+/** documentClass → DocType coarse mapping (used for metadata / backward compat). */
+export function docTypeForClass(cls: LatexClass): DocType {
+  return cls === "report" ? "report" : "article";
+}
 
 export function isTemplateId(v: unknown): v is TemplateId {
   return typeof v === "string" && (TEMPLATE_IDS as readonly string[]).includes(v);
@@ -482,26 +696,30 @@ export function getTemplate(id: TemplateId): DocumentTemplate {
   return TEMPLATES[id];
 }
 
-/** Danh sách template cho UI (giữ thứ tự khai báo). */
+/** Ordered list of templates for UI display. */
 export function listTemplates(): DocumentTemplate[] {
   return TEMPLATE_IDS.map((id) => TEMPLATES[id]);
 }
 
-/** Suy ra template mặc định từ docType (tương thích ngược khi chỉ có docType). */
+/**
+ * Infer default template from docType (backward compat: when only docType is provided).
+ *   report  → thesis  (chapter-based long document)
+ *   article → academic (flat-section paper)
+ */
 export function templateForDocType(docType: DocType): TemplateId {
-  return docType === "report" ? "thesis" : "general";
+  return docType === "report" ? "thesis" : "academic";
 }
 
-/** Render LaTeX mẫu hợp lệ theo template (dùng cho MockProvider/dev offline). */
+/** Render a valid LaTeX skeleton for the given template (used by MockProvider / dev offline). */
 export function renderTemplateLatex(id: TemplateId, description: string): string {
-  return TEMPLATES[id].renderMock(description || "(mô tả trống)");
+  return TEMPLATES[id].renderMock(description || "(no description)");
 }
 
 /**
- * Bọc một THÂN LaTeX tuỳ ý trong preamble của template (documentClass + packages).
- * Dùng cho E5 (Markdown→LaTeX): converter phát body, hàm này ghép preamble.
- * ĐÂY LÀ NGUỒN PREAMBLE DUY NHẤT — không hard-code preamble ở nơi khác (tránh drift).
- * `extraPackages` là gói phát sinh theo nội dung (listings/booktabs/hyperref/amsmath...).
+ * Wrap an arbitrary LaTeX body in the template's preamble (documentClass + packages).
+ * Used by E5 (Markdown→LaTeX): the converter produces the body, this function adds the preamble.
+ * SINGLE SOURCE OF TRUTH for preamble — do not hard-code preambles elsewhere.
+ * `extraPackages` = packages inferred from content (listings, booktabs, hyperref, amsmath, ...).
  */
 export function wrapBodyInTemplate(
   id: TemplateId,
@@ -510,5 +728,13 @@ export function wrapBodyInTemplate(
 ): string {
   const t = TEMPLATES[id];
   const packages = [...new Set([...t.packages, ...extraPackages])];
-  return docRaw(t.documentClass, packages, [], [body]);
+  return [
+    `\\documentclass{${t.documentClass}}`,
+    "\\usepackage{fontspec}",
+    ...packages.map((p) => `\\usepackage{${p}}`),
+    "\\begin{document}",
+    body,
+    "\\end{document}",
+    "",
+  ].join("\n");
 }

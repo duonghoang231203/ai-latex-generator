@@ -239,7 +239,7 @@ export default function DocumentWorkspace({
         </Link>
         <h1 className="min-w-0 flex-1 truncate text-xl font-semibold">{doc.title}</h1>
         <span className="text-xs text-zinc-500">
-          {getTemplate(doc.template).label} · {doc.pdfBase64 ? "có PDF" : "chưa có PDF"} · attempts:{" "}
+          {getTemplate(doc.template)?.label ?? doc.template} · {doc.pdfBase64 ? "có PDF" : "chưa có PDF"} · attempts:{" "}
           {doc.attempts}
         </span>
         <button

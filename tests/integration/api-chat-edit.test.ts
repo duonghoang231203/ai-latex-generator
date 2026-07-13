@@ -157,7 +157,7 @@ describe("chat-edit API — các trường hợp", () => {
       title: "Rỗng",
       ownerId: "test-user",
       docType: "article",
-      template: "general",
+      template: "academic",
       description: "",
       latex: "",
       attempts: 1,
