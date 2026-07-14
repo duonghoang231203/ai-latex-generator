@@ -2,7 +2,8 @@
 
 ## 1. Tầm nhìn Kiến trúc Backend (Backend Architecture Vision)
 
-Dựa trên lộ trình phát triển chung của dự án (các Epic E1, E2, E3, E4, E7) và đặc thù của hệ thống:
+Dựa trên lộ trình phát triển chung của dự án (các Epic E1, E2, E3, E4, E6, E7 — và Phase 6 mở rộng
+template `#later`) và đặc thù của hệ thống:
 
 - **Scope:** Tập trung mở rộng `Orchestrator` (trái tim điều phối AI) để xử lý các luồng phức tạp (nhiều bước, nhiều file), đồng thời nâng cấp hạ tầng lưu trữ và xác thực chuẩn bị cho mô hình v2 đa người dùng.
 - **Microservices & Modules:** 
@@ -49,8 +50,76 @@ Dựa trên lộ trình phát triển chung của dự án (các Epic E1, E2, E3
 *Mục tiêu: Chuẩn bị cho ứng dụng SaaS đa người dùng.*
 
 - **BE-4.1 `[Platform]`:** Thiết kế Schema Database cho Users, Workspaces, Projects, và Documents. (Lựa chọn Prisma hoặc Drizzle ORM).
-- **BE-4.2 `[Platform]`:** Tích hợp Auth system (NextAuth.js hoặc Supabase Auth). Thêm Middleware để bảo vệ API routes.
+- **BE-4.2 `[Platform]`:** ✅ **Một phần đã xong (2026-07-14, verify bằng code thật):** Auth system
+  đã chọn và implement **Supabase Auth** (không còn là lựa chọn "NextAuth.js hoặc Supabase" — đã
+  chốt Supabase) — `lib/auth/current-user.ts`, `app/login/`, `app/auth/callback/route.ts`, document
+  CRUD qua `lib/store/supabase-document-store.ts` + RLS (`supabase/migrations/0001_documents.sql`).
+  **Còn thiếu:** Middleware tập trung (`middleware.ts` ở root) — hiện gate quyền rời rạc ở từng
+  route/component, chưa có 1 lớp kiểm tra session/redirect thống nhất.
 - **BE-4.3 `[Platform]`:** Di chuyển dữ liệu file vật lý sang Cloud Storage (ví dụ: AWS S3 hoặc Supabase Storage), cung cấp pre-signed URLs cho việc tải/hiển thị assets.
+
+### ⚪ Phase 6: Mở rộng Template `#later`
+
+*Mục tiêu: Bổ sung 7 template còn thiếu so với ý định sản phẩm ban đầu — xem
+[`docs/project-overview-pdr.md`](./project-overview-pdr.md) § Product Description
+("reports, academic papers, math/physics/chemistry documents, engineering, thesis, Beamer
+presentations, letters/CVs, and exams"). Epic này KHÁC với "chuẩn hoá `promptGuidance`" của E6
+Giai đoạn 2 (đã xong cho 4 template hiện có) — đây là thêm `TemplateId` MỚI, không phải sửa lại
+template đã có.*
+
+> ⚠️ **Bối cảnh phát hiện lỗi tài liệu (2026-07-14):** `docs/feature-tracking.md` và
+> `docs/features/e6-prompt-engineering/explainer.md` trước đây ghi "chuẩn hoá `promptGuidance` cho
+> 11 templates" — số liệu này SAI. Đã verify bằng code thật: `TemplateId`
+> (`lib/types/document.ts`) chỉ có 4 giá trị (`academic`/`math`/`thesis`/`slides`), và `TEMPLATES`
+> là `Record<TemplateId, DocumentTemplate>` nên về mặt kiểu TypeScript không thể có 11 entry. "11"
+> bị chép nhầm từ mô tả sản phẩm ban đầu mà không đối chiếu lại với code. Phase này ghi nhận đúng
+> việc CẦN LÀM để số 11 (hoặc gần đó) trở thành sự thật trong code — 4 hiện có + 7 dưới đây = 11.
+
+**7 template cần thêm** (mỗi template ước tính effort tương đương ~0.5–1 ngày nếu theo đúng pattern
+4 template hiện có — xem `lib/templates/registry.ts` mục `academic`/`math` làm ví dụ tham chiếu):
+
+| Template mới | `LatexClass` dùng | Ghi chú kỹ thuật riêng |
+|:--|:--|:--|
+| `report` | `report` (đã có trong `LatexClass`) | Báo cáo chung — khác `thesis` (không cần chapter hierarchy/TOC dài, ngắn hơn). |
+| `physics` | `article` | Cần ký hiệu vector (`\vec{}`/`bm`), đơn vị SI (`siunitx`) — kiểm tra package có an toàn Tectonic sandbox trước khi thêm vào allowlist. |
+| `chemistry` | `article` | Cần `mhchem` cho công thức hoá học (phản ứng, mũi tên cân bằng) — package phổ biến CTAN, khả năng cao an toàn. |
+| `engineering` | `article` hoặc `report` | Có thể cần biểu đồ mạch (`circuitikz`) — nếu dùng, phải theo đúng nguyên tắc positive-alternative đã áp dụng ở E6 (không chỉ FORBIDDEN mà có hướng dẫn thay thế cụ thể khi thiếu). |
+| `letter` | `letter` (đã có trong `LatexClass`, CHƯA có template dùng) | Document class `letter` khác cấu trúc `\begin{letter}{...}` — không dùng `\section` như các template khác, cần `renderMock()` riêng biệt hoàn toàn. |
+| `cv` | `article` (khuyến nghị — tránh `moderncv` nếu chưa audit an toàn Tectonic sandbox) | **Cần audit an toàn trước khi chọn package** — nhiều CV package (`moderncv`, `europasscv`) có thể cần `\includegraphics` (ảnh đại diện) — mâu thuẫn với nguyên tắc đã ghi ở đầu file registry.ts: "NO `\includegraphics` external files". Cần quyết định: bỏ ảnh đại diện, hoặc dùng placeholder/TikZ. |
+| `exam` | `exam` (đã có trong `LatexClass`, CHƯA có template dùng) | Document class `exam` có lệnh riêng cho câu hỏi/điểm số (`\question`, `\part`, `\begin{solution}`) — cần `knownTheoremEnvironments` tương đương để validate đúng, không lẫn với `amsthm` của `math`. |
+
+**Checklist per-template (đúng 8 field của `DocumentTemplate` interface, `lib/templates/registry.ts`):**
+
+- [ ] Thêm giá trị mới vào `TemplateId` union + `TEMPLATE_IDS` array (`lib/types/document.ts`).
+- [ ] Định nghĩa `TEMPLATES[id]` đầy đủ: `label`/`category`/`description` (UI, tiếng Việt),
+      `documentClass`, `packages` (gợi ý — không phải allowlist).
+- [ ] `promptGuidance` theo ĐÚNG schema 5-field cố định (TYPE/Structure/Required/FORBIDDEN/EXAMPLE) —
+      không tự sáng tạo format khác, xem comment trong `DocumentTemplate` interface.
+- [ ] `renderMock()` — skeleton LaTeX hợp lệ dùng cho `MockProvider`/dev (không gọi AI thật).
+- [ ] `capabilities` (`TemplateCapabilities`) — khai báo đúng khả năng, dùng để enforce allowlist +
+      hướng dẫn repair.
+- [ ] `packageAllowlist` — audit AN TOÀN từng package mới trước khi thêm (Tectonic `--untrusted`,
+      không shell-escape, không `\includegraphics` file ngoài — xem nguyên tắc đầu `registry.ts`).
+- [ ] `repairHints` (nếu có lỗi đặc thù template hay gặp, theo pattern `math`/`academic` hiện có).
+- [ ] `knownTheoremEnvironments` (chỉ nếu dùng `amsthm`/tương đương — vd. `exam` với `\begin{solution}`).
+- [ ] Test: theo pattern `tests/integration/api-templates.test.ts` (mỗi template hiện có đều có 1
+      test case xác nhận field bắt buộc xuất hiện đúng trong output).
+- [ ] **(Không bắt buộc ngay, nhưng nên làm khi ổn định)** Eval bằng `lib/prompt-eval/` (Promptfoo) —
+      theo đúng pattern đã dùng cho `math` ở E6 Giai đoạn 3, đo compliance thật bằng AI thật trước
+      khi tin prompt đã đúng.
+
+**Thứ tự làm đề xuất** (rủi ro thấp → cao, để phát hiện sớm nếu có vấn đề an toàn/kiến trúc):
+1. `report` (gần giống `thesis`/`academic` nhất, rủi ro thấp nhất — tốt để làm đầu tiên xác nhận lại
+   pattern còn đúng sau khi đã có 4 template).
+2. `chemistry` (chỉ cần 1 package mới `mhchem`, không có vấn đề an toàn đặc biệt).
+3. `physics` (tương tự `chemistry`, thêm `siunitx`).
+4. `engineering` (cân nhắc kỹ `circuitikz` trước khi cam kết).
+5. `exam` (cần `knownTheoremEnvironments` riêng — độ phức tạp trung bình).
+6. `letter` (document class hoàn toàn khác cấu trúc — cần soạn `body` cho `letter` class đúng cú
+   pháp riêng, vd. `\begin{letter}{...}`/`\opening`/`\closing`; **đã verify** helper `docRaw()`
+   hiện có trong `registry.ts` là generic — nhận `body: string[]` bất kỳ, không giả định `\section`
+   — nên vẫn tái dùng được, chỉ cần soạn đúng nội dung `body` theo cú pháp `letter`).
+7. `cv` (làm CUỐI — cần quyết định trước về ảnh đại diện/package, rủi ro an toàn cao nhất trong 7).
 
 ### ⚪ Phase 5: CI/CD & DevOps (Platform Maturity)
 
