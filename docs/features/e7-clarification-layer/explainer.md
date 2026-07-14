@@ -375,19 +375,26 @@ status: generating → compiling → validating (E6) → repair loop → done/er
 - **Có bắt buộc áp dụng cho MỌI request không?** Không — cần policy rõ: request đơn giản/rõ ràng
   hiển nhiên nên bỏ qua bước hiểu request để tránh tăng latency không cần thiết cho trường hợp phổ
   biến nhất.
-- **Trạng thái?** Chưa code — mới ở giai đoạn ghi nhận ý tưởng/thiết kế vào roadmap. Cần **eval data
-  thực tế** (tỉ lệ request mơ hồ dẫn tới tài liệu kém chất lượng) trước khi cam kết effort L — tương tự
-  nguyên tắc đã áp dụng khi defer `MathGenerationPlan`/`MathDocumentMode` ở E6 (chờ chứng minh cần
-  thiết bằng dữ liệu, tránh over-engineer khi chưa có consumer thực tế).
+- **Trạng thái?** (Cập nhật 2026-07-14) **Nhóm A đã code + test** (schema `RequestPlan`,
+  `ClarificationField`/registry, `ClarificationPolicy`, `MockProvider.generateObject()` — 23 test
+  mới, xem § 6.4) — đây là logic THUẦN, không gọi AI/SSE/UI, không đổi hành vi generate/repair hiện
+  tại. **Nhóm B (orchestrator wiring, state+resume, SSE, UI) vẫn CHƯA code** — vẫn cần **eval data
+  thực tế** (tỉ lệ request mơ hồ dẫn tới tài liệu kém chất lượng) trước khi cam kết effort L cho phần
+  này — tương tự nguyên tắc đã áp dụng khi defer `MathGenerationPlan`/`MathDocumentMode` ở E6 (chờ
+  chứng minh cần thiết bằng dữ liệu, tránh over-engineer khi chưa có consumer thực tế). E7 vẫn giữ
+  tag `#later` trong `feature-tracking.md` — tool `askUserQuestion` thật (chờ user qua UI) chưa hoạt
+  động, chỉ phần lõi quyết định đã có sẵn, sẵn sàng khi nối dây.
 
 ---
 
-## 6. Task breakdown khi bắt đầu implement (chưa bắt đầu — chờ eval data)
+## 6. Task breakdown khi bắt đầu implement (Nhóm A đã code — Nhóm B chờ eval data)
 
-> Cập nhật: **2026-07-14**. Đây là **task breakdown bàn giao** (implementation-ready), viết ra để
-> sẵn sàng dùng khi điều kiện tiên quyết ở mục 5 (eval data thực tế) được đáp ứng — **KHÔNG coi là đã
-> bỏ qua điều kiện đó**, và **KHÔNG đổi trạng thái `#later`** hiện tại của E7. Tất cả 9 task dưới đây
-> vẫn ở dạng kế hoạch, chưa có dòng code nào được viết.
+> Cập nhật: **2026-07-14**. Task 1-4 (Nhóm A) đã được implement + test (xem § 6.4) — quyết định làm
+> ngay phần logic thuần (schema/registry/policy), KHÔNG đợi eval data, vì phần này không gọi AI/SSE/
+> UI, không đổi hành vi generate/repair hiện có, và effort thấp. Task 5-9 (Nhóm B — orchestrator
+> wiring, state+resume, SSE, UI) **vẫn ở dạng kế hoạch, chưa có dòng code nào được viết** — vẫn cần
+> điều kiện tiên quyết ở mục 5 (eval data thực tế) trước khi bắt đầu, và **KHÔNG đổi trạng thái
+> `#later`** hiện tại của E7 trong `feature-tracking.md`.
 
 ### 6.1. Phát hiện quan trọng làm thay đổi phạm vi so với mục 3.6
 
@@ -411,7 +418,7 @@ status: generating → compiling → validating (E6) → repair loop → done/er
 
 ### 6.2. Danh sách 9 task
 
-**Task 1 — [MỚI] Nền tảng: sửa `MockProvider.generateObject()`**
+**Task 1 — ✅ ĐÃ XONG (2026-07-14) — [MỚI] Nền tảng: sửa `MockProvider.generateObject()`**
 - Mục tiêu: trả dữ liệu giả hợp lệ (đủ pass Zod schema validation) khi `AI_PROVIDER=mock`, thay vì
   throw lỗi ngay.
 - File: `lib/ai/mock.ts`.
@@ -419,7 +426,7 @@ status: generating → compiling → validating (E6) → repair loop → done/er
 - Test gợi ý: unit test gọi `MockProvider.generateObject(RequestPlanSchema, anyPrompt)` → không throw,
   kết quả pass `.parse()` của schema.
 
-**Task 2 — `lib/ai/schemas/request-plan.ts` (mới)**
+**Task 2 — ✅ ĐÃ XONG (2026-07-14) — `lib/ai/schemas/request-plan.ts` (mới)**
 - Mục tiêu: định nghĩa Zod schema `RequestPlan` đúng cấu trúc đã chốt ở mục 3.3 (`intent`,
   `templateId`, `requirements[]`, `assumptions[]`, `missingInformation[]` — mỗi item có `field` +
   `importance: "critical"|"optional"` —, `ambiguity: "low"|"medium"|"high"`, `confidence: number`,
@@ -431,7 +438,7 @@ status: generating → compiling → validating (E6) → repair loop → done/er
   `missingInformation[]` item.
 - Test gợi ý: unit test schema với input hợp lệ/không hợp lệ (thiếu field bắt buộc, giá trị enum sai).
 
-**Task 3 — `lib/templates/registry.ts` — mở rộng `DocumentTemplate` interface**
+**Task 3 — ✅ ĐÃ XONG (2026-07-14) — `lib/templates/registry.ts` — mở rộng `DocumentTemplate` interface**
 - Mục tiêu: thêm field mới `clarificationFields?: ClarificationField[]` (type `ClarificationField`
   gồm `id`, `importance: "critical"|"optional"`, `question`, `options?`, `defaultIfSkipped?`).
 - File: `lib/templates/registry.ts`.
@@ -441,7 +448,7 @@ status: generating → compiling → validating (E6) → repair loop → done/er
 - Test gợi ý: theo pattern `tests/integration/api-templates.test.ts` hiện có — xác nhận field mới
   optional không phá vỡ template cũ (không có `clarificationFields` vẫn hợp lệ).
 
-**Task 4 — `lib/clarification/policy.ts` (mới) — `ClarificationPolicy`**
+**Task 4 — ✅ ĐÃ XONG (2026-07-14) — `lib/clarification/policy.ts` (mới) — `ClarificationPolicy`**
 - Mục tiêu: hàm THUẦN (pure function) — input `RequestPlan` + `clarificationFields` của template đã
   chọn, output quyết định generate-ngay-với-default hay clarify-với-danh-sách-câu-hỏi-cụ-thể (mỗi
   câu hỏi kèm `required` suy ra từ `importance`).
@@ -516,3 +523,40 @@ Nhóm B (phần "wiring" phức tạp hơn — CHỈ bắt đầu sau khi eval d
 Nhóm A có thể làm và chứng minh logic `ClarificationPolicy` đúng với chi phí thấp nhất (thuần logic,
 không phụ thuộc AI/SSE thật) — hữu ích ngay cả khi quyết định cuối cùng KHÔNG triển khai Nhóm B, vì
 đã có sẵn 1 module đã test kỹ để tái sử dụng nếu quyết định đổi.
+
+### 6.4. Nhóm A — chi tiết implementation thật (2026-07-14)
+
+File đã tạo/sửa, tất cả đã qua `npx vitest run` (278/278 pass, 0 regression so với 255 trước đó) và
+`npx tsc --noEmit` (0 lỗi mới — 3 lỗi còn lại trong `tests/unit/prompts.test.ts` là pre-existing,
+không liên quan, đã verify bằng `git log` là từ commit `87b49c7ea` trước đó):
+
+- `lib/ai/mock.ts` — thêm `generateMockFromSchema()` (Task 1): introspect Zod schema qua API chính
+  thức cho library authors (`schema._zod.def`, `def.type` là discriminator) — đã **verify bằng thực
+  nghiệm** (`node -e`) cấu trúc thật của `def` cho từng loại (`object.shape`, `optional.innerType`,
+  `enum.entries`, `array.element`) trước khi viết, không suy đoán tên field nội bộ. Hỗ trợ
+  object/string/number/boolean/enum/array/optional/nullable/default; loại chưa hỗ trợ → throw lỗi
+  RÕ RÀNG (không silently trả sai kiểu). `tests/unit/mock-generate-object.test.ts` (6 test).
+- `lib/ai/schemas/request-plan.ts` (mới, Task 2) — `RequestPlanSchema` (Zod) đúng cấu trúc mục 3.3.
+  `TemplateId` đồng bộ thủ công (4 giá trị) — có test xác nhận `"physics"` bị từ chối (bằng chứng
+  trực tiếp cho phát hiện "11 templates" sai đã sửa ở `feature-tracking.md`/`backend-roadmap.md`).
+  `tests/unit/request-plan-schema.test.ts` (7 test).
+- `lib/templates/registry.ts` — thêm `ClarificationField` interface + `DocumentTemplate.
+  clarificationFields?` (Task 3), khai báo cho `math` đúng ví dụ mục 3.5 (`math_mode` optional,
+  `problem_statement` critical). 3 template khác không đổi (field optional, không phá gì).
+  `tests/unit/template-clarification-fields.test.ts` (2 test).
+- `lib/clarification/policy.ts` (mới, Task 4) — `applyClarificationPolicy()`, hàm thuần.
+  `tests/unit/clarification-policy.test.ts` (8 test) — cover cả 3 Outcome, Ví dụ 4 (field hỗn hợp),
+  unknown ambiguity, và 1 quyết định thiết kế phát sinh KHI CODE THẬT (không có trong mục 3.2/3.5
+  gốc, cần ghi lại ở đây):
+  > **Quyết định mới:** `required` (Decision B) của MỖI câu hỏi lấy từ
+  > `RequestPlan.missingInformation[].importance` (do AI suy luận CHO TỪNG REQUEST), KHÔNG lấy từ
+  > `ClarificationField.importance` tĩnh khai báo sẵn ở template. Lý do: cùng một field logic (vd.
+  > `math_mode`) có thể "optional" ở request này nhưng lý thuyết có thể cần coi là "critical" ở
+  > request khác — importance thực tế phụ thuộc ngữ cảnh của TỪNG request, template chỉ cung cấp
+  > câu hỏi/options/default cố định (dữ liệu tĩnh), không cung cấp mức độ quan trọng cố định.
+  > `ClarificationField.importance` trong registry vẫn giữ nguyên (dùng làm giá trị THAM CHIẾU/
+  > mặc định hợp lý khi viết `clarificationFields`), nhưng `ClarificationPolicy` khi có `RequestPlan`
+  > thật luôn ưu tiên importance theo request.
+
+Chưa làm: Nhóm B (Task 5-9) — cần điều kiện tiên quyết mục 5 (eval data thực tế) trước khi bắt đầu,
+theo đúng quyết định ban đầu.
