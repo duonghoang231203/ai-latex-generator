@@ -33,7 +33,7 @@ Bảng theo dõi tiến độ các tính năng của dự án AI LaTeX Generator
 
 | Trạng thái | Tính năng | Mô tả chi tiết |
 | :---: | :--- | :--- |
-| 🔲 | **Authentication & Database (v2)** | Multi-user Auth (Đăng nhập, phân quyền) & Lưu trữ trên Database (Postgres/Mongo) thay vì local files. |
+| 🔄 | **Authentication & Database (v2)** | Multi-user Auth qua Supabase (đăng nhập, session, RLS theo `owner_id`) + lưu trữ Postgres qua `STORE_BACKEND=supabase` — **đã implement cho document CRUD**. Còn thiếu: `middleware.ts` tập trung (hiện gate quyền tại từng route/component, chưa có 1 lớp middleware chung), workspace/project ownership (multi-user cho E1 multi-file), migration dữ liệu cũ từ file-based sang Postgres. |
 | 🔲 | **Advanced deployment strategies** | Triển khai trên môi trường Cloud, Dockerization, thiết lập CI/CD pipeline. |
 
 ---
@@ -242,12 +242,34 @@ Các đầu việc cụ thể được trích xuất từ [`project-roadmap.md`]
 
 ### ⚪ Phase 3 — Platform Maturity
 
-#### Authentication & Database (v2)
+#### Authentication & Database (v2) 🔄 *(một phần đã implement — xem ghi chú)*
 
-- [ ] Multi-user Auth: đăng nhập, quản lý phiên, phân quyền.
-- [ ] Chuyển lưu trữ từ file-based (`DATA_DIR`) sang Database (Postgres hoặc Mongo).
-- [ ] Tách dữ liệu theo người dùng (ownership / authorization).
-- [ ] Lớp migration dữ liệu từ file-based sang DB.
+> ⚠️ **Đã sửa mâu thuẫn 2026-07-14:** mục này trước đây ghi 🔲 Todo hoàn toàn, nhưng đọc code thật
+> (`lib/auth/current-user.ts`, `lib/store/supabase-document-store.ts`,
+> `supabase/migrations/0001_documents.sql`, `app/login/`, `app/auth/callback/`) xác nhận phần CRUD
+> tài liệu qua Supabase **đã implement và hoạt động**, không phải kế hoạch tương lai. `README.md` đã
+> phản ánh đúng điều này. Danh sách dưới đây cập nhật lại theo trạng thái thật.
+
+- [x] Multi-user Auth qua Supabase: đăng nhập (`app/login/page.tsx` + `login-form.tsx`), callback
+      OAuth (`app/auth/callback/route.ts`), đọc session server-side
+      (`lib/auth/current-user.ts` → `getCurrentUser()`/`getCurrentUserId()`).
+- [x] Lưu trữ trên Database (Postgres qua Supabase): `lib/store/supabase-document-store.ts` implement
+      đủ CRUD (`createDocument`/`getDocument`/`listDocuments`/`updateDocument`/`appendMessages`/
+      `deleteDocument`), chọn qua `STORE_BACKEND=supabase` trong facade `documentStore.ts`
+      (mặc định vẫn `file`, không đổi behavior khi không set).
+- [x] Migration schema: `supabase/migrations/0001_documents.sql` — bảng `documents` ánh xạ 1-1
+      `StoredDocument`, cột suy diễn `has_pdf` (tránh kéo `pdf_base64` nặng khi list), trigger
+      `set_updated_at`, index theo `(owner_id, updated_at desc)`.
+- [x] Tách dữ liệu theo người dùng (ownership/authorization): **RLS đầy đủ 4 policy**
+      (select/insert/update/delete, tất cả `using (auth.uid() = owner_id)`), `owner_id` là cột
+      `not null references auth.users(id) on delete cascade` — không thể tạo document không có chủ.
+- [ ] **Middleware tập trung** (`middleware.ts` ở root) — hiện CHƯA có; việc gate quyền đang nằm rời
+      rạc ở từng route/component (route Supabase tự chặn qua RLS ở tầng DB, nhưng chưa có 1 lớp
+      kiểm tra session sớm/redirect thống nhất ở tầng Next.js middleware).
+- [ ] **Ownership cho multi-file project (E1)** — RLS hiện chỉ áp cho bảng `documents` (single-doc
+      CRUD); chưa có khái niệm workspace/project multi-user khi E1 UI thật được wiring.
+- [ ] Lớp migration dữ liệu: chuyển tài liệu ĐÃ TỒN TẠI trên `file` backend (JSON trong `DATA_DIR`)
+      sang Postgres — hiện 2 backend độc lập, không tự động đồng bộ/migrate qua nhau.
 
 #### Advanced deployment strategies
 
