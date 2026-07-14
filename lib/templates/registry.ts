@@ -46,6 +46,37 @@ export interface TemplateRepairHint {
   action: string;
 }
 
+/**
+ * E7 · Clarification Layer (docs/features/e7-clarification-layer/explainer.md § 3.5, § 6 Task 3) —
+ * domain knowledge a template declares about which of its fields commonly go missing, WITHOUT
+ * implementing any tool/UI itself. One universal `askUserQuestion` tool (not yet built — see
+ * explainer.md § 3.4) will consume this data; templates never implement their own ask-tool.
+ *
+ * `importance` maps directly to `askUserQuestion.required` (Decision B, explainer.md § 3.2):
+ *   "critical" → required: true  (no skip button — generation blocks until answered)
+ *   "optional" → required: false (skip button uses `defaultIfSkipped`)
+ *
+ * NOT YET CONSUMED by any orchestrator code — E7 is still #later in feature-tracking.md. This
+ * field exists so the template registry is ready when Task 4/5 (ClarificationPolicy, wiring)
+ * begin; declaring it here does not change current generate/repair behavior.
+ */
+export interface ClarificationField {
+  /** Stable id — matches `RequestPlan.missingInformation[].field` when the AI recognizes this
+   *  known field (as opposed to a dynamically-worded ambiguity not in this list). */
+  id: string;
+  importance: "critical" | "optional";
+  /** Predefined question text (Vietnamese) — used instead of letting the AI word it dynamically,
+   *  per the hybrid principle in explainer.md § 3.5 (predefined when known, AI-authored only for
+   *  unknown ambiguity). */
+  question: string;
+  /** Choices offered to the user, if the question is a single/multiple-choice type. */
+  options?: string[];
+  /** Value used to fill this field when importance is "optional" and the user skips the question.
+   *  Required for optional fields — a critical field has no default by definition (that's why it's
+   *  critical: the AI cannot guess it safely). */
+  defaultIfSkipped?: string;
+}
+
 export interface DocumentTemplate {
   id: TemplateId;
   label: string;           // display name for UI (Vietnamese)
@@ -91,7 +122,14 @@ export interface DocumentTemplate {
    * Only templates that use amsthm and own their preamble should set this.
    */
   knownTheoremEnvironments?: string[];
+
+  /**
+   * E7 (not yet wired — see ClarificationField docstring above). Domain-specific fields this
+   * template's requests commonly lack. Optional and unused by any current code path.
+   */
+  clarificationFields?: ClarificationField[];
 }
+
 
 // ─── Internal helpers ─────────────────────────────────────────────────────
 
@@ -456,6 +494,24 @@ export const TEMPLATES: Record<TemplateId, DocumentTemplate> = {
           "\\end{example}",
         ],
       ),
+
+    // E7 (not yet wired — see ClarificationField docstring). Domain knowledge only, unused by any
+    // current code path. Values match the worked example in
+    // docs/features/e7-clarification-layer/explainer.md § 3.5.
+    clarificationFields: [
+      {
+        id: "math_mode",
+        importance: "optional",
+        question: "Bạn muốn tài liệu theo hướng nào?",
+        options: ["concept-explanation", "theorem-proof", "worked-solution", "problem-set"],
+        defaultIfSkipped: "concept-explanation",
+      },
+      {
+        id: "problem_statement",
+        importance: "critical",
+        question: "Bạn gửi giúp mình nội dung bài toán cần giải.",
+      },
+    ],
   }),
 
   // ── 3. Thesis / Long report ───────────────────────────────────────────
