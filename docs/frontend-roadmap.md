@@ -2,7 +2,8 @@
 
 ## 1. Tầm nhìn Kiến trúc Frontend (Frontend Architecture Vision)
 
-Dựa trên lộ trình phát triển chung của dự án (các Epic E1, E2, E3, E4, E7) và các quyết định kỹ thuật đã thống nhất:
+Dựa trên lộ trình phát triển chung của dự án (các Epic E1, E2, E3, E4, E6, E7 — và Phase 7 mở rộng
+template `#later`) và các quyết định kỹ thuật đã thống nhất:
 
 - **Scope:** Cân bằng giữa việc phát triển tính năng cốt lõi (Feature-driven) và nâng cấp kiến trúc nền tảng chuẩn bị cho v2 (Multi-user, Complex Workspaces).
 - **State Management:** Sử dụng **Zustand** để tách biệt logic quản lý File Explorer (cây thư mục, tabs) và logic Chat/Compile ra khỏi các UI components.
@@ -63,9 +64,35 @@ Dựa trên lộ trình phát triển chung của dự án (các Epic E1, E2, E3
 
 *Mục tiêu: Tích hợp với kiến trúc Backend v2 để hỗ trợ cộng tác đa người dùng.*
 
-- **FE-6.1 `[Platform]`:** Xây dựng luồng Authentication hoàn chỉnh (Đăng nhập, Đăng ký, Quên mật khẩu, OAuth) tích hợp với BE Auth.
+- **FE-6.1 `[Platform]`:** 🔄 **Một phần đã xong (2026-07-14, verify bằng code thật —
+  `app/login/login-form.tsx`):** Đăng nhập + Đăng ký (email/password, xử lý lỗi, xác nhận email qua
+  `app/auth/callback/route.ts`) đã hoạt động. **Còn thiếu:** Quên mật khẩu (`resetPasswordForEmail`)
+  và OAuth (Google/GitHub...) — đã verify KHÔNG có `resetPassword`/`signInWithOAuth` ở đâu trong
+  `app/`.
 - **FE-6.2 `[Platform]`:** Giao diện Quản lý Tài khoản & Phân quyền (Settings, Quota limits, Subscription nếu có).
 - **FE-6.3 `[Platform]`:** Tích hợp Supabase Real-time / WebSockets. Nâng cấp Zustand store để đồng bộ trạng thái tài liệu theo thời gian thực (hiển thị con trỏ của người khác đang gõ, presence indicators).
+
+### ⚪ Phase 7: Mở rộng Template (E6 handoff) `#later`
+
+*Mục tiêu: FE-side cho epic mở rộng 7 template mới — xem
+[`docs/backend-roadmap.md` § Phase 6](./backend-roadmap.md#-phase-6-mở-rộng-template-later) cho
+phần BE (định nghĩa `DocumentTemplate` mới trong `lib/templates/registry.ts`).*
+
+> ✅ **Đã verify (2026-07-14) — phần lớn KHÔNG cần việc FE:** `components/TemplateSelect.tsx` đọc
+> hoàn toàn động từ `listTemplates()` (registry), nhóm theo `category` — thêm template mới ở BE sẽ
+> **tự động** xuất hiện đúng trong dropdown, không cần sửa component này. Danh sách dưới đây chỉ ghi
+> phần THẬT sự cần việc FE, không lặp lại việc BE đã tự động có.
+
+- [ ] `FE-7.1 [AI-Core]` Với `letter`/`cv`/`exam` — cấu trúc input người dùng cần mô tả có thể khác
+      hẳn `academic`/`math` (vd. CV cần các field như kinh nghiệm/kỹ năng thay vì 1 ô mô tả tự do).
+      Cân nhắc: có cần form nhập liệu có cấu trúc riêng cho các template này, hay vẫn dùng 1 ô mô tả
+      tự do như hiện tại và để AI tự suy luận (giống cách `academic`/`math` đang làm)? — **quyết định
+      này nên đợi tới khi E7 (Clarification Layer) triển khai**, vì `clarificationFields` của E7
+      (xem `docs/features/e7-clarification-layer/explainer.md`) chính là cơ chế đúng để hỏi thêm
+      field còn thiếu theo domain, không cần xây form riêng cho từng template ở FE.
+- [ ] `FE-7.2 [Web-Direction]` Preview/hiển thị đặc thù nếu `exam` cần layout khác (vd. có thể cần
+      ẩn/hiện phần "Đáp án" tuỳ chế độ xem — kiểm tra khi có template `exam` thật, không giả định
+      trước khi có `DocumentTemplate` thật để tham chiếu).
 
 ---
 
