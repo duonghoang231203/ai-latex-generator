@@ -200,14 +200,15 @@ Các đầu việc cụ thể được trích xuất từ [`project-roadmap.md`]
 >
 > 📄 Giải thích (thiết kế): [`features/e7-clarification-layer/explainer.md`](./features/e7-clarification-layer/explainer.md) · ⚠️ chưa implement
 >
-> **Chưa bắt đầu — cần 2 điều kiện trước khi cam kết effort L:**
+> **Chưa bắt đầu — 1/2 điều kiện đã đáp ứng, còn 1 điều kiện cần dữ liệu thực tế:**
 >
-> 1. **Eval baseline của E6 Giai đoạn 3** phải hoàn thành trước (đo compile rate/repair attempts hiện
->    tại) — nếu không có baseline, không thể chứng minh Clarification Layer thực sự cải thiện gì.
-> 2. **Eval data thực tế** cho thấy tỉ lệ request mơ hồ dẫn tới chất lượng kém là vấn đề đáng kể
+> 1. ✅ **Eval baseline của E6 Giai đoạn 3 đã hoàn thành** (2026-07-13, xem
+>    [`e6-prompt-engineering/changelog.md`](./features/e6-prompt-engineering/changelog.md)) — Math
+>    template v2 đo được **12/14 PASS (85.71%)** trên AI thật sau 4 fix P0. Có baseline để so sánh.
+> 2. 🔲 **Eval data thực tế** cho thấy tỉ lệ request mơ hồ dẫn tới chất lượng kém là vấn đề đáng kể
 >    (tương tự nguyên tắc đã áp dụng khi defer `MathGenerationPlan`/`MathDocumentMode` ở E6: chờ
 >    chứng minh cần thiết bằng dữ liệu thực tế trước khi implement, tránh over-engineer khi chưa có
->    consumer thực tế).
+>    consumer thực tế) — **vẫn chưa có, cần làm Bước 0 dưới đây trước khi tiếp tục.**
 >
 - [ ] **Bước 0 (trước implement):** thu thập eval data — đo tỉ lệ request mơ hồ hiện tại dẫn tới tài
       liệu cần chat-edit sửa lại do sai ý định ban đầu. Chỉ tiếp tục các bước dưới nếu số liệu cho
@@ -215,9 +216,11 @@ Các đầu việc cụ thể được trích xuất từ [`project-roadmap.md`]
 - [ ] Định nghĩa schema `RequestPlan` (structured output qua `generateObject()`): `intent`,
       `templateId`, `requirements`, `assumptions`, `missingInformation`, `ambiguity`, `confidence`,
       `recommendedAction` (`"generate" | "clarify"`).
-- [ ] Thiết kế `ClarificationPolicy` (module code riêng, KHÔNG để AI tự quyết định): áp dụng 3 cấp độ
-      rõ ràng — Level 1 (không hỏi, dùng default), Level 2 (hỏi optional, có nút bỏ qua), Level 3
-      (bắt buộc hỏi, block generate).
+- [ ] Thiết kế `ClarificationPolicy` (module code riêng, KHÔNG để AI tự quyết định): áp dụng **2
+      quyết định độc lập** (đã thách thức lại "3 cấp độ" ban đầu và sửa 2026-07-14, xem mục 3.2 của
+      explainer.md) — Quyết định A ở tầng request (`recommendedAction`: hỏi hay không) + Quyết định B
+      ở tầng từng field bị thiếu (`importance` → `required`: bắt buộc hay có thể bỏ qua). Một request
+      có thể có đồng thời field `critical` và `optional`, không ép vào một "cấp độ" duy nhất.
 - [ ] Định nghĩa tool `askUserQuestion` dùng chung (schema Zod: `question`/`reason`/`type`
       `single_choice|multiple_choice|free_text`/`options`/`allowCustomAnswer`/`required`) — MỘT tool
       cho mọi template, không tạo tool riêng theo từng domain.
@@ -234,7 +237,8 @@ Các đầu việc cụ thể được trích xuất từ [`project-roadmap.md`]
 - [ ] Giới hạn cứng số câu hỏi mỗi lượt + tổng số lượt clarify mỗi request (né over-clarification và
       vòng lặp vô hạn).
 - [ ] Kiểm thử: `RequestPlan` cho các case rõ ràng/mơ hồ/thiếu critical field; `ClarificationPolicy`
-      cho 3 cấp độ; resume flow merge câu trả lời đúng vào request context.
+      cho cả 2 quyết định độc lập (bao gồm case field hỗn hợp critical+optional cùng lúc); resume
+      flow merge câu trả lời đúng vào request context.
 
 ### ⚪ Phase 3 — Platform Maturity
 

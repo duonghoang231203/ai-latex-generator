@@ -1,6 +1,7 @@
 # Giải thích sâu — E7 · Clarification Layer (hỏi làm rõ trước khi generate)
 
-> Ngày: 2026-07-13 · Theme: **Request understanding (Human-in-the-loop, trước generate)** · Ưu tiên
+> Ngày: 2026-07-13 (cập nhật 2026-07-14: sửa mục 3.2 — 2 quyết định độc lập thay cho "3 cấp độ")
+> · Theme: **Request understanding (Human-in-the-loop, trước generate)** · Ưu tiên
 > roadmap: **6 (cross-cutting, sau E6)** · Effort: L
 > Loại: **tài liệu giải thích dễ đọc — GIAI ĐOẠN THIẾT KẾ.**
 >
@@ -59,14 +60,28 @@ nên `clarify` (hỏi người dùng qua một tool dùng chung `askUserQuestion
 - Tách rõ trách nhiệm: **AI suy luận** (intent, thiếu gì) — **Code quyết định** (có được hỏi không,
   bao nhiêu câu) — **Tool thực hiện** (render UI, nhận câu trả lời). Không để model tự do quyết định
   UX vì sẽ không nhất quán giữa các lần chạy.
+  > **Bằng chứng cụ thể (không phải suy đoán), đã thách thức lại và chốt 2026-07-14:** E6 đã đo được
+  > bằng thực nghiệm rằng cùng 1 prompt, cùng 1 dataset, chạy AI thật 2 lần độc lập cho ra **cùng tỉ
+  > lệ pass (12/14) nhưng case fail HOÀN TOÀN KHÁC NHAU** mỗi lần (xem
+  > [`e6-prompt-engineering/changelog.md`](../e6-prompt-engineering/changelog.md)). Nếu để AI tự
+  > quyết "có nên hỏi hay không", cùng 1 mô tả gửi 2 lần có thể một lần bị hỏi, một lần không — không
+  > viết được test assertion ổn định, không debug được khi user complain "sao lần trước không hỏi mà
+  > lần này hỏi". Đây cùng nguyên tắc đã áp dụng khi tách `packageAllowlist` validation khỏi prompt ở
+  > E6 — **"prompt không phải security boundary"** — ở đây là **"prompt không phải policy boundary"**:
+  > constraint sản phẩm (vd. tối đa bao nhiêu câu hỏi/lượt) là quyết định UX, không phải suy luận ngữ
+  > nghĩa, nên không nên nhồi vào prompt rồi hy vọng AI tuân thủ nhất quán mỗi lần.
 - Vercel AI SDK hỗ trợ đúng 2 nguyên liệu cần: (a) **structured output** (`generateObject`) để ép
   `RequestPlan` về schema cố định, và (b) **tool calls yêu cầu tương tác người dùng** (tool result gửi
   ra client, UI render, client gửi lại bằng `addToolOutput`, sau đó model/luồng tiếp tục) — pattern
   này đã có ví dụ chính thức (`askForConfirmation`). Không cần cơ chế `needsApproval` (đó là cho
   approve/reject action như xoá tài liệu, semantic khác với "hỏi thông tin tự do").
-- Cho phép **3 cấp độ rõ ràng** thay vì nhị phân hỏi/không hỏi (xem mục 3) — khớp với brainstorm đã
-  thảo luận: có request rõ đủ (generate ngay), có request nên hỏi nhưng optional (user có thể bỏ qua),
-  có request bắt buộc phải hỏi (thiếu thông tin tối thiểu để generate có nghĩa).
+- Cho phép **2 quyết định độc lập** thay vì nhị phân hỏi/không hỏi gộp chung (xem mục 3.2): (a) ở
+  tầng *request* — có cần hỏi không (`RequestPlan.recommendedAction`), và (b) ở tầng *từng field bị
+  thiếu* — nếu hỏi, field đó có bắt buộc trả lời để tiếp tục không (`clarificationFields[].importance`,
+  forward thành `askUserQuestion.required`). Tách 2 quyết định này vì một request thực tế có thể có
+  ĐỒNG THỜI cả field `critical` và field `optional` bị thiếu cùng lúc (ví dụ "Tạo CV cho tôi, vị trí
+  Backend" — thiếu `experience` bắt buộc + thiếu `target_style` optional) — không thể ép cả request
+  vào một mức độ "rõ ràng" duy nhất.
 
 ---
 
@@ -107,25 +122,61 @@ Code:
   - resume generation với context đã làm giàu
 ```
 
-### 3.2. Ba cấp độ rõ ràng (mirror đúng brainstorm đã thảo luận)
+### 3.2. Hai quyết định độc lập (không phải một thang bậc 3 mức)
+
+> **Sửa lại so với brainstorm ban đầu (đã thách thức lại và chốt 2026-07-14):** ban đầu mô tả là "3
+> cấp độ rõ ràng" như một enum/thang bậc tuyến tính duy nhất. Đây là **mô tả đúng về 3 outcome UX
+> quan sát được**, nhưng **sai nếu implement như 1 giá trị nguyên tử** — vì nó gộp chung 2 quyết định
+> vốn độc lập, thuộc 2 tầng dữ liệu khác nhau, đã tồn tại RÕ RÀNG SẴN trong schema (`recommendedAction`
+> ở mục 3.3, `required` ở mục 3.4) nhưng bị diễn giải nhầm thành một biến số duy nhất. 3 outcome dưới
+> đây là **kết quả của việc kết hợp 2 boolean**, không phải 3 giá trị của cùng 1 enum:
+>
+> - **Quyết định A (tầng REQUEST, do `ClarificationPolicy` chốt từ `RequestPlan.recommendedAction`):**
+>   có cần hỏi bất cứ điều gì không — `"generate"` hay `"clarify"`.
+> - **Quyết định B (tầng TỪNG FIELD bị thiếu, lấy trực tiếp từ `clarificationFields[].importance` của
+>   template — KHÔNG do AI tự quyết mỗi lần):** nếu request cần hỏi, field cụ thể đó có bắt buộc trả
+>   lời để tiếp tục không — `importance: "critical"` → `askUserQuestion.required = true`;
+>   `importance: "optional"` → `required = false`.
+>
+> Quyết định B áp dụng **cho từng field riêng biệt**, không phải cho toàn request — vì một request
+> có thể có nhiều field thiếu với `importance` khác nhau cùng lúc (xem ví dụ 4 dưới).
+
+Ba outcome UX (kết hợp từ 2 quyết định trên):
 
 ```
-Level 1 — Không hỏi:
+Outcome 1 — Không hỏi:  (A = "generate")
   "Tạo tài liệu về đạo hàm" (template math, mơ hồ nhưng có sensible default)
   → RequestPlan.recommendedAction = "generate"
   → dùng default: mode=concept-explanation, depth=standard, audience=introductory
   → generate ngay, không làm phiền user
+  → Quyết định B không áp dụng — không có field nào được hỏi.
 
-Level 2 — Hỏi optional (UX phải cho phép bỏ qua):
+Outcome 2 — Hỏi optional:  (A = "clarify", B = false cho field đó)
   "Tạo CV cho tôi" (template cv)
-  → RequestPlan.recommendedAction = "clarify", nhưng field không phải "critical"
+  → RequestPlan.recommendedAction = "clarify"
+  → field liên quan có importance = "optional" → askUserQuestion.required = false
   → hỏi: "Bạn muốn CV theo hướng nào? [Software Engineer] [Designer] [Marketing] [Khác...]"
   → LUÔN có nút "Bỏ qua và tạo luôn" — Question helpful ≠ Question required
 
-Level 3 — Bắt buộc hỏi (block generate cho tới khi có câu trả lời):
+Outcome 3 — Bắt buộc hỏi:  (A = "clarify", B = true cho field đó)
   "Giải bài này giúp tôi" (không có đề bài kèm theo, template math)
   → RequestPlan.missingInformation = [{ field: "problem_statement", importance: "critical" }]
+  → importance = "critical" → askUserQuestion.required = true
   → KHÔNG generate bằng cách đoán — bắt buộc chờ câu trả lời trước khi tiếp tục
+
+Ví dụ 4 — Vì sao PHẢI tách 2 quyết định (field hỗn hợp trong CÙNG 1 request):
+  "Tạo CV cho tôi, vị trí Backend" (template cv)
+  → RequestPlan.recommendedAction = "clarify"
+  → missingInformation = [
+      { field: "experience",   importance: "critical" },  // không đoán được → B = true
+      { field: "target_style", importance: "optional"  },  // có default → B = false
+    ]
+  → HỎI CẢ HAI field trong cùng 1 lượt (giới hạn số câu/lượt — xem mục 4), nhưng:
+      - "experience"   → required: true  (không có nút bỏ qua, block generate tới khi trả lời)
+      - "target_style" → required: false (có nút bỏ qua riêng cho field này)
+  → Không thể mô tả request này bằng ĐÚNG 1 "cấp độ" — nó vừa Outcome 2 vừa Outcome 3 tại cùng
+    một thời điểm, cho 2 field khác nhau. Đây là bằng chứng cụ thể cho việc 2 quyết định độc lập
+    đúng hơn 1 enum 3 giá trị.
 ```
 
 ### 3.3. Luồng dữ liệu (Request → RequestPlan → Generate hoặc Clarify)
@@ -142,10 +193,16 @@ Level 3 — Bắt buộc hỏi (block generate cho tới khi có câu trả lờ
                             templateId: TemplateId
                             requirements: Requirement[]
                             assumptions: Assumption[]
-                            missingInformation: MissingInformation[]  // field + importance
+                            missingInformation: MissingInformation[]  // field + importance — mỗi
+                                                                       // item tự quyết required/optional
+                                                                       // của RIÊNG field đó (mục 3.2),
+                                                                       // KHÔNG do recommendedAction
+                                                                       // quyết định chung cho cả request
                             ambiguity: "low" | "medium" | "high"
                             confidence: number
-                            recommendedAction: "generate" | "clarify"
+                            recommendedAction: "generate" | "clarify" // CHỈ trả lời "có cần hỏi gì
+                                                                       // không" (Quyết định A) — không
+                                                                       // mang nghĩa required/optional
                           }
                               │
                               ▼
@@ -186,7 +243,9 @@ askUserQuestion({
     description?: string;
   }>,
   allowCustomAnswer?: boolean,     // cho phép trả lời khác ngoài options
-  required: boolean,               // true = Level 3 (block), false = Level 2 (có nút bỏ qua)
+  required: boolean,               // Quyết định B (mục 3.2), set TỪ importance của field này —
+                                    // true = "critical" (block, không có nút bỏ qua)
+                                    // false = "optional" (có nút bỏ qua riêng cho field này)
 })
 ```
 
@@ -208,7 +267,8 @@ clarificationFields:
     defaultIfSkipped: concept-explanation
 
   - id: problem_statement
-    importance: critical            # không có default — nếu thiếu, BẮT BUỘC hỏi (Level 3)
+    importance: critical            # không có default — nếu thiếu, BẮT BUỘC hỏi (Quyết định B = true,
+                                     # required: true trong askUserQuestion, xem mục 3.2)
     question: "Bạn gửi giúp mình nội dung bài toán cần giải."
 ```
 
