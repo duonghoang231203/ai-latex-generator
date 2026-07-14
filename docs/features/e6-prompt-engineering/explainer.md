@@ -172,8 +172,11 @@ buildUserPrompt(input: GenerateInput)
 
 **File:** `lib/templates/registry.ts → DocumentTemplate.promptGuidance`
 
-`promptGuidance` của 11 templates hiện vẫn là free-text, chưa có cấu trúc chuẩn.
-Đề xuất format thống nhất:
+`promptGuidance` của 4 template hiện có (`academic`/`math`/`thesis`/`slides` — đã sửa số liệu sai
+"11 templates" 2026-07-14, xem [`docs/backend-roadmap.md` § Phase 6](../../backend-roadmap.md#-phase-6-mở-rộng-template-later)
+cho epic mở rộng thêm 7 template mới, khác phạm vi với chuẩn hoá format ở đây) đã theo cấu trúc
+chuẩn 5-field cố định (TYPE/Structure/Required/FORBIDDEN/EXAMPLE — xem `DocumentTemplate` interface
+trong `registry.ts`). Format đã áp dụng, không còn là đề xuất:
 
 ```
 DẠNG: <tên template>
@@ -360,10 +363,12 @@ một constant string, chưa gắn với cơ chế eval nào. Sau khi có `lib/p
 
 - [x] Module hoá `lib/ai/prompts/` — tương thích ngược hoàn toàn với consumer code.
 - [x] XML-structured prompts cho generate, repair, edit, sources.
-- [ ] Chuẩn hoá cấu trúc `promptGuidance` cho tất cả 11 templates.
-- [ ] Thiết kế prompt cho E2 Agentic assembly (outline + section writing).
-- [ ] Thêm `promptVersion` vào response metadata để debug theo request.
-- [ ] Structured output schema cho outline/diagnosis (dùng `generateObject()`).
+- [x] ~~Chuẩn hoá cấu trúc `promptGuidance` cho tất cả 11 templates~~ — đã sửa số liệu sai 2026-07-14:
+      chỉ có 4 template thật (`TemplateId`), đã chuẩn hoá đủ cả 4. "11" là epic khác (mở rộng thêm
+      7 template mới) — xem `docs/backend-roadmap.md` § Phase 6, tag `#later`.
+- [ ] `#later` Thiết kế prompt cho E2 Agentic assembly (outline + section writing).
+- [ ] `#later` Thêm `promptVersion` vào response metadata để debug theo request.
+- [ ] `#later` Structured output schema cho outline/diagnosis (dùng `generateObject()`).
 
 ### Giai đoạn 3 — Evaluation & Versioning 🔲 *(ưu tiên P0 — làm tiếp theo, trước E7; stack đã verify)*
 
@@ -413,7 +418,7 @@ một constant string, chưa gắn với cơ chế eval nào. Sau khi có `lib/p
 | `lib/ai/prompts/repair-latex.ts` | `buildRepairPrompt()` + `detectErrorType()` |
 | `lib/ai/prompts/edit-document.ts` | `buildEditPrompt()` |
 | `lib/ai/prompts/sources.ts` | `buildRawSourcesBlock()` + `buildRetrievedSourcesBlock()` |
-| `lib/templates/registry.ts` | `DocumentTemplate.promptGuidance` — per-template guidance (11 templates) |
+| `lib/templates/registry.ts` | `DocumentTemplate.promptGuidance` — per-template guidance (4 templates thật: `academic`/`math`/`thesis`/`slides`) |
 | `lib/ai/vercel-provider.ts` | Gọi `buildUserPrompt` + `SYSTEM_PROMPT` → gửi đến LLM |
 | `lib/orchestrator/document.ts` | Điều phối generate/repair/edit — truyền `GenerateInput` vào provider |
 | `lib/ai/sanitize.ts` | Post-process output từ AI trước khi compile |
