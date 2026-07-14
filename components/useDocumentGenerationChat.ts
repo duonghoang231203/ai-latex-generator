@@ -36,8 +36,10 @@ export interface ChatItem {
   error?: string;
   /** E7 — có mặt khi status === "awaiting_clarification": jobId để PATCH câu trả lời, và danh
    *  sách câu hỏi cần render (mỗi câu tự quyết required — "Question helpful ≠ Question required",
-   *  xem docs/features/e7-clarification-layer/explainer.md § 3.2). */
-  clarification?: { jobId: string; questions: ClarificationQuestion[] };
+   *  xem docs/features/e7-clarification-layer/explainer.md § 3.2). `expiresAt` (ISO string) — thời
+   *  điểm session hết hạn ở server (SESSION_TTL_MS, lib/clarification/session.ts) — dùng để hiển
+   *  thị đếm ngược và tự phát hiện hết hạn ở client (thay vì chỉ biết qua lỗi 404 khó hiểu khi PATCH). */
+  clarification?: { jobId: string; questions: ClarificationQuestion[]; expiresAt: string };
 }
 
 let idCounter = 0;
@@ -120,7 +122,11 @@ export function useDocumentGenerationChat() {
               pendingReadersRef.current.set(botId, { reader, decoder, buffer, acc });
               patch({
                 status: "awaiting_clarification",
-                clarification: { jobId: data.jobId, questions: data.questions },
+                clarification: {
+                  jobId: data.jobId,
+                  questions: data.questions,
+                  expiresAt: data.expiresAt,
+                },
               });
               return; // dừng vòng lặp NGAY — KHÔNG đọc thêm cho tới khi user trả lời.
             } else if (data.text) {
@@ -256,8 +262,24 @@ export function useDocumentGenerationChat() {
           body: JSON.stringify({ answers }),
         });
         if (!res.ok) {
-          const data = await res.json().catch(() => ({}));
-          patch({ status: "error", error: data.error ?? `Lỗi ${res.status}` });
+          if (res.status === 404) {
+            // Session đã hết hạn (SESSION_TTL_MS, mặc định 5 phút) HOẶC đã được trả lời trước đó
+            // — server đã TỰ generate với mô tả gốc từ lâu (xem SessionTimeoutError trong
+            // maybeClarify(), app/api/documents/route.ts) và có thể đã gửi 'complete' trong lúc
+            // tab này không lắng nghe (vd. chuyển sang tab khác). Không coi là lỗi kỹ thuật —
+            // giải thích rõ nguyên nhân thay vì hiển thị message 404 khó hiểu từ server.
+            patch({
+              status: "error",
+              error:
+                "Phiên hỏi đáp đã hết hạn (quá 5 phút không có câu trả lời). Hệ thống đã tự tạo " +
+                "tài liệu bằng mô tả ban đầu — kiểm tra danh sách tài liệu, hoặc gửi lại yêu cầu " +
+                "mới nếu cần bổ sung thông tin.",
+            });
+            router.refresh();
+          } else {
+            const data = await res.json().catch(() => ({}));
+            patch({ status: "error", error: data.error ?? `Lỗi ${res.status}` });
+          }
           pendingReadersRef.current.delete(botId);
           setBusy(false);
           return;
@@ -275,7 +297,7 @@ export function useDocumentGenerationChat() {
       setBusy(false);
       abortRef.current = null;
     },
-    [consumeStream],
+    [consumeStream, router],
   );
 
   return { items, busy, send, reset, answerClarification };

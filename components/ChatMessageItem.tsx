@@ -118,6 +118,7 @@ export default function ChatMessageItem({
             </Marker>
             <ClarificationQuestionForm
               questions={item.clarification.questions}
+              expiresAt={item.clarification.expiresAt}
               onSubmit={(answers) =>
                 onAnswerClarification(item.id, item.clarification!.jobId, answers)
               }

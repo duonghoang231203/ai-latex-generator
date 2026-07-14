@@ -167,6 +167,12 @@ describe("E7 end-to-end: hệ thống CÓ hỏi lại user khi RequestPlan.recom
     expect(events).not.toContain("complete");
     expect(buffer).toContain("problem_statement");
     expect(buffer).toContain("Bạn gửi giúp mình nội dung bài toán cần giải");
+    // Payload PHẢI có expiresAt (ISO string) — client dùng để hiển thị đếm ngược/tự disable khi
+    // hết hạn (thêm 2026-07-14 sau khi phát hiện qua debug thật: user rời tab quá 5 phút quay lại
+    // bấm gửi luôn gặp lỗi 404 khó hiểu vì không có cách nào biết session đã hết hạn TRƯỚC khi gửi).
+    const expiresAtMatch = buffer.match(/"expiresAt":"([^"]+)"/);
+    expect(expiresAtMatch).toBeTruthy();
+    expect(new Date(expiresAtMatch![1]).getTime()).toBeGreaterThan(Date.now());
   });
 
   it("sau khi PATCH câu trả lời vào /clarify/[jobId] → generation TIẾP TỤC, document được tạo với mô tả đã enrich", async () => {

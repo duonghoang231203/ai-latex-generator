@@ -6,6 +6,7 @@ import {
   activeSessionCountForTest,
   __resetSessionsForTest,
   SessionTimeoutError,
+  SESSION_TTL_MS,
 } from "@/lib/clarification/session";
 import type { PendingQuestion } from "@/lib/clarification/policy";
 
@@ -65,7 +66,7 @@ describe("Clarification session store (E7 Task 6 — in-memory + resume qua Prom
     expect(activeSessionCountForTest()).toBe(1);
 
     const assertion = expect(wait).rejects.toThrow(SessionTimeoutError);
-    await vi.advanceTimersByTimeAsync(5 * 60 * 1000 + 1);
+    await vi.advanceTimersByTimeAsync(SESSION_TTL_MS + 1);
     await assertion;
 
     expect(activeSessionCountForTest()).toBe(0);

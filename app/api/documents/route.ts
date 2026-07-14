@@ -12,7 +12,7 @@ import { isDocumentError, type DocumentRequest, type DocumentResult } from "@/li
 import type { OrchestratorDeps } from "@/lib/orchestrator/document";
 import { log } from "@/lib/log";
 import { understandRequest } from "@/lib/clarification/understand-request";
-import { createPendingSession, SessionTimeoutError } from "@/lib/clarification/session";
+import { createPendingSession, SessionTimeoutError, SESSION_TTL_MS } from "@/lib/clarification/session";
 import type { LatexProvider } from "@/lib/ai/types";
 
 export const runtime = "nodejs";
@@ -85,6 +85,11 @@ async function maybeClarify(
     jobId,
     questions: result.decision.questions,
     reason: result.plan.intent,
+    // Timestamp TUYỆT ĐỐI (không phải "còn bao nhiêu ms") — tránh sai lệch do độ trễ network giữa
+    // lúc server tạo session và lúc client nhận được event này. Client tự tính "còn lại" bằng
+    // Date.now() so với giá trị này, không cần đồng bộ đồng hồ tuyệt đối (đủ chính xác cho UX
+    // đếm ngược, sai lệch vài giây không quan trọng ở đây).
+    expiresAt: new Date(Date.now() + SESSION_TTL_MS).toISOString(),
   });
 
   let answers: Record<string, string>;
