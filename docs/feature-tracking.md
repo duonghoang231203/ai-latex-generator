@@ -294,7 +294,11 @@ Các đầu việc cụ thể được trích xuất từ [`project-roadmap.md`]
 - [ ] Hoàn thiện Dockerization (đã có `Dockerfile`, `docker-compose.yml`, `Caddyfile`).
 - [ ] Thiết lập CI/CD pipeline (build + lint + test + deploy).
 - [ ] Triển khai Cloud + cấu hình TLS/domain qua Caddy cho production.
-- [ ] Healthcheck / logging / observability cho môi trường production.
+- [ ] Healthcheck / logging / observability cho môi trường production — **chi tiết đầy đủ (2026-07-14,
+      8 task con BE-5.3.1–5.3.8) đã viết tại
+      [`docs/backend-roadmap.md` § BE-5.3](./backend-roadmap.md#-phase-5-cicd--devops-platform-maturity)**,
+      bao gồm bối cảnh phát hiện thật (không debug được vấn đề E7 do thiếu log) và audit privacy
+      cần làm trước khi thêm Sentry SDK.
 
 ---
 

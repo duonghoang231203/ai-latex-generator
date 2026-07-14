@@ -127,7 +127,79 @@ template đã có.*
 
 - **BE-5.1 `[Platform]`:** Hoàn thiện luồng CI/CD (GitHub Actions): Chạy unit tests, chạy E6 prompt evals mỗi khi có PR.
 - **BE-5.2 `[Platform]`:** Cấu hình Docker cho Orchestrator và tách biệt hoàn toàn `compile-service` sang một môi trường an toàn cao (GCP Cloud Run / AWS Fargate) vì đây là sandbox chạy mã untrusted.
-- **BE-5.3 `[Platform]`:** Thiết lập hệ thống Monitor & Logging (Sentry, Datadog) để theo dõi các lỗi Tectonic biên dịch và lỗi API timeout.
+- **BE-5.3 `[Platform]`:** 🔄 **Một phần đã có (2026-07-14, khảo sát bằng code thật)** — mở rộng
+  chi tiết bên dưới. Nền tối giản đã tồn tại (`lib/log.ts` — JSON structured log, tự động redact
+  field nhạy cảm), nhưng **độ phủ rất thấp** và **không có APM/error tracking thật** — cần làm rõ
+  scope trước khi cam kết "Sentry, Datadog" (câu gốc quá chung, chưa đủ để bàn giao).
+
+  > **Bối cảnh phát hiện (khi debug E7 thật 2026-07-14):** user hỏi mô tả mơ hồ ("Giải bài này giúp
+  > tôi") qua AI thật (`AI_PROVIDER=sotatek-anthropic`), kỳ vọng hệ thống hỏi lại nhưng KHÔNG thấy
+  > câu hỏi xuất hiện. Không thể xác định nguyên nhân (thiếu template? AI trả JSON không khớp
+  > schema bị catch âm thầm ở `maybeClarify()`? timeout?) vì **không có log nào ở tầng
+  > `understandRequest()`/`provider.generateObject()` ghi lại request/response AI thật** — chỉ có
+  > `log.warn("clarification.understand_failed", ...)` khi CATCH lỗi, không có log khi THÀNH CÔNG
+  > để biết AI thực sự trả `recommendedAction` gì. Đây là ví dụ cụ thể, không phải lý thuyết, cho
+  > việc thiếu observability đã làm CHẬM việc debug 1 vấn đề thật.
+
+  **Khảo sát hiện trạng (đã đọc code, không suy đoán):**
+  - `lib/log.ts` — logger JSON dòng, ghi qua `console.log/warn/error`, có `REDACT` set (loại bỏ
+    `apikey`/`token`/`latex`/`content`/`description`...). KHÔNG có log level filter (luôn ghi cả
+    3 mức), KHÔNG có correlation/request ID xuyên suốt 1 request, KHÔNG ghi ra file (chỉ stdout —
+    mất log khi container restart nếu không có log driver bên ngoài thu lại).
+  - **Chỉ 6 điểm gọi `log.*()` trong toàn bộ codebase**, tất cả ở tầng route:
+    `document.create` (×2), `document.chat_edit` (×2), `clarification.understand_failed`,
+    `clarification.timeout`. **Không có log nào** ở: `lib/orchestrator/document.ts` (generate/
+    repair loop — không biết attempt nào đang chạy, lỗi gì khiến phải repair),
+    `lib/compile/client.ts` (gọi compile-service — không biết latency/lỗi network thật),
+    `lib/ai/vercel-provider.ts` (gọi AI SDK — không biết request/response/token usage thật ngoài
+    những gì lộ qua `GenerateOutcome.usage`, và field đó cũng không được log ở đâu).
+  - **Không có Sentry/Datadog/APM nào được cài** — đã verify `package.json` không có
+    `@sentry/*`/`dd-trace`. `winston` xuất hiện trong `package-lock.json` nhưng CHỈ là dependency
+    transitive của `promptfoo` (E6 eval tooling) — verify bằng `npm ls winston` → chỉ
+    `promptfoo@0.121.18 → winston@3.19.0`, KHÔNG phải logger chính app đang dùng.
+  - `docker-compose`/Caddy: chưa khảo sát log driver container (out of scope khảo sát lần này —
+    cần làm khi tới BE-5.3.4 dưới đây).
+
+  **Task con (đúng 8 hạng mục, theo thứ tự rủi ro/effort tăng dần — làm được độc lập từng cái):**
+
+  - [ ] **BE-5.3.1** Thêm `requestId`/`jobId` xuyên suốt 1 request — sinh 1 lần ở đầu route
+        (`crypto.randomUUID()`, đã có sẵn pattern tương tự ở `lib/clarification/session.ts`), gắn
+        vào MỌI dòng log của request đó (generate → validate → compile → repair → lưu trữ). Không
+        có cái này thì không thể "trace" 1 request cụ thể qua nhiều dòng log rời rạc — nên làm
+        ĐẦU TIÊN vì mọi task sau đều cần nó để log hữu ích.
+  - [ ] **BE-5.3.2** Bổ sung log vào `lib/orchestrator/document.ts` (`runDocument`/
+        `runDocumentFromMarkdown`/`runProject`/`runEdit`/`runRepairLoop`): số `attempts` hiện tại,
+        `finishReason` mỗi lượt generate, tóm tắt lỗi validate/compile trước khi vào repair (không
+        log toàn bộ `errorLog` dài — chỉ 1-2 dòng đầu hoặc `ErrorType` đã có từ `detectErrorType()`
+        của E6). Đây là chỗ hiện tại "mù" nhất — không log gì suốt cả vòng lặp repair.
+  - [ ] **BE-5.3.3** Bổ sung log vào `lib/clarification/understand-request.ts`/`maybeClarify()`
+        (`app/api/documents/route.ts`): log THÀNH CÔNG (không chỉ lỗi) — `recommendedAction`,
+        số field trong `missingInformation`, `ambiguity`, `confidence` — đây trực tiếp giải quyết
+        vấn đề đã gặp thật ở trên (không debug được vì thiếu chính xác log này).
+  - [ ] **BE-5.3.4** Bổ sung log vào `lib/compile/client.ts` (gọi compile-service qua HTTP): latency
+        thật, status code, có phải lỗi network/timeout hay lỗi biên dịch LaTeX (2 loại khác nhau,
+        cần phân biệt rõ trong log để biết nên sửa prompt hay sửa infra).
+  - [ ] **BE-5.3.5** Thêm log level filter qua biến môi trường (`LOG_LEVEL`, mặc định `info`) —
+        hiện `lib/log.ts` luôn ghi cả 3 mức, production nên tắt `info` ồn ào, giữ `warn`/`error`.
+  - [ ] **BE-5.3.6** Quyết định + tích hợp **error tracking thật** (Sentry hoặc tương đương) —
+        CHỈ cho `error` level (exception thật, không phải business failure như "repair loop hết
+        lượt" — đó vẫn là HTTP 200 theo thiết kế hiện tại, xem `DocumentError`). Cần audit kỹ
+        trước khi thêm SDK: Sentry SDK có thể tự động capture request body — PHẢI cấu hình
+        `beforeSend`/scrubbing để không vô tình gửi `description`/`latex` (nội dung user) lên
+        bên thứ 3, đây là rủi ro privacy thật, không phải lý thuyết (dữ liệu người dùng nhập).
+  - [ ] **BE-5.3.7** Quyết định + tích hợp **metrics/APM** (Datadog hoặc tương đương) cho số liệu
+        tổng hợp (compile success rate theo template, thời gian trung bình generate→PDF, tần suất
+        `awaiting_user_input` thật của E7 — chính số liệu "eval data thực tế" mà E7 đang thiếu để
+        quyết định có nên bật `CLARIFICATION_ENABLED` cho user thật hay không, xem
+        `docs/features/e7-clarification-layer/explainer.md` § 5/§ 6.5).
+  - [ ] **BE-5.3.8** Log driver cho container (`docker-compose`) — thu log ra ngoài container
+        (hiện chỉ `console.log` ra stdout, mất khi container restart nếu không có driver thu lại
+        bên ngoài) — cần khảo sát Caddy/next-app hiện đang log ra đâu trước khi quyết định driver.
+
+  **Thứ tự làm đề xuất:** 5.3.1 (nền tảng, bắt buộc trước mọi task khác) → 5.3.2/5.3.3 (điền chỗ
+  trống quan trọng nhất, chi phí thấp — không cần dependency mới) → 5.3.4/5.3.5 (tương tự) →
+  5.3.6/5.3.7 (cần audit privacy + quyết định vendor trước khi thêm SDK ngoài) → 5.3.8 (hạ tầng,
+  làm khi gần production thật).
 
 ---
 
