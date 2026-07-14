@@ -375,19 +375,21 @@ status: generating → compiling → validating (E6) → repair loop → done/er
 - **Có bắt buộc áp dụng cho MỌI request không?** Không — cần policy rõ: request đơn giản/rõ ràng
   hiển nhiên nên bỏ qua bước hiểu request để tránh tăng latency không cần thiết cho trường hợp phổ
   biến nhất.
-- **Trạng thái?** (Cập nhật 2026-07-14) **Nhóm A đã code + test** (schema `RequestPlan`,
-  `ClarificationField`/registry, `ClarificationPolicy`, `MockProvider.generateObject()` — 23 test
-  mới, xem § 6.4) — đây là logic THUẦN, không gọi AI/SSE/UI, không đổi hành vi generate/repair hiện
-  tại. **Nhóm B (orchestrator wiring, state+resume, SSE, UI) vẫn CHƯA code** — vẫn cần **eval data
-  thực tế** (tỉ lệ request mơ hồ dẫn tới tài liệu kém chất lượng) trước khi cam kết effort L cho phần
-  này — tương tự nguyên tắc đã áp dụng khi defer `MathGenerationPlan`/`MathDocumentMode` ở E6 (chờ
-  chứng minh cần thiết bằng dữ liệu, tránh over-engineer khi chưa có consumer thực tế). E7 vẫn giữ
-  tag `#later` trong `feature-tracking.md` — tool `askUserQuestion` thật (chờ user qua UI) chưa hoạt
-  động, chỉ phần lõi quyết định đã có sẵn, sẵn sàng khi nối dây.
+- **Trạng thái?** (Cập nhật 2026-07-14, lần 2) **Cả Nhóm A và Nhóm B đã code + test** (§ 6.4, § 6.5)
+  — theo yêu cầu chủ động của người dùng, TRƯỚC KHI điều kiện tiên quyết dưới đây được đáp ứng bằng
+  eval data thật. Toàn bộ luồng end-to-end (understand → clarify → resume → generate) đã verify
+  bằng integration test thật (`tests/integration/api-documents-clarify.test.ts`, gọi đúng route SSE
+  thật). Tính năng nằm sau feature flag `CLARIFICATION_ENABLED` (mặc định `false`,
+  `lib/config.ts`) — code tồn tại nhưng KHÔNG chạy cho user thật tới khi có quyết định RIÊNG để bật
+  cờ này, độc lập với việc code đã được viết. **Vẫn CHƯA có eval data thực tế** (tỉ lệ request mơ hồ
+  dẫn tới tài liệu kém chất lượng) — nếu quyết định BẬT tính năng cho user thật (không chỉ để code
+  tồn tại), nên đo trước để biết tần suất `awaiting_user_input` sẽ xảy ra thật là bao nhiêu, tránh
+  làm phiền user quá mức nếu AI đánh giá "clarify" quá thường xuyên trong thực tế (khác với eval
+  set nhỏ đã dùng để test).
 
 ---
 
-## 6. Task breakdown khi bắt đầu implement (Nhóm A đã code — Nhóm B chờ eval data)
+## 6. Task breakdown khi bắt đầu implement (Nhóm A + Nhóm B đã code, xem § 6.5)
 
 > Cập nhật: **2026-07-14**. Task 1-4 (Nhóm A) đã được implement + test (xem § 6.4) — quyết định làm
 > ngay phần logic thuần (schema/registry/policy), KHÔNG đợi eval data, vì phần này không gọi AI/SSE/
@@ -460,8 +462,8 @@ status: generating → compiling → validating (E6) → repair loop → done/er
   và `optional` thiếu cùng lúc, ví dụ "Tạo CV cho tôi, vị trí Backend") — xác nhận output hỏi CẢ HAI
   field trong 1 lượt nhưng với `required` khác nhau cho từng field.
 
-**Task 5 — `lib/orchestrator/document.ts` — thêm `understandRequest()`**
-- Mục tiêu: gọi TRƯỚC `generateWithTruncationRecovery()` trong `runDocument`/
+**Task 5 — ✅ ĐÃ XONG (2026-07-14, THIẾT KẾ KHÁC MÔ TẢ GỐC — xem § 6.5) — `understandRequest()`**
+- Mục tiêu GỐC: gọi TRƯỚC `generateWithTruncationRecovery()` trong `runDocument`/
   `runDocumentFromMarkdown`/`runEdit`.
 - File: `lib/orchestrator/document.ts`.
 - Phụ thuộc: Task 2, Task 4.
@@ -472,21 +474,14 @@ status: generating → compiling → validating (E6) → repair loop → done/er
   lời).
 
 **Task 6 — [Phức tạp nhất — cần quyết định kỹ thuật rõ trước khi code] Cơ chế lưu state + resume**
-- Mục tiêu: quyết định nơi lưu `RequestPlan` + câu trả lời user đang chờ, giữa 2 request HTTP riêng
-  biệt (request ban đầu và request resume sau khi user trả lời).
-- Câu hỏi kỹ thuật cần trả lời TRƯỚC khi code (không có câu trả lời sẵn — cần quyết định khi tới lúc):
-  - In-memory theo `jobId` (đơn giản, nhưng mất state khi restart server — có chấp nhận được không
-    với UX generate 1 lần)? Hay cần bền hơn (DB/Redis)?
-  - Format endpoint resume: nhận `jobId` + câu trả lời, trả về gì (tiếp tục SSE stream cũ, hay mở
-    stream mới)?
-  - Giới hạn TTL cho state đang chờ (user bỏ đi giữa đường, không trả lời — dọn dẹp thế nào)?
-- File: chưa xác định (phụ thuộc quyết định kiến trúc trên) — có thể `lib/clarification/session.ts`
-  hoặc tương đương.
-- Phụ thuộc: Task 5.
-- Test gợi ý: chưa viết được cụ thể tới khi có quyết định kiến trúc — nhưng PHẢI cover case timeout/
-  cleanup nếu chọn hướng có TTL.
+**Task 6 — ✅ ĐÃ XONG (2026-07-14) — Cơ chế lưu state + resume**
+- 3 câu hỏi kiến trúc đã có CÂU TRẢ LỜI THẬT (xem § 6.5 để biết chi tiết + trade-off):
+  1. In-memory theo `jobId` (Map trong process) — KHÔNG dùng DB/Redis.
+  2. KHÔNG mở SSE stream mới — giữ stream gốc mở, resolve 1 Promise đang treo trong closure của nó.
+  3. TTL 5 phút, reject bằng `SessionTimeoutError` khi hết hạn.
+- File: `lib/clarification/session.ts`.
 
-**Task 7 — `app/api/documents/route.ts` (+ tương đương edit/project nếu có)**
+**Task 7 — ✅ ĐÃ XONG (2026-07-14) — `app/api/documents/route.ts` + endpoint resume mới**
 - Mục tiêu: thêm 2 SSE event mới `understanding` và `awaiting_user_input` (gửi kèm payload câu hỏi
   theo schema `askUserQuestion` ở mục 3.4), gọi cơ chế lưu state ở Task 6.
 - File: `app/api/documents/route.ts`.
@@ -494,7 +489,7 @@ status: generating → compiling → validating (E6) → repair loop → done/er
 - Test gợi ý: integration test theo pattern hiện có trong `tests/integration/`, dùng `MockProvider`
   đã sửa ở Task 1 — xác nhận SSE stream đúng thứ tự event khi có/không có clarify.
 
-**Task 8 — UI component (`components/`)**
+**Task 8 — ✅ ĐÃ XONG (2026-07-14, limitation: chỉ single_choice/free_text — xem § 6.5) — UI component**
 - Mục tiêu: component render câu hỏi theo `type` (`single_choice`/`multiple_choice`/`free_text`),
   LUÔN có nút "Bỏ qua và tạo luôn" khi `required: false` (nguyên tắc Outcome 2, mục 3.2 —
   "Question helpful ≠ Question required").
@@ -503,22 +498,27 @@ status: generating → compiling → validating (E6) → repair loop → done/er
 - Test gợi ý: component test theo pattern `tests/unit/theme-toggle.test.tsx` (React Testing Library)
   hiện có trong project.
 
-**Task 9 — Test tổng hợp ở mỗi lớp**
+**Task 9 — ✅ ĐÃ XONG (2026-07-14) — Test tổng hợp ở mỗi lớp**
 - Unit test cho schema (Task 2) và `ClarificationPolicy` (Task 4) nên viết TRƯỚC vì không cần AI
   thật, theo pattern `tests/unit/` hiện có.
 - Integration test cho route (Task 7) dùng `MockProvider` đã sửa (Task 1), theo pattern
   `tests/integration/` hiện có.
 
-### 6.3. Thứ tự làm đề xuất
+### 6.3. Thứ tự làm đề xuất (ĐÃ THỰC HIỆN — cả 2 nhóm, 2026-07-14)
 
 ```
-Nhóm A (effort thấp, test độc lập, không chạm SSE/UI — nên làm trước):
-  Task 1 → Task 2 → Task 3 → Task 4
+Nhóm A (effort thấp, test độc lập, không chạm SSE/UI):
+  Task 1 → Task 2 → Task 3 → Task 4                              ✅ ĐÃ XONG (§ 6.4)
 
-Nhóm B (phần "wiring" phức tạp hơn — CHỈ bắt đầu sau khi eval data đã xác nhận cần thiết,
-        điều kiện tiên quyết mục 5, hiện CHƯA đáp ứng):
-  Task 5 → Task 6 → Task 7 → Task 8
+Nhóm B (phần "wiring"):
+  Task 5 → Task 6 → Task 7 → Task 8 → Task 9                     ✅ ĐÃ XONG (§ 6.5)
 ```
+
+> **Lưu ý về điều kiện tiên quyết:** mục 5 đặt điều kiện "cần eval data thực tế đo tỉ lệ request mơ
+> hồ" trước khi bắt đầu Nhóm B. Nhóm B đã được implement TRƯỚC KHI điều kiện này được đáp ứng —
+> quyết định này do người dùng chủ động yêu cầu, KHÔNG phải do agent tự quyết bỏ qua điều kiện.
+> Tính năng vẫn nằm sau feature flag `CLARIFICATION_ENABLED` (mặc định `false`) — bật tính năng cho
+> user thật vẫn cần quyết định riêng, độc lập với việc code đã tồn tại.
 
 Nhóm A có thể làm và chứng minh logic `ClarificationPolicy` đúng với chi phí thấp nhất (thuần logic,
 không phụ thuộc AI/SSE thật) — hữu ích ngay cả khi quyết định cuối cùng KHÔNG triển khai Nhóm B, vì
@@ -558,5 +558,83 @@ không liên quan, đã verify bằng `git log` là từ commit `87b49c7ea` trư
   > mặc định hợp lý khi viết `clarificationFields`), nhưng `ClarificationPolicy` khi có `RequestPlan`
   > thật luôn ưu tiên importance theo request.
 
-Chưa làm: Nhóm B (Task 5-9) — cần điều kiện tiên quyết mục 5 (eval data thực tế) trước khi bắt đầu,
-theo đúng quyết định ban đầu.
+### 6.5. Nhóm B — chi tiết implementation thật (2026-07-14)
+
+> Implement TRƯỚC KHI điều kiện tiên quyết mục 5 (eval data thực tế) được đáp ứng — theo yêu cầu
+> chủ động của người dùng, không phải agent tự quyết bỏ qua. `CLARIFICATION_ENABLED=false` mặc định
+> (`lib/config.ts`) — tính năng tồn tại trong code nhưng KHÔNG chạy cho user thật tới khi bật cờ.
+
+**3 quyết định kiến trúc của Task 6** (câu hỏi mở trong bản thiết kế gốc, giờ có câu trả lời thật,
+xem docstring đầy đủ trong `lib/clarification/session.ts`):
+1. **In-memory** theo `jobId` (`Map` trong process) — KHÔNG dùng DB/Redis (project không có hạ tầng
+   session/cache nào ngoài Postgres cho documents). Trade-off CHẤP NHẬN: mất state khi restart
+   server hoặc chạy nhiều instance — chấp nhận được vì generate là hành động 1 lần, không phải mất
+   dữ liệu đã lưu. Nếu cần multi-instance production thật, đây là điểm PHẢI đổi sang Redis.
+2. **Không mở SSE stream mới** — route giữ `ReadableStream` gốc MỞ, dùng 1 `Promise` treo trong
+   closure của nó; endpoint resume (`PATCH /api/documents/clarify/[jobId]`) chỉ resolve Promise đó.
+   Tránh hoàn toàn vấn đề "nối lại 1 stream đã đóng".
+3. **TTL 5 phút** (`SESSION_TTL_MS`) — hết hạn thì `reject` bằng `SessionTimeoutError`; route bắt lỗi
+   này và tiếp tục generate với description gốc (không chặn user vô thời hạn).
+
+**Quyết định thiết kế khác với mô tả gốc của Task 5** (lý do đầy đủ trong comment
+`app/api/documents/route.ts::maybeClarify()`): **tách HOÀN TOÀN `understandRequest()` khỏi
+`runDocument()`**, không nhúng vào bên trong như mô tả ban đầu ("gọi TRƯỚC
+`generateWithTruncationRecovery()` TRONG runDocument"). Lý do: `runDocument()` có 10 call site thật
+(8 file, bao gồm test) — đổi return type của nó (thêm 1 union case thứ 3 vào `DocumentResult`) có
+rủi ro cụ thể: `isDocumentError()` ở 2 route khác (`app/api/documents/[id]/chat/route.ts` và chính
+`route.ts`) chỉ check `error !== undefined` — 1 case mới không có field `error` sẽ bị coi là "không
+lỗi" và cố lưu như document thành công, dù thực ra "đang chờ user trả lời". Route SSE tự gọi
+`understandRequest()` rồi `runByFormat()` liên tiếp — luồng dữ liệu tương đương, rủi ro thấp hơn
+nhiều. `DocumentResult`/`isDocumentError()`/`runDocument()` signature **không đổi gì**.
+
+**`understandRequest()` cũng được sửa signature** so với bản viết ở Task 5 ban đầu (trước khi viết
+integration test thật): nhận `provider: LatexProvider` qua THAM SỐ (dependency injection), thay vì
+tự gọi `generateStructuredData()`/`getProvider()` (factory global singleton). Lý do phát hiện khi
+viết integration test: `getProvider()` hardcode `new MockProvider("happy")` không có cách nào để
+test injection ép `recommendedAction` cụ thể — sửa để nhận provider qua tham số vừa khớp pattern DI
+đã dùng cho `OrchestratorDeps.provider`, vừa cho phép test dùng `MockProvider` với
+`generateObjectOverride` mới (thêm vào `lib/ai/mock.ts` — 2nd constructor param, optional).
+
+**Limitation thật của Task 8 (UI), không giả vờ đã đủ:**
+- `PendingQuestion` (`lib/clarification/policy.ts`) chưa có field `type` riêng biệt như mô tả mục
+  3.4 (`single_choice`/`multiple_choice`/`free_text`) — UI hiện suy luận đơn giản: có `options` →
+  render nút chọn 1 (single_choice), không có → input tự do (free_text). **`multiple_choice` CHƯA
+  implement** — nếu cần, phải thêm field `type` vào `PendingQuestion`/`askUserQuestion` schema
+  trước, không chỉ sửa UI.
+- Route non-SSE (nhánh `else` trong `route.ts` POST) **hoàn toàn không hỗ trợ E7** — clarify cần chờ
+  user qua 1 request HTTP khác, không thể xảy ra trong request/response đồng bộ. Đã ghi rõ bằng
+  comment trong code, không âm thầm bỏ qua.
+
+**File đã tạo/sửa** (tất cả qua `npx vitest run` — 296/296 pass, 0 regression so với 278 trước Nhóm
+B; `npx tsc --noEmit` — 0 lỗi mới; `npx eslint` trên toàn bộ file liên quan — sạch):
+- `lib/ai/prompts/understand-request.ts` (mới) — prompt Request Understanding, theo đúng convention
+  XML-tag của `buildGeneratePrompt()`.
+- `lib/clarification/understand-request.ts` (mới) — `understandRequest(provider, input)`.
+- `lib/clarification/session.ts` (mới) — session store, xem 3 quyết định kiến trúc trên.
+  `tests/unit/clarification-session.test.ts` (7 test, bao gồm TTL timeout dùng `vi.useFakeTimers()`).
+- `lib/ai/mock.ts` — thêm `generateObjectOverride` (constructor param 2, optional) cho
+  `MockProvider` — cần để test được nhánh "clarify" (mock mặc định luôn lấy giá trị ENUM ĐẦU TIÊN,
+  tức luôn "generate", không đủ để test nhánh khác).
+- `lib/config.ts` — thêm `clarificationEnabled` (đọc `CLARIFICATION_ENABLED`, mặc định `false`).
+- `app/api/documents/route.ts` — thêm `maybeClarify()`, gọi trong nhánh SSE trước `runByFormat()`.
+- `app/api/documents/clarify/[jobId]/route.ts` (mới) — `GET` (lấy lại câu hỏi đang chờ, cho
+  trường hợp reload trang) + `PATCH` (gửi câu trả lời, resolve session).
+- `components/useDocumentGenerationChat.ts` — thêm `ClarificationQuestion`/`clarification` vào
+  `ChatItem`, tách vòng lặp đọc SSE thành `consumeStream()` dùng chung cho lần gọi đầu và lần tiếp
+  tục sau `answerClarification()`; lưu `reader` đang mở theo `botId` trong `pendingReadersRef`.
+- `components/ClarificationQuestionForm.tsx` (mới) — render câu hỏi, nút gửi disabled khi còn field
+  `required` chưa trả lời, nút "Bỏ qua câu này" LUÔN hiện khi `!required` (Outcome 2, mục 3.2).
+  `tests/unit/clarification-question-form.test.tsx` (7 test, bao gồm Ví dụ 4 field hỗn hợp).
+- `components/ChatMessageItem.tsx`, `components/ChatAssistant.tsx` — nối `ClarificationQuestionForm`
+  vào nhánh render `status === "awaiting_clarification"`.
+
+**Bằng chứng end-to-end thật** (`tests/integration/api-documents-clarify.test.ts`, 4 test) — gọi
+ĐÚNG route SSE thật (`POST /api/documents` với `Accept: text/event-stream`), verify TRỰC TIẾP câu
+hỏi "hệ thống có hỏi lại user không":
+1. `recommendedAction: "clarify"` → route gửi `awaiting_user_input` với đúng câu hỏi, generation
+   THỰC SỰ DỪNG (không có event `complete` cho tới khi trả lời).
+2. `PATCH /api/documents/clarify/[jobId]` với câu trả lời → generation TIẾP TỤC trong CÙNG 1 SSE
+   stream (không mở stream mới), document được tạo với description đã enrich câu trả lời.
+3. `recommendedAction: "generate"` → không có `awaiting_user_input`, hành vi giống hệt trước E7.
+4. `CLARIFICATION_ENABLED=false` (mặc định) → không gọi `understandRequest()` — nếu route lỡ gọi,
+   test tự throw ngay (`currentPlanOverride` không được set), tự động phát hiện regression.

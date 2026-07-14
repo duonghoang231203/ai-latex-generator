@@ -25,7 +25,7 @@ Bảng theo dõi tiến độ các tính năng của dự án AI LaTeX Generator
 | 🔲 | **E2 · Agentic multi-step document assembly** `#later` | Cơ chế tạo dàn ý và tự động viết nội dung theo dạng Checklist (Human-in-the-loop). | Theme: Smart assembly · Ưu tiên **4** (sau E1) · Effort L |
 | 🔲 | **E4 · OCR công thức Toán/Lý/Hóa** `#later` | Nhận diện công thức Toán/Lý/Hóa từ hình ảnh thành mã LaTeX. | Theme: Multimodal input · Ưu tiên **5** · Effort M |
 | 🔄 | **E6 · Prompt Engineering** | Cải thiện hệ thống prompt toàn dự án: system prompt, repair/edit prompt, per-template guidance, RAG injection, đo lường chất lượng. | Theme: Output quality · Ưu tiên **3** (cross-cutting) · Effort M · Giai đoạn 1 ✅, Giai đoạn 2 một phần ✅ (còn lại `#later`), Giai đoạn 3 🔄 (12/14 PASS AI thật, còn lại `#later`) |
-| 🔄 | **E7 · Clarification Layer** `#later` | Bước hiểu yêu cầu (Request Understanding) trước generate: sinh `RequestPlan` có cấu trúc, code quyết định generate ngay hay hỏi lại qua tool `askUserQuestion` dùng chung toàn app. **Nhóm A (schema/registry/policy, logic thuần) đã code+test 2026-07-14** — Nhóm B (orchestrator/SSE/UI) vẫn chờ eval data. | Theme: Request understanding · Ưu tiên **6** (sau E6, cần eval data cho Nhóm B) · Effort L |
+| ✅ | **E7 · Clarification Layer** `#flag-off` | Bước hiểu yêu cầu (Request Understanding) trước generate: sinh `RequestPlan` có cấu trúc, code quyết định generate ngay hay hỏi lại qua tool `askUserQuestion` dùng chung toàn app. **Toàn bộ đã code+test 2026-07-14** (end-to-end đã verify bằng integration test thật), nhưng nằm sau `CLARIFICATION_ENABLED=false` (mặc định) — chưa bật cho user thật, chưa có eval data đo tần suất thật ngoài eval set nhỏ dùng để test. | Theme: Request understanding · Ưu tiên **6** · Effort L |
 
 ---
 
@@ -214,7 +214,7 @@ Các đầu việc cụ thể được trích xuất từ [`project-roadmap.md`]
       với `compile-service` thật để đo Final compile success đúng nghĩa (PDF thật); tách
       `CapabilityAlternative[]` thành cấu trúc dữ liệu riêng khi cần thêm cho template khác.
 
-#### E7 · Clarification Layer — *Request understanding (human-in-the-loop, trước generate)* `#later`
+#### E7 · Clarification Layer — *Request understanding (human-in-the-loop, trước generate)* `#flag-off`
 >
 > 📄 Giải thích (thiết kế): [`features/e7-clarification-layer/explainer.md`](./features/e7-clarification-layer/explainer.md) · ⚠️ chưa implement
 >
