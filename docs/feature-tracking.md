@@ -19,13 +19,13 @@ Bảng theo dõi tiến độ các tính năng của dự án AI LaTeX Generator
 
 | Trạng thái | Tính năng | Mô tả chi tiết | Người phụ trách / Ghi chú |
 | :---: | :--- | :--- | :--- |
-| 🔲 | **E1 · Multi-file project support (Core)** | Kiến trúc lưu trữ dạng thư mục (Directory-based storage) phục vụ tài liệu lớn. | Theme: Scale · Ưu tiên **1** (enabler) · Effort L |
+| ⏸️ | **E1 · Multi-file project support (Core)** `#deferred` | Kiến trúc lưu trữ dạng thư mục (Directory-based storage) phục vụ tài liệu lớn. Nền đã có (data model, compile-service, `runProject()`); **tạm dừng tiếp tục** — chờ ưu tiên lại. | Theme: Scale · Ưu tiên **1** (enabler) · Effort L |
 | ✅ | **E5 · Markdown → LaTeX conversion** | Viết nháp bằng định dạng Markdown, tự động chuyển sang chuẩn LaTeX. | Theme: Authoring speed · Ưu tiên **2** (quick win) · Effort S–M · **Done** |
 | ✅ | **E3 · RAG (Retrieval-Augmented Generation)** | Truy hồi tài liệu tham khảo (upload) để AI viết nội dung chính xác, có trích dẫn nguồn. | Theme: Content accuracy · Ưu tiên **3** · Effort M–L · **Done** (mặc định tắt: `RAG_ENABLED`) |
-| 🔲 | **E2 · Agentic multi-step document assembly** | Cơ chế tạo dàn ý và tự động viết nội dung theo dạng Checklist (Human-in-the-loop). | Theme: Smart assembly · Ưu tiên **4** (sau E1) · Effort L |
-| 🔲 | **E4 · OCR công thức Toán/Lý/Hóa** | Nhận diện công thức Toán/Lý/Hóa từ hình ảnh thành mã LaTeX. | Theme: Multimodal input · Ưu tiên **5** · Effort M |
-| 🔄 | **E6 · Prompt Engineering** | Cải thiện hệ thống prompt toàn dự án: system prompt, repair/edit prompt, per-template guidance, RAG injection, đo lường chất lượng. | Theme: Output quality · Ưu tiên **3** (cross-cutting) · Effort M · Giai đoạn 1–2 ✅, Giai đoạn 3 🔄 (baseline eval đã chạy) |
-| 🔲 | **E7 · Clarification Layer** | Bước hiểu yêu cầu (Request Understanding) trước generate: sinh `RequestPlan` có cấu trúc, code quyết định generate ngay hay hỏi lại qua tool `askUserQuestion` dùng chung toàn app. | Theme: Request understanding · Ưu tiên **6** (sau E6, cần eval data) · Effort L |
+| 🔲 | **E2 · Agentic multi-step document assembly** `#later` | Cơ chế tạo dàn ý và tự động viết nội dung theo dạng Checklist (Human-in-the-loop). | Theme: Smart assembly · Ưu tiên **4** (sau E1) · Effort L |
+| 🔲 | **E4 · OCR công thức Toán/Lý/Hóa** `#later` | Nhận diện công thức Toán/Lý/Hóa từ hình ảnh thành mã LaTeX. | Theme: Multimodal input · Ưu tiên **5** · Effort M |
+| 🔄 | **E6 · Prompt Engineering** | Cải thiện hệ thống prompt toàn dự án: system prompt, repair/edit prompt, per-template guidance, RAG injection, đo lường chất lượng. | Theme: Output quality · Ưu tiên **3** (cross-cutting) · Effort M · Giai đoạn 1 ✅, Giai đoạn 2 một phần ✅ (còn lại `#later`), Giai đoạn 3 🔄 (12/14 PASS AI thật, còn lại `#later`) |
+| 🔲 | **E7 · Clarification Layer** `#later` | Bước hiểu yêu cầu (Request Understanding) trước generate: sinh `RequestPlan` có cấu trúc, code quyết định generate ngay hay hỏi lại qua tool `askUserQuestion` dùng chung toàn app. | Theme: Request understanding · Ưu tiên **6** (sau E6, cần eval data) · Effort L |
 
 ---
 
@@ -44,7 +44,12 @@ Các đầu việc cụ thể được trích xuất từ [`project-roadmap.md`]
 
 ### 🟡 Phase 2 — Advanced Features
 
-#### E1 · Multi-file project support (Core) — *Scale*
+#### E1 · Multi-file project support (Core) — *Scale* `#deferred`
+>
+> ⏸️ **TẠM DỪNG (2026-07-14)** — nền tảng đã có (data model, compile-service path-guard,
+> `runProject()` ở orchestrator), nhưng chưa tiếp tục các phần còn thiếu (UI, wiring vào luồng tạo
+> tài liệu thật). Giữ nguyên trạng thái hiện tại, không phát triển thêm cho tới khi được ưu tiên
+> lại — không xoá vì phần đã làm vẫn hoạt động và có test bao phủ.
 >
 > 📄 Giải thích (thiết kế): [`features/e1-multi-file-project/explainer.md`](./features/e1-multi-file-project/explainer.md) · ⚠️ chưa implement
 > 🧪 Spike (đã xong 2026-07-09): [`features/e1-multi-file-project/spike-tectonic-multifile.md`](./features/e1-multi-file-project/spike-tectonic-multifile.md) — `\input`/`\include`/asset chạy được dưới Tectonic `--untrusted`; **path-guard bắt buộc**.
@@ -85,7 +90,7 @@ Các đầu việc cụ thể được trích xuất từ [`project-roadmap.md`]
 
 > ⚙️ Mặc định `RAG_ENABLED=false` (bật để dùng). Embedding mặc định `mock` (tất định/offline); `transformers` cần cài `@xenova/transformers`.
 
-#### E2 · Agentic multi-step document assembly — *Smart assembly (Human-in-the-loop)*
+#### E2 · Agentic multi-step document assembly — *Smart assembly (Human-in-the-loop)* `#later`
 >
 > 📄 Giải thích (thiết kế): [`features/e2-agentic-assembly/explainer.md`](./features/e2-agentic-assembly/explainer.md) · ⚠️ chưa implement
 
@@ -95,7 +100,7 @@ Các đầu việc cụ thể được trích xuất từ [`project-roadmap.md`]
 - [ ] Mở rộng `lib/orchestrator/document.ts` cho quy trình nhiều bước + lưu trạng thái tiến trình.
 - [ ] UI: hiển thị tiến trình checklist, chỉnh sửa từng mục (tận dụng `Marker` / chat assistant sẵn có).
 
-#### E4 · OCR công thức Toán/Lý/Hóa — *Multimodal input*
+#### E4 · OCR công thức Toán/Lý/Hóa — *Multimodal input* `#later`
 >
 > 📄 Giải thích (thiết kế): [`features/e4-formula-ocr/explainer.md`](./features/e4-formula-ocr/explainer.md) · ⚠️ chưa implement
 
@@ -119,15 +124,28 @@ Các đầu việc cụ thể được trích xuất từ [`project-roadmap.md`]
 - [x] Thêm `<attempt_context>` cho repair lần N > 1: "thử hướng KHÁC, đừng lặp lại".
 - [x] Bổ sung **42 tests** trong `tests/unit/prompts.test.ts` bao phủ tất cả builders + `detectErrorType`.
 >
-> **Giai đoạn 2 — Structural improvements** (một phần ✅)
+> **Giai đoạn 2 — Structural improvements** (một phần ✅, phần còn lại `#later`)
 
 - [x] Module hoá `lib/ai/prompts/` — XML-structured prompts cho generate/repair/edit/sources.
-- [ ] Chuẩn hoá cấu trúc `promptGuidance` cho tất cả 11 templates về format thống nhất (`lib/templates/registry.ts`).
-- [ ] Thiết kế prompt cho E2 Agentic assembly: `generate-outline.ts`, `generate-section.ts`.
-- [ ] Structured output schema cho outline/diagnosis dùng `generateObject()` (`lib/ai/schemas/`).
-- [ ] Thêm `promptVersion` vào response metadata để debug theo từng request.
+- [x] ~~Chuẩn hoá cấu trúc `promptGuidance` cho tất cả 11 templates~~ — **đã sửa số liệu sai
+      2026-07-14**: `TemplateId` (`lib/types/document.ts`) chỉ có **4 giá trị thật**
+      (`academic`/`math`/`thesis`/`slides`), `TEMPLATES` là `Record<TemplateId, DocumentTemplate>`
+      nên không thể có 11 entry — "11" bị chép nhầm từ mô tả sản phẩm ban đầu
+      (`project-overview-pdr.md`: "reports, academic, math/physics/chemistry, engineering, thesis,
+      Beamer, letters/CVs, exams") mà không verify lại với code. 4 template hiện có đã được chuẩn
+      hoá đủ (schema 5-field cố định, xem `DocumentTemplate.promptGuidance` trong `registry.ts`).
+- [ ] **`#later` — Task bàn giao: Mở rộng 7 template mới** (epic riêng, KHÔNG phải "chuẩn hoá" — đây
+      là thêm `TemplateId` mới, effort ước tính tương đương thêm 1 template = ~0.5–1 ngày/template
+      nếu theo đúng pattern 4 template hiện có). Xem chi tiết đầy đủ (phạm vi kỹ thuật, checklist per
+      template, thứ tự làm đề xuất) tại
+      [`docs/backend-roadmap.md` § Phase 6](./backend-roadmap.md#-phase-6-mở-rộng-template-tag-later).
+      7 template cần thêm, theo đúng ý định sản phẩm ban đầu:
+      `report`, `physics`, `chemistry`, `engineering`, `letter`, `cv`, `exam`.
+- [ ] `#later` Thiết kế prompt cho E2 Agentic assembly: `generate-outline.ts`, `generate-section.ts`.
+- [ ] `#later` Structured output schema cho outline/diagnosis dùng `generateObject()` (`lib/ai/schemas/`).
+- [ ] `#later` Thêm `promptVersion` vào response metadata để debug theo từng request.
 >
-> **Giai đoạn 3 — Evaluation & Versioning** 🔄 **(4 P0 đã implement — 9/14 → 12/14 PASS, xem changelog.md)**
+> **Giai đoạn 3 — Evaluation & Versioning** `#later` 🔄 **(4 P0 đã implement — 9/14 → 12/14 PASS, xem changelog.md)**
 > 📄 Chi tiết dataset/metrics/kiến trúc: mục 4.3 trong [`explainer.md`](./features/e6-prompt-engineering/explainer.md)
 > 🧪 Spike (đã xong 2026-07-13): [`spike-promptfoo-integration.md`](./features/e6-prompt-engineering/spike-promptfoo-integration.md) — Promptfoo custom TS provider chạy được (`moduleResolution: bundler` + `@/*`), custom scorer tái dùng `validateLatex()` thật hoạt động đúng; **không cần workaround**.
 > 📈 Changelog: [`changelog.md`](./features/e6-prompt-engineering/changelog.md) — 4 entry: baseline Mock (40/40) → AI thật lần 1 (4/14, phát hiện bug `polyglossia`) → sau fix polyglossia (9/14) → **sau 4 P0 finishReason/truncation-recovery/positive-alternative (12/14, 85.71%)**.
@@ -191,12 +209,12 @@ Các đầu việc cụ thể được trích xuất từ [`project-roadmap.md`]
     Final compile success CHƯA ĐO (`compile-success.ts` scorer chưa chạy với `compile-service` thật).
     Xem chi tiết đầy đủ + giải thích gap giữa "prompt compliance" và "final success" hiện trùng
     nhau: `changelog.md`.
-- [ ] **(Còn lại)** `pass@k`/eval nhiều lần (Promptfoo `repeat` config) để đo flaky rate; nối provider
-      eval với `runRepairLoop()` thật để đo Recovery success; chạy `compile-success.ts` với
-      `compile-service` thật để đo Final compile success đúng nghĩa (PDF thật); tách
+- [ ] `#later` **(Còn lại)** `pass@k`/eval nhiều lần (Promptfoo `repeat` config) để đo flaky rate;
+      nối provider eval với `runRepairLoop()` thật để đo Recovery success; chạy `compile-success.ts`
+      với `compile-service` thật để đo Final compile success đúng nghĩa (PDF thật); tách
       `CapabilityAlternative[]` thành cấu trúc dữ liệu riêng khi cần thêm cho template khác.
 
-#### E7 · Clarification Layer — *Request understanding (human-in-the-loop, trước generate)*
+#### E7 · Clarification Layer — *Request understanding (human-in-the-loop, trước generate)* `#later`
 >
 > 📄 Giải thích (thiết kế): [`features/e7-clarification-layer/explainer.md`](./features/e7-clarification-layer/explainer.md) · ⚠️ chưa implement
 >
@@ -271,7 +289,7 @@ Các đầu việc cụ thể được trích xuất từ [`project-roadmap.md`]
 - [ ] Lớp migration dữ liệu: chuyển tài liệu ĐÃ TỒN TẠI trên `file` backend (JSON trong `DATA_DIR`)
       sang Postgres — hiện 2 backend độc lập, không tự động đồng bộ/migrate qua nhau.
 
-#### Advanced deployment strategies
+#### Advanced deployment strategies `#later`
 
 - [ ] Hoàn thiện Dockerization (đã có `Dockerfile`, `docker-compose.yml`, `Caddyfile`).
 - [ ] Thiết lập CI/CD pipeline (build + lint + test + deploy).
