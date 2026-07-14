@@ -379,3 +379,140 @@ status: generating → compiling → validating (E6) → repair loop → done/er
   thực tế** (tỉ lệ request mơ hồ dẫn tới tài liệu kém chất lượng) trước khi cam kết effort L — tương tự
   nguyên tắc đã áp dụng khi defer `MathGenerationPlan`/`MathDocumentMode` ở E6 (chờ chứng minh cần
   thiết bằng dữ liệu, tránh over-engineer khi chưa có consumer thực tế).
+
+---
+
+## 6. Task breakdown khi bắt đầu implement (chưa bắt đầu — chờ eval data)
+
+> Cập nhật: **2026-07-14**. Đây là **task breakdown bàn giao** (implementation-ready), viết ra để
+> sẵn sàng dùng khi điều kiện tiên quyết ở mục 5 (eval data thực tế) được đáp ứng — **KHÔNG coi là đã
+> bỏ qua điều kiện đó**, và **KHÔNG đổi trạng thái `#later`** hiện tại của E7. Tất cả 9 task dưới đây
+> vẫn ở dạng kế hoạch, chưa có dòng code nào được viết.
+
+### 6.1. Phát hiện quan trọng làm thay đổi phạm vi so với mục 3.6
+
+Đã đọc trực tiếp code (không suy đoán) và xác nhận 2 điều chỉnh so với thiết kế gốc ở mục 3.6:
+
+- **Hạ tầng `generateObject()` ĐÃ TỒN TẠI SẴN** — `LatexProvider.generateObject<T>(schema, prompt):
+  Promise<T>` đã có trong interface (`lib/ai/types.ts`), implement thật ở `vercel-provider.ts` (dùng
+  `generateObject` của Vercel AI SDK), và có wrapper public `generateStructuredData<T>()`
+  (`lib/ai/structured.ts`). **KHÔNG cần "xây cơ chế mới cho structured output"** như mục 3.6 ngụ ý —
+  chỉ cần viết schema `RequestPlan` và gọi `generateStructuredData()`. Đã verify bằng grep:
+  `generateStructuredData` **chưa có consumer nào** trong toàn codebase — an toàn để mở rộng.
+- **Nhưng `MockProvider.generateObject()` (`lib/ai/mock.ts`) hiện throw lỗi ngay** cho mọi schema
+  động ("not implemented for dynamic schemas") — chặn hoàn toàn khả năng dev/test offline
+  (`AI_PROVIDER=mock`) cho bất kỳ tính năng dùng `generateObject`, bao gồm E7. Đây là **1 task nền
+  tảng bổ sung** (Task 1 dưới đây), không có trong 6 điểm chạm liệt kê gốc ở mục 3.6.
+- SSE hiện tại (`app/api/documents/route.ts`) chỉ có 2 event trung gian (`chunk`, `status:compiling`)
+  trước `complete`/`error`; `ReadableStream` đóng khi hàm `start()` return trong 1 lượt HTTP duy
+  nhất — để có state `awaiting_user_input` cần cơ chế **lưu state + resume qua request HTTP riêng**,
+  KHÔNG thể chỉ "mở rộng enqueue" đơn giản như liệt kê ngắn ở mục 3.6. Đây là Task 6, phần phức tạp
+  nhất trong toàn bộ 9 task.
+
+### 6.2. Danh sách 9 task
+
+**Task 1 — [MỚI] Nền tảng: sửa `MockProvider.generateObject()`**
+- Mục tiêu: trả dữ liệu giả hợp lệ (đủ pass Zod schema validation) khi `AI_PROVIDER=mock`, thay vì
+  throw lỗi ngay.
+- File: `lib/ai/mock.ts`.
+- Phụ thuộc: không — làm trước tiên, không cần task nào khác.
+- Test gợi ý: unit test gọi `MockProvider.generateObject(RequestPlanSchema, anyPrompt)` → không throw,
+  kết quả pass `.parse()` của schema.
+
+**Task 2 — `lib/ai/schemas/request-plan.ts` (mới)**
+- Mục tiêu: định nghĩa Zod schema `RequestPlan` đúng cấu trúc đã chốt ở mục 3.3 (`intent`,
+  `templateId`, `requirements[]`, `assumptions[]`, `missingInformation[]` — mỗi item có `field` +
+  `importance: "critical"|"optional"` —, `ambiguity: "low"|"medium"|"high"`, `confidence: number`,
+  `recommendedAction: "generate"|"clarify"`).
+- File: `lib/ai/schemas/request-plan.ts` (mới).
+- Phụ thuộc: Task 1 (để test được bằng Mock).
+- Ghi nhớ khi implement: `recommendedAction` CHỈ trả lời Quyết định A (mục 3.2) — KHÔNG mang nghĩa
+  required/optional của field, đó là Quyết định B, lấy từ `importance` của từng
+  `missingInformation[]` item.
+- Test gợi ý: unit test schema với input hợp lệ/không hợp lệ (thiếu field bắt buộc, giá trị enum sai).
+
+**Task 3 — `lib/templates/registry.ts` — mở rộng `DocumentTemplate` interface**
+- Mục tiêu: thêm field mới `clarificationFields?: ClarificationField[]` (type `ClarificationField`
+  gồm `id`, `importance: "critical"|"optional"`, `question`, `options?`, `defaultIfSkipped?`).
+- File: `lib/templates/registry.ts`.
+- Phụ thuộc: Task 2 (dùng chung khái niệm `importance`).
+- Khai báo thử nghiệm: ít nhất 1 template (`math`) theo đúng ví dụ đã có ở mục 3.5
+  (`math_mode` optional, `problem_statement` critical).
+- Test gợi ý: theo pattern `tests/integration/api-templates.test.ts` hiện có — xác nhận field mới
+  optional không phá vỡ template cũ (không có `clarificationFields` vẫn hợp lệ).
+
+**Task 4 — `lib/clarification/policy.ts` (mới) — `ClarificationPolicy`**
+- Mục tiêu: hàm THUẦN (pure function) — input `RequestPlan` + `clarificationFields` của template đã
+  chọn, output quyết định generate-ngay-với-default hay clarify-với-danh-sách-câu-hỏi-cụ-thể (mỗi
+  câu hỏi kèm `required` suy ra từ `importance`).
+- File: `lib/clarification/policy.ts` (mới).
+- Phụ thuộc: Task 2, Task 3.
+- **Đây là phần dễ unit-test nhất** — không phụ thuộc AI/SSE, có thể viết và test độc lập, KHÔNG cần
+  đợi Task 5-8. Nên làm sớm để chứng minh logic đúng với chi phí thấp nhất.
+- Test gợi ý: PHẢI cover case "field hỗn hợp" (ví dụ 4, mục 3.2 — 1 request có cả field `critical`
+  và `optional` thiếu cùng lúc, ví dụ "Tạo CV cho tôi, vị trí Backend") — xác nhận output hỏi CẢ HAI
+  field trong 1 lượt nhưng với `required` khác nhau cho từng field.
+
+**Task 5 — `lib/orchestrator/document.ts` — thêm `understandRequest()`**
+- Mục tiêu: gọi TRƯỚC `generateWithTruncationRecovery()` trong `runDocument`/
+  `runDocumentFromMarkdown`/`runEdit`.
+- File: `lib/orchestrator/document.ts`.
+- Phụ thuộc: Task 2, Task 4.
+- Cần định nghĩa rõ kiểu trả về mới khi cần dừng chờ user — KHÔNG phá vỡ `DocumentResult` hiện có
+  (cân nhắc: union type mới, hoặc field optional bổ sung). KHÔNG đổi `runRepairLoop()`.
+- Test gợi ý: unit test cho từng entrypoint — case "generate ngay" (không đổi hành vi hiện tại) và
+  case "cần clarify" (trả về đúng kiểu mới, KHÔNG gọi `provider.generate()` cho tới khi có câu trả
+  lời).
+
+**Task 6 — [Phức tạp nhất — cần quyết định kỹ thuật rõ trước khi code] Cơ chế lưu state + resume**
+- Mục tiêu: quyết định nơi lưu `RequestPlan` + câu trả lời user đang chờ, giữa 2 request HTTP riêng
+  biệt (request ban đầu và request resume sau khi user trả lời).
+- Câu hỏi kỹ thuật cần trả lời TRƯỚC khi code (không có câu trả lời sẵn — cần quyết định khi tới lúc):
+  - In-memory theo `jobId` (đơn giản, nhưng mất state khi restart server — có chấp nhận được không
+    với UX generate 1 lần)? Hay cần bền hơn (DB/Redis)?
+  - Format endpoint resume: nhận `jobId` + câu trả lời, trả về gì (tiếp tục SSE stream cũ, hay mở
+    stream mới)?
+  - Giới hạn TTL cho state đang chờ (user bỏ đi giữa đường, không trả lời — dọn dẹp thế nào)?
+- File: chưa xác định (phụ thuộc quyết định kiến trúc trên) — có thể `lib/clarification/session.ts`
+  hoặc tương đương.
+- Phụ thuộc: Task 5.
+- Test gợi ý: chưa viết được cụ thể tới khi có quyết định kiến trúc — nhưng PHẢI cover case timeout/
+  cleanup nếu chọn hướng có TTL.
+
+**Task 7 — `app/api/documents/route.ts` (+ tương đương edit/project nếu có)**
+- Mục tiêu: thêm 2 SSE event mới `understanding` và `awaiting_user_input` (gửi kèm payload câu hỏi
+  theo schema `askUserQuestion` ở mục 3.4), gọi cơ chế lưu state ở Task 6.
+- File: `app/api/documents/route.ts`.
+- Phụ thuộc: Task 5, Task 6.
+- Test gợi ý: integration test theo pattern hiện có trong `tests/integration/`, dùng `MockProvider`
+  đã sửa ở Task 1 — xác nhận SSE stream đúng thứ tự event khi có/không có clarify.
+
+**Task 8 — UI component (`components/`)**
+- Mục tiêu: component render câu hỏi theo `type` (`single_choice`/`multiple_choice`/`free_text`),
+  LUÔN có nút "Bỏ qua và tạo luôn" khi `required: false` (nguyên tắc Outcome 2, mục 3.2 —
+  "Question helpful ≠ Question required").
+- File: `components/` (tên cụ thể chưa xác định).
+- Phụ thuộc: Task 7 (cần payload SSE thật để biết đúng props).
+- Test gợi ý: component test theo pattern `tests/unit/theme-toggle.test.tsx` (React Testing Library)
+  hiện có trong project.
+
+**Task 9 — Test tổng hợp ở mỗi lớp**
+- Unit test cho schema (Task 2) và `ClarificationPolicy` (Task 4) nên viết TRƯỚC vì không cần AI
+  thật, theo pattern `tests/unit/` hiện có.
+- Integration test cho route (Task 7) dùng `MockProvider` đã sửa (Task 1), theo pattern
+  `tests/integration/` hiện có.
+
+### 6.3. Thứ tự làm đề xuất
+
+```
+Nhóm A (effort thấp, test độc lập, không chạm SSE/UI — nên làm trước):
+  Task 1 → Task 2 → Task 3 → Task 4
+
+Nhóm B (phần "wiring" phức tạp hơn — CHỈ bắt đầu sau khi eval data đã xác nhận cần thiết,
+        điều kiện tiên quyết mục 5, hiện CHƯA đáp ứng):
+  Task 5 → Task 6 → Task 7 → Task 8
+```
+
+Nhóm A có thể làm và chứng minh logic `ClarificationPolicy` đúng với chi phí thấp nhất (thuần logic,
+không phụ thuộc AI/SSE thật) — hữu ích ngay cả khi quyết định cuối cùng KHÔNG triển khai Nhóm B, vì
+đã có sẵn 1 module đã test kỹ để tái sử dụng nếu quyết định đổi.
