@@ -605,7 +605,48 @@ test injection ép `recommendedAction` cụ thể — sửa để nhận provide
   user qua 1 request HTTP khác, không thể xảy ra trong request/response đồng bộ. Đã ghi rõ bằng
   comment trong code, không âm thầm bỏ qua.
 
-**File đã tạo/sửa** (tất cả qua `npx vitest run` — 296/296 pass, 0 regression so với 278 trước Nhóm
+### 6.6. Bug thật phát hiện qua debug với user (2026-07-14) — đã sửa
+
+**Triệu chứng báo cáo:** user hỏi "Giải bài này giúp tôi" với template `math`, thấy câu hỏi xuất
+hiện đúng, nhưng khi trả lời thì nhận lỗi *"Phiên hỏi đáp không tồn tại (đã hết hạn hoặc đã trả lời
+trước đó)"*.
+
+**Quá trình điều tra (loại dần giả thuyết bằng bằng chứng, không đoán mò):**
+1. Giả thuyết đầu (SAI, đã loại): nhiều process/module singleton bị mất state giữa request SSE và
+   request PATCH (do Next.js dev server compile route on-demand). Đã kiểm tra `Get-NetTCPConnection`
+   → chỉ 1 process duy nhất lắng nghe port — loại giả thuyết này.
+2. Hỏi user 3 câu xác nhận cụ thể: (a) thời gian giữa lúc thấy câu hỏi và lúc trả lời — **user xác
+   nhận đúng 5 phút**, trùng khớp `SESSION_TTL_MS`; (b) có bấm gửi/bỏ qua nhiều lần — có; (c) log
+   terminal có gì lạ — không. Kết hợp thêm dữ kiện user **rời sang tab khác** trong lúc đó.
+3. **Nguyên nhân xác nhận:** đây KHÔNG phải bug logic — server hoạt động ĐÚNG thiết kế
+   (`SessionTimeoutError` sau 5 phút → tự generate với description gốc, không chặn vô thời hạn).
+   Vấn đề là **gap UX thật**: client không có cách nào biết session đã hết hạn TRƯỚC khi bấm gửi —
+   form câu hỏi vẫn hiển thị y như cũ dù đã quá TTL, không có đếm ngược, không tự disable, và khi
+   PATCH thất bại chỉ hiện message kỹ thuật khó hiểu từ server.
+
+**Fix đã áp dụng:**
+- `lib/clarification/session.ts` — export `SESSION_TTL_MS` (trước đó là `const` nội bộ, không export
+  được ra ngoài để đồng bộ với client).
+- `app/api/documents/route.ts::maybeClarify()` — payload `awaiting_user_input` thêm
+  `expiresAt` (timestamp TUYỆT ĐỐI dạng ISO string, không phải "còn bao nhiêu ms" — tránh sai lệch
+  do độ trễ network giữa lúc server tạo session và lúc client nhận event).
+- `components/useDocumentGenerationChat.ts` — `ChatItem.clarification` thêm `expiresAt`; nhánh PATCH
+  404 giờ phân biệt rõ: **hết hạn** → message thân thiện giải thích đã tự tạo tài liệu + gọi
+  `router.refresh()` (để user thấy ngay document đã tự sinh), thay vì đưa thẳng lỗi kỹ thuật.
+- `components/ClarificationQuestionForm.tsx` — thêm hook `useCountdown(expiresAt)` (tick mỗi giây
+  qua `setInterval`), hiển thị "Còn m:ss để trả lời" cạnh nút gửi; khi hết hạn, nút gửi tự
+  `disabled` NGAY (không cần user bấm mới biết) và hiển thị "Đã hết thời gian trả lời — hệ thống đã
+  tự tạo tài liệu bằng mô tả ban đầu."
+
+**Test bổ sung** (đã qua `npx vitest run`, `npx tsc --noEmit`, `npx eslint` — đều sạch):
+- `tests/unit/clarification-question-form.test.tsx` — 4 test mới dùng `vi.useFakeTimers()`: hiển
+  thị đúng định dạng ban đầu, đếm ngược giảm theo thời gian thật trôi qua, `expiresAt` ở quá khứ →
+  disabled ngay khi render (mô phỏng đúng case user rời tab), và **hết hạn trong lúc component đang
+  mount** (không chỉ hết hạn từ trước) → nút tự chuyển `disabled` không cần re-render từ props.
+- `tests/integration/api-documents-clarify.test.ts` — thêm assertion `expiresAt` thật trong payload
+  SSE, xác nhận là timestamp tương lai hợp lệ (không chỉ test ở tầng component, mà cả route thật).
+
+
 B; `npx tsc --noEmit` — 0 lỗi mới; `npx eslint` trên toàn bộ file liên quan — sạch):
 - `lib/ai/prompts/understand-request.ts` (mới) — prompt Request Understanding, theo đúng convention
   XML-tag của `buildGeneratePrompt()`.
