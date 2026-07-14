@@ -11,6 +11,9 @@ import { getCurrentUserId } from "@/lib/auth/current-user";
 import { isDocumentError, type DocumentRequest, type DocumentResult } from "@/lib/types/document";
 import type { OrchestratorDeps } from "@/lib/orchestrator/document";
 import { log } from "@/lib/log";
+import { understandRequest } from "@/lib/clarification/understand-request";
+import { createPendingSession, SessionTimeoutError } from "@/lib/clarification/session";
+import type { LatexProvider } from "@/lib/ai/types";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -26,6 +29,84 @@ function runByFormat(
     return runDocumentFromMarkdown(req, deps, onChunk, onCompileStart);
   }
   return runDocument(req, deps, onChunk, onCompileStart);
+}
+
+/**
+ * E7 (docs/features/e7-clarification-layer/explainer.md § 6, Task 5+7) — chạy Request
+ * Understanding TRƯỚC generate, chỉ khi bật `CLARIFICATION_ENABLED=true` VÀ request có `template`
+ * (clarificationFields gắn với template — không áp dụng khi không chọn template).
+ *
+ * QUYẾT ĐỊNH THIẾT KẾ (khác với mô tả gốc "gọi TRONG runDocument" ở mục 3.6/Task 5 — xem lý do đầy
+ * đủ trong explainer.md § 6.4): tách HOÀN TOÀN khỏi runDocument()/DocumentResult để không đổi
+ * signature của 4 orchestrator entrypoint (10 call site hiện có, bao gồm 8 file test) — an toàn
+ * hơn nhiều so với thêm 1 union case thứ 3 vào DocumentResult (rủi ro: isDocumentError() ở 2 route
+ * khác sẽ coi case mới là "không lỗi" và cố lưu như document thành công).
+ *
+ * `enqueue` được truyền vào để gửi 2 SSE event mới (`understanding`, `awaiting_user_input`) ngay
+ * trong closure của stream ĐANG MỞ — route KHÔNG mở stream thứ 2. Nếu user trả lời trước khi hết
+ * TTL, trả về answers đã merge; nếu hết hạn, ném SessionTimeoutError để caller xử lý (đóng stream
+ * bằng event lỗi rõ ràng thay vì treo vô hạn).
+ *
+ * Trả về mô tả bổ sung để nhồi vào `description` gốc trước khi generate — cách đơn giản nhất để
+ * "enrich context" (mục 3.3 luồng dữ liệu) mà không cần đổi GenerateInput/DocumentRequest.
+ */
+async function maybeClarify(
+  req: DocumentRequest,
+  provider: LatexProvider,
+  enqueue: (event: string, data: unknown) => void,
+): Promise<DocumentRequest> {
+  const cfg = getConfig();
+  if (!cfg.clarificationEnabled || !req.template) return req;
+
+  enqueue("status", { status: "understanding" });
+
+  let result;
+  try {
+    result = await understandRequest(provider, {
+      description: req.description,
+      templateId: req.template,
+    });
+  } catch (e) {
+    // Lỗi hạ tầng AI (vd. generateObject thất bại) KHÔNG được chặn user — coi như "generate" với
+    // description gốc, log lại để biết tần suất fallback này xảy ra bao nhiêu.
+    log.warn("clarification.understand_failed", {
+      template: req.template,
+      message: e instanceof Error ? e.message : String(e),
+    });
+    return req;
+  }
+
+  if (result.decision.action === "generate" || result.decision.questions.length === 0) {
+    return req;
+  }
+
+  const { jobId, wait } = createPendingSession(result.decision.questions);
+  enqueue("awaiting_user_input", {
+    jobId,
+    questions: result.decision.questions,
+    reason: result.plan.intent,
+  });
+
+  let answers: Record<string, string>;
+  try {
+    answers = await wait;
+  } catch (e) {
+    if (e instanceof SessionTimeoutError) {
+      // Hết TTL không có trả lời — KHÔNG chặn generate vô thời hạn: tiếp tục với description gốc
+      // (giống case field optional bị skip), thay vì để SSE treo mãi.
+      log.info("clarification.timeout", { template: req.template });
+      return req;
+    }
+    throw e;
+  }
+
+  const enrichment = Object.entries(answers)
+    .map(([field, value]) => `${field}: ${value}`)
+    .join("\n");
+  return {
+    ...req,
+    description: `${req.description}\n\n[Thông tin bổ sung từ người dùng]\n${enrichment}`,
+  };
 }
 
 /** Tiêu đề: ưu tiên mô tả; với Markdown lấy dòng đầu (bỏ ký tự '#'). */
@@ -111,7 +192,8 @@ export async function POST(request: Request): Promise<Response> {
         };
 
         try {
-          const result = await runByFormat(
+          const deps = buildOrchestratorDeps();
+          const clarifiedReq = await maybeClarify(
             {
               description: parsed.value.description,
               docType: parsed.value.docType,
@@ -120,7 +202,13 @@ export async function POST(request: Request): Promise<Response> {
               inputFormat: parsed.value.inputFormat,
               markdown: parsed.value.markdown,
             },
-            buildOrchestratorDeps(),
+            deps.provider,
+            enqueue,
+          );
+
+          const result = await runByFormat(
+            clarifiedReq,
+            deps,
             (chunk) => {
               enqueue("chunk", { text: chunk });
             },
@@ -179,6 +267,10 @@ export async function POST(request: Request): Promise<Response> {
       },
     });
   } else {
+    // E7 (Request Understanding + clarify) KHÔNG áp dụng ở nhánh non-SSE này — clarify cần chờ
+    // user trả lời qua MỘT request HTTP khác (PATCH .../clarify/[jobId]), không thể xảy ra trong
+    // một request/response đồng bộ, không streaming. Nhánh này luôn generate ngay dù
+    // CLARIFICATION_ENABLED=true, giống hành vi trước khi E7 tồn tại.
     try {
       const result = await runByFormat(
         {

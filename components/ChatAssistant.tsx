@@ -62,7 +62,7 @@ const previewMd = new MarkdownIt({ html: false, linkify: false, typographer: fal
 
 export default function ChatAssistant() {
   const router = useRouter();
-  const { items, busy, send, reset } = useDocumentGenerationChat();
+  const { items, busy, send, reset, answerClarification } = useDocumentGenerationChat();
   const [template, setTemplate] = useState<TemplateId>("academic");
   const [text, setText] = useState("");
   const [markdownMode, setMarkdownMode] = useState(false);
@@ -197,6 +197,7 @@ export default function ChatAssistant() {
                   <ChatMessageItem
                     item={item}
                     onOpen={(docId) => router.push(`/documents/${docId}`)}
+                    onAnswerClarification={answerClarification}
                   />
                 </MessageScrollerItem>
               ))}

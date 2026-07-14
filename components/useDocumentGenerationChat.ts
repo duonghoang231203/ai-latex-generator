@@ -6,7 +6,18 @@ import { useCallback, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { InputFormat, SourceFile, TemplateId } from "@/lib/types/document";
 
-export type ChatItemStatus = "streaming" | "done" | "error";
+export type ChatItemStatus = "streaming" | "done" | "error" | "awaiting_clarification";
+
+/** Một câu hỏi cần hỏi lại người dùng trước khi tiếp tục generate (E7). Khớp với
+ *  PendingQuestion (lib/clarification/policy.ts) — payload thật gửi qua SSE event
+ *  `awaiting_user_input`, xem app/api/documents/route.ts. */
+export interface ClarificationQuestion {
+  fieldId: string;
+  question: string;
+  options?: string[];
+  required: boolean;
+  defaultIfSkipped?: string;
+}
 
 /** Một lượt trong hội thoại trợ lý (người dùng hoặc trợ lý). */
 export interface ChatItem {
@@ -23,6 +34,10 @@ export interface ChatItem {
   hasPdf?: boolean;
   /** Thông báo lỗi (khi thất bại). */
   error?: string;
+  /** E7 — có mặt khi status === "awaiting_clarification": jobId để PATCH câu trả lời, và danh
+   *  sách câu hỏi cần render (mỗi câu tự quyết required — "Question helpful ≠ Question required",
+   *  xem docs/features/e7-clarification-layer/explainer.md § 3.2). */
+  clarification?: { jobId: string; questions: ClarificationQuestion[] };
 }
 
 let idCounter = 0;
@@ -47,13 +62,103 @@ export function useDocumentGenerationChat() {
   const [items, setItems] = useState<ChatItem[]>([GREETING]);
   const [busy, setBusy] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
+  // E7 — reader của stream ĐANG MỞ, chờ answerClarification() tiếp tục đọc sau khi PATCH resume
+  // (route KHÔNG mở stream mới — xem lib/clarification/session.ts quyết định kiến trúc #2).
+  // Key theo botId vì user về lý thuyết có thể có nhiều lượt chat song song (dù UI hiện tại chặn
+  // gửi mới khi busy=true, giữ theo id để không giả định chỉ có 1 lượt đang chạy).
+  const pendingReadersRef = useRef<
+    Map<string, { reader: ReadableStreamDefaultReader<Uint8Array>; decoder: TextDecoder; buffer: string; acc: string }>
+  >(new Map());
 
   const reset = useCallback(() => {
     abortRef.current?.abort();
     abortRef.current = null;
     setBusy(false);
     setItems([GREETING]);
+    pendingReadersRef.current.clear();
   }, []);
+
+  /**
+   * Đọc tiếp SSE stream cho `botId`, xử lý từng `data: ` event tới khi stream đóng hoặc gặp
+   * `awaiting_user_input` (dừng đọc, chờ user trả lời — KHÔNG coi là lỗi/kết thúc).
+   * Dùng chung cho lần gọi ĐẦU (trong send()) và lần TIẾP TỤC (trong answerClarification()) —
+   * cùng 1 vòng lặp, chỉ khác điểm bắt đầu.
+   */
+  const consumeStream = useCallback(
+    async (
+      botId: string,
+      reader: ReadableStreamDefaultReader<Uint8Array>,
+      decoder: TextDecoder,
+      initialBuffer: string,
+      initialAcc: string,
+    ) => {
+      const patch = (updates: Partial<ChatItem>) =>
+        setItems((prev) => prev.map((it) => (it.id === botId ? { ...it, ...updates } : it)));
+
+      let buffer = initialBuffer;
+      let acc = initialAcc;
+      let settled = false;
+      let awaitingClarification = false;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() ?? "";
+        for (const line of lines) {
+          if (!line.startsWith("data: ")) continue;
+          const dataStr = line.slice(6).trim();
+          if (!dataStr) continue;
+          try {
+            const data = JSON.parse(dataStr);
+            if (data.jobId && Array.isArray(data.questions)) {
+              // E7 — awaiting_user_input. Lưu reader để answerClarification() tiếp tục đọc SAU
+              // khi PATCH resolve session — KHÔNG đóng reader, KHÔNG setBusy(false) theo nghĩa
+              // "xong việc" (vẫn đang chờ, chỉ không còn streaming text).
+              awaitingClarification = true;
+              pendingReadersRef.current.set(botId, { reader, decoder, buffer, acc });
+              patch({
+                status: "awaiting_clarification",
+                clarification: { jobId: data.jobId, questions: data.questions },
+              });
+              return; // dừng vòng lặp NGAY — KHÔNG đọc thêm cho tới khi user trả lời.
+            } else if (data.text) {
+              acc += data.text;
+              patch({ streamedLatex: acc });
+            } else if (data.doc) {
+              settled = true;
+              const failed = Boolean(data.doc.error);
+              const warns: string[] = Array.isArray(data.warnings) ? data.warnings : [];
+              const warnNote = warns.length > 0 ? ` (Lưu ý: ${warns.join(" · ")})` : "";
+              patch({
+                status: "done",
+                streamedLatex: acc,
+                docId: data.doc.id,
+                hasPdf: Boolean(data.doc.pdfBase64),
+                error: failed ? data.doc.error : undefined,
+                clarification: undefined,
+                text: failed
+                  ? `Đã tạo tài liệu “${data.doc.title}”, nhưng biên dịch PDF chưa thành công. Bạn có thể mở để xem mã nguồn và nhật ký lỗi.${warnNote}`
+                  : `Đã tạo xong tài liệu “${data.doc.title}”. Nhấn để mở và xem PDF.${warnNote}`,
+              });
+              router.refresh();
+            } else if (data.message) {
+              settled = true;
+              patch({ status: "error", error: data.message });
+            }
+          } catch {
+            // bỏ qua chunk JSON không hợp lệ
+          }
+        }
+      }
+
+      if (!awaitingClarification && !settled) {
+        patch({ status: "error", error: "Kết nối bị gián đoạn trước khi hoàn tất." });
+      }
+    },
+    [router],
+  );
 
   const send = useCallback(
     async (
@@ -114,65 +219,64 @@ export function useDocumentGenerationChat() {
 
         const reader = res.body.getReader();
         const decoder = new TextDecoder();
-        let buffer = "";
-        let acc = "";
-        let settled = false;
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split("\n");
-          buffer = lines.pop() ?? "";
-          for (const line of lines) {
-            if (!line.startsWith("data: ")) continue;
-            const dataStr = line.slice(6).trim();
-            if (!dataStr) continue;
-            try {
-              const data = JSON.parse(dataStr);
-              if (data.text) {
-                acc += data.text;
-                patch({ streamedLatex: acc });
-              } else if (data.doc) {
-                settled = true;
-                const failed = Boolean(data.doc.error);
-                const warns: string[] = Array.isArray(data.warnings) ? data.warnings : [];
-                const warnNote =
-                  warns.length > 0 ? ` (Lưu ý: ${warns.join(" · ")})` : "";
-                patch({
-                  status: "done",
-                  streamedLatex: acc,
-                  docId: data.doc.id,
-                  hasPdf: Boolean(data.doc.pdfBase64),
-                  error: failed ? data.doc.error : undefined,
-                  text: failed
-                    ? `Đã tạo tài liệu “${data.doc.title}”, nhưng biên dịch PDF chưa thành công. Bạn có thể mở để xem mã nguồn và nhật ký lỗi.${warnNote}`
-                    : `Đã tạo xong tài liệu “${data.doc.title}”. Nhấn để mở và xem PDF.${warnNote}`,
-                });
-                router.refresh();
-              } else if (data.message) {
-                settled = true;
-                patch({ status: "error", error: data.message });
-              }
-            } catch {
-              // bỏ qua chunk JSON không hợp lệ
-            }
-          }
-        }
-
-        if (!settled) {
-          patch({ status: "error", error: "Kết nối bị gián đoạn trước khi hoàn tất." });
-        }
+        await consumeStream(botId, reader, decoder, "", "");
       } catch (e) {
         if ((e as Error)?.name === "AbortError") return;
         patch({ status: "error", error: "Không kết nối được máy chủ. Vui lòng thử lại." });
       } finally {
-        setBusy(false);
-        abortRef.current = null;
+        // KHÔNG setBusy(false) nếu đang chờ clarification — user vẫn cần trả lời trước khi có
+        // thể gửi lượt mới (giữ nguyên hành vi "1 lượt tại một thời điểm" hiện có của UI).
+        if (!pendingReadersRef.current.has(botId)) {
+          setBusy(false);
+          abortRef.current = null;
+        }
       }
     },
-    [busy, router],
+    [busy, consumeStream],
   );
 
-  return { items, busy, send, reset };
+  /**
+   * Gửi câu trả lời cho MỘT câu hỏi đang chờ (hoặc bỏ qua nếu `answers` rỗng và câu hỏi đó không
+   * `required` — UI phải tự chặn gửi rỗng cho câu required, xem ClarificationQuestionForm).
+   * PATCH .../clarify/[jobId] → resolveSession() ở server → SSE stream gốc (đang mở, lưu trong
+   * pendingReadersRef) tự động tiếp tục — hàm này gọi lại consumeStream() để đọc phần còn lại.
+   */
+  const answerClarification = useCallback(
+    async (botId: string, jobId: string, answers: Record<string, string>) => {
+      const pending = pendingReadersRef.current.get(botId);
+      if (!pending) return; // đã bị dọn dẹp (vd. reset()) — không còn gì để tiếp tục.
+
+      const patch = (updates: Partial<ChatItem>) =>
+        setItems((prev) => prev.map((it) => (it.id === botId ? { ...it, ...updates } : it)));
+
+      try {
+        const res = await fetch(`/api/documents/clarify/${jobId}`, {
+          method: "PATCH",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ answers }),
+        });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          patch({ status: "error", error: data.error ?? `Lỗi ${res.status}` });
+          pendingReadersRef.current.delete(botId);
+          setBusy(false);
+          return;
+        }
+      } catch {
+        patch({ status: "error", error: "Không gửi được câu trả lời. Vui lòng thử lại." });
+        pendingReadersRef.current.delete(botId);
+        setBusy(false);
+        return;
+      }
+
+      pendingReadersRef.current.delete(botId);
+      patch({ status: "streaming", clarification: undefined });
+      await consumeStream(botId, pending.reader, pending.decoder, pending.buffer, pending.acc);
+      setBusy(false);
+      abortRef.current = null;
+    },
+    [consumeStream],
+  );
+
+  return { items, busy, send, reset, answerClarification };
 }

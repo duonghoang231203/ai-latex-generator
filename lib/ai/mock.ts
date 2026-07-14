@@ -133,7 +133,16 @@ export class MockProvider implements LatexProvider {
   readonly name = "mock";
   private calls = 0;
 
-  constructor(private readonly scenario: MockScenario = "happy") {}
+  /**
+   * `generateObjectOverride` — cho phép test/dev ép kết quả `generateObject()` cụ thể, thay vì
+   * dùng `generateMockFromSchema()` (luôn lấy GIÁ TRỊ ĐẦU TIÊN của mỗi enum — không đủ để test
+   * các nhánh khác của logic phụ thuộc `RequestPlan.recommendedAction`, vd. E7's "clarify" path,
+   * vì `generateMockFromSchema()` luôn mock ra "generate" — giá trị đầu tiên của enum đó).
+   */
+  constructor(
+    private readonly scenario: MockScenario = "happy",
+    private readonly generateObjectOverride?: (schema: z.ZodTypeAny, prompt: string) => unknown,
+  ) {}
 
   get callCount(): number {
     return this.calls;
@@ -174,12 +183,15 @@ export class MockProvider implements LatexProvider {
   }
 
   /**
-   * Sinh dữ liệu giả HỢP LỆ theo schema (không throw) — dùng generateMockFromSchema() rồi PARSE
-   * LẠI qua chính schema đó trước khi trả, để đảm bảo kết quả luôn pass validation của caller
-   * (bắt lỗi sớm ngay tại đây nếu generateMockFromSchema() sinh sai, thay vì để caller tự phát
-   * hiện qua lỗi khó hiểu ở xa).
+   * Sinh dữ liệu giả HỢP LỆ theo schema. Ưu tiên `generateObjectOverride` nếu có (test cần ép giá
+   * trị cụ thể) — nếu không, dùng `generateMockFromSchema()` rồi PARSE LẠI qua chính schema đó
+   * trước khi trả, để đảm bảo kết quả luôn pass validation của caller (bắt lỗi sớm ngay tại đây
+   * nếu generateMockFromSchema() sinh sai, thay vì để caller tự phát hiện qua lỗi khó hiểu ở xa).
    */
   async generateObject<T>(schema: z.ZodType<T>, prompt: string): Promise<T> {
+    if (this.generateObjectOverride) {
+      return schema.parse(this.generateObjectOverride(schema, prompt));
+    }
     const raw = generateMockFromSchema(schema);
     return schema.parse(raw);
   }

@@ -21,6 +21,7 @@ export interface AppConfig {
   ocrLangs: string; // ngôn ngữ OCR (vd 'vie+eng')
   markdownInputEnabled: boolean; // bật chế độ soạn Markdown → LaTeX (E5)
   ragEnabled: boolean; // bật RAG (retrieval nguồn theo liên quan) — E3
+  clarificationEnabled: boolean; // bật E7 Request Understanding + hỏi lại user trước generate
   embeddingProvider: string; // 'mock' | 'transformers' | 'openai'
   embeddingModel: string; // model embedding (vd 'Xenova/multilingual-e5-small')
   embeddingCacheDir: string; // cache vector theo hash nội dung
@@ -59,6 +60,10 @@ export function getConfig(): AppConfig {
     markdownInputEnabled:
       (process.env.MARKDOWN_INPUT_ENABLED ?? "true").toLowerCase() !== "false",
     ragEnabled: (process.env.RAG_ENABLED ?? "false").toLowerCase() === "true",
+    // E7 mặc định TẮT (giống RAG khi mới thêm) — cần state/resume qua nhiều request HTTP + UI
+    // render câu hỏi, cả hai đều chưa hoàn thiện (Task 6/8, xem explainer.md § 6). Bật nhầm cho
+    // user thật khi chưa có UI xử lý sẽ làm SSE "kẹt" ở awaiting_user_input không ai trả lời được.
+    clarificationEnabled: (process.env.CLARIFICATION_ENABLED ?? "false").toLowerCase() === "true",
     embeddingProvider: process.env.EMBEDDING_PROVIDER ?? "mock",
     embeddingModel: process.env.EMBEDDING_MODEL ?? "Xenova/multilingual-e5-small",
     embeddingCacheDir:

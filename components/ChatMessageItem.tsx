@@ -16,14 +16,17 @@ import {
 } from "@/components/ui/message";
 import { Marker, MarkerContent, MarkerIcon } from "@/components/ui/marker";
 import { Spinner } from "@/components/ui/spinner";
+import ClarificationQuestionForm from "@/components/ClarificationQuestionForm";
 import type { ChatItem } from "@/components/useDocumentGenerationChat";
 
 export default function ChatMessageItem({
   item,
   onOpen,
+  onAnswerClarification,
 }: {
   item: ChatItem;
   onOpen: (docId: string) => void;
+  onAnswerClarification: (botId: string, jobId: string, answers: Record<string, string>) => void;
 }) {
   // Lượt của người dùng: căn phải, bong bóng primary, không cần avatar.
   if (item.role === "user") {
@@ -102,6 +105,23 @@ export default function ChatMessageItem({
                 </Button>
               </MessageFooter>
             )}
+          </>
+        )}
+
+        {item.status === "awaiting_clarification" && item.clarification && (
+          <>
+            <Marker role="status">
+              <MarkerIcon>
+                <TriangleAlertIcon />
+              </MarkerIcon>
+              <MarkerContent>Cần thêm thông tin trước khi tạo tài liệu</MarkerContent>
+            </Marker>
+            <ClarificationQuestionForm
+              questions={item.clarification.questions}
+              onSubmit={(answers) =>
+                onAnswerClarification(item.id, item.clarification!.jobId, answers)
+              }
+            />
           </>
         )}
 
