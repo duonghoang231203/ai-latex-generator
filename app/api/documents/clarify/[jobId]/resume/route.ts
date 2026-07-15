@@ -49,6 +49,10 @@ export async function POST(request: Request, { params }: RouteParams): Promise<R
   if (!userId) {
     return Response.json({ error: "Chưa đăng nhập" }, { status: 401 });
   }
+  // BE-5.3.1: requestId riêng cho luồng resume này — KHÔNG dùng lại requestId của request tạo
+  // session ban đầu (đã đóng từ lâu, có thể không còn trace log cũ), vì đây là 1 request HTTP
+  // hoàn toàn mới, độc lập (đúng kiến trúc § 6.7).
+  const requestId = crypto.randomUUID();
 
   const { jobId } = await params;
 
@@ -133,7 +137,7 @@ export async function POST(request: Request, { params }: RouteParams): Promise<R
         };
 
         try {
-          const deps = buildOrchestratorDeps();
+          const deps = buildOrchestratorDeps(requestId);
           const result = await runByFormat(
             req,
             deps,
@@ -158,6 +162,7 @@ export async function POST(request: Request, { params }: RouteParams): Promise<R
           });
 
           log.info("document.create", {
+            requestId,
             id: doc.id,
             template: session.template,
             docType: session.docType,
@@ -193,7 +198,7 @@ export async function POST(request: Request, { params }: RouteParams): Promise<R
 
   // Non-SSE — theo đúng cấu trúc nhánh else của route.ts chính.
   try {
-    const result = await runByFormat(req, buildOrchestratorDeps());
+    const result = await runByFormat(req, buildOrchestratorDeps(requestId));
     const failed = isDocumentError(result);
     const doc = await createDocument({
       title: deriveTitle(session.description, []),
@@ -211,6 +216,7 @@ export async function POST(request: Request, { params }: RouteParams): Promise<R
     });
 
     log.info("document.create", {
+      requestId,
       id: doc.id,
       template: session.template,
       docType: session.docType,

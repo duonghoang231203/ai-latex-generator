@@ -67,6 +67,7 @@ async function maybeClarify(
   provider: LatexProvider,
   ownerId: string,
   enqueue: (event: string, data: unknown) => void,
+  requestId: string,
 ): Promise<MaybeClarifyResult> {
   const cfg = getConfig();
   if (!cfg.clarificationEnabled || !req.template) {
@@ -85,13 +86,34 @@ async function maybeClarify(
     // Lỗi hạ tầng AI (vd. generateObject thất bại) KHÔNG được chặn user — coi như "generate" với
     // description gốc, log lại để biết tần suất fallback này xảy ra bao nhiêu.
     log.warn("clarification.understand_failed", {
+      requestId,
       template: req.template,
       message: e instanceof Error ? e.message : String(e),
     });
     return { needsClarification: false, req };
   }
 
-  if (result.decision.action === "generate" || result.decision.questions.length === 0) {
+  if (result.decision.action === "generate") {
+    log.info("clarification.understood", {
+      requestId,
+      template: req.template,
+      recommendedAction: "generate",
+      questionCount: 0,
+      ambiguity: result.plan.ambiguity,
+      confidence: result.plan.confidence,
+    });
+    return { needsClarification: false, req };
+  }
+
+  if (result.decision.questions.length === 0) {
+    log.info("clarification.understood", {
+      requestId,
+      template: req.template,
+      recommendedAction: "clarify",
+      questionCount: 0,
+      ambiguity: result.plan.ambiguity,
+      confidence: result.plan.confidence,
+    });
     return { needsClarification: false, req };
   }
 
@@ -104,6 +126,16 @@ async function maybeClarify(
     markdown: req.markdown,
     questions: result.decision.questions,
     expiresAt: new Date(Date.now() + CLARIFICATION_SESSION_TTL_MS).toISOString(),
+  });
+
+  log.info("clarification.understood", {
+    requestId,
+    template: req.template,
+    recommendedAction: result.decision.action,
+    questionCount: result.decision.questions.length,
+    ambiguity: result.plan.ambiguity,
+    confidence: result.plan.confidence,
+    jobId: session.id,
   });
 
   return {
@@ -142,6 +174,9 @@ export async function GET(): Promise<Response> {
 
 export async function POST(request: Request): Promise<Response> {
   const cfg = getConfig();
+  // BE-5.3.1: 1 requestId cho toàn bộ request này, gắn vào mọi dòng log phát sinh (orchestrator,
+  // clarification, document.create) — cho phép trace 1 request cụ thể qua nhiều dòng log rời rạc.
+  const requestId = crypto.randomUUID();
 
   const userId = await getCurrentUserId();
   if (!userId) {
@@ -198,7 +233,7 @@ export async function POST(request: Request): Promise<Response> {
         };
 
         try {
-          const deps = buildOrchestratorDeps();
+          const deps = buildOrchestratorDeps(requestId);
           const clarifyResult = await maybeClarify(
             {
               description: parsed.value.description,
@@ -211,6 +246,7 @@ export async function POST(request: Request): Promise<Response> {
             deps.provider,
             userId,
             enqueue,
+            requestId,
           );
 
           if (clarifyResult.needsClarification) {
@@ -254,6 +290,7 @@ export async function POST(request: Request): Promise<Response> {
           });
 
           log.info("document.create", {
+            requestId,
             id: doc.id,
             template: parsed.value.template,
             docType: parsed.value.docType,
@@ -301,7 +338,7 @@ export async function POST(request: Request): Promise<Response> {
           inputFormat: parsed.value.inputFormat,
           markdown: parsed.value.markdown,
         },
-        buildOrchestratorDeps(),
+        buildOrchestratorDeps(requestId),
       );
 
       const failed = isDocumentError(result);
@@ -321,6 +358,7 @@ export async function POST(request: Request): Promise<Response> {
       });
 
       log.info("document.create", {
+        requestId,
         id: doc.id,
         template: parsed.value.template,
         docType: parsed.value.docType,

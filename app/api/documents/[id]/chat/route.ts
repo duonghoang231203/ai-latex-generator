@@ -20,6 +20,8 @@ const MAX_INSTRUCTION_CHARS = 4000;
 export async function POST(request: Request, ctx: Ctx): Promise<Response> {
   const { id } = await ctx.params;
   const cfg = getConfig();
+  // BE-5.3.1: requestId cho toàn bộ lượt chat-edit này.
+  const requestId = crypto.randomUUID();
 
   const userId = await getCurrentUserId();
   if (!userId) {
@@ -90,7 +92,7 @@ export async function POST(request: Request, ctx: Ctx): Promise<Response> {
               docType: doc.docType,
               template: doc.template,
             },
-            buildOrchestratorDeps(),
+            buildOrchestratorDeps(requestId),
             (chunk) => {
               enqueue("chunk", { text: chunk });
             },
@@ -121,6 +123,7 @@ export async function POST(request: Request, ctx: Ctx): Promise<Response> {
             return;
           }
           log.info("document.chat_edit", {
+            requestId,
             id,
             template: doc.template,
             attempts: result.attempts,
@@ -160,7 +163,7 @@ export async function POST(request: Request, ctx: Ctx): Promise<Response> {
           docType: doc.docType,
           template: doc.template,
         },
-        buildOrchestratorDeps(),
+        buildOrchestratorDeps(requestId),
       );
 
       const failed = isDocumentError(result);
@@ -183,6 +186,7 @@ export async function POST(request: Request, ctx: Ctx): Promise<Response> {
         return Response.json({ error: "Không tìm thấy tài liệu" }, { status: 404 });
       }
       log.info("document.chat_edit", {
+        requestId,
         id,
         template: doc.template,
         attempts: result.attempts,
