@@ -375,10 +375,12 @@ status: generating → compiling → validating (E6) → repair loop → done/er
 - **Có bắt buộc áp dụng cho MỌI request không?** Không — cần policy rõ: request đơn giản/rõ ràng
   hiển nhiên nên bỏ qua bước hiểu request để tránh tăng latency không cần thiết cho trường hợp phổ
   biến nhất.
-- **Trạng thái?** (Cập nhật 2026-07-14, lần 2) **Cả Nhóm A và Nhóm B đã code + test** (§ 6.4, § 6.5)
-  — theo yêu cầu chủ động của người dùng, TRƯỚC KHI điều kiện tiên quyết dưới đây được đáp ứng bằng
-  eval data thật. Toàn bộ luồng end-to-end (understand → clarify → resume → generate) đã verify
-  bằng integration test thật (`tests/integration/api-documents-clarify.test.ts`, gọi đúng route SSE
+- **Trạng thái?** (Cập nhật 2026-07-14, lần 3 — redesign kiến trúc session, xem § 6.7) **Cả Nhóm A
+  và Nhóm B đã code + test**, đã qua 1 lần redesign kiến trúc session (§ 6.7 — bỏ Promise-treo-
+  trong-RAM, lưu session bền, resume qua SSE độc lập hoàn toàn) theo yêu cầu chủ động của người
+  dùng, TRƯỚC KHI điều kiện tiên quyết dưới đây được đáp ứng bằng eval data thật. Toàn bộ luồng
+  end-to-end (understand → clarify → resume qua route độc lập → generate) đã verify bằng
+  integration test thật (`tests/integration/api-documents-clarify.test.ts`, gọi đúng 2 route SSE
   thật). Tính năng nằm sau feature flag `CLARIFICATION_ENABLED` (mặc định `false`,
   `lib/config.ts`) — code tồn tại nhưng KHÔNG chạy cho user thật tới khi có quyết định RIÊNG để bật
   cờ này, độc lập với việc code đã được viết. **Vẫn CHƯA có eval data thực tế** (tỉ lệ request mơ hồ
@@ -389,7 +391,7 @@ status: generating → compiling → validating (E6) → repair loop → done/er
 
 ---
 
-## 6. Task breakdown khi bắt đầu implement (Nhóm A + Nhóm B đã code, xem § 6.5)
+## 6. Task breakdown khi bắt đầu implement (Nhóm A + Nhóm B đã code — xem § 6.7 cho kiến trúc MỚI NHẤT)
 
 > Cập nhật: **2026-07-14**. Task 1-4 (Nhóm A) đã được implement + test (xem § 6.4) — quyết định làm
 > ngay phần logic thuần (schema/registry/policy), KHÔNG đợi eval data, vì phần này không gọi AI/SSE/
@@ -646,36 +648,118 @@ trước đó)"*.
 - `tests/integration/api-documents-clarify.test.ts` — thêm assertion `expiresAt` thật trong payload
   SSE, xác nhận là timestamp tương lai hợp lệ (không chỉ test ở tầng component, mà cả route thật).
 
+### 6.7. Redesign lần 2 (2026-07-14) — bỏ Promise-treo-trong-RAM, lưu session bền, resume qua SSE mới
 
-B; `npx tsc --noEmit` — 0 lỗi mới; `npx eslint` trên toàn bộ file liên quan — sạch):
-- `lib/ai/prompts/understand-request.ts` (mới) — prompt Request Understanding, theo đúng convention
-  XML-tag của `buildGeneratePrompt()`.
-- `lib/clarification/understand-request.ts` (mới) — `understandRequest(provider, input)`.
-- `lib/clarification/session.ts` (mới) — session store, xem 3 quyết định kiến trúc trên.
-  `tests/unit/clarification-session.test.ts` (7 test, bao gồm TTL timeout dùng `vi.useFakeTimers()`).
-- `lib/ai/mock.ts` — thêm `generateObjectOverride` (constructor param 2, optional) cho
-  `MockProvider` — cần để test được nhánh "clarify" (mock mặc định luôn lấy giá trị ENUM ĐẦU TIÊN,
-  tức luôn "generate", không đủ để test nhánh khác).
-- `lib/config.ts` — thêm `clarificationEnabled` (đọc `CLARIFICATION_ENABLED`, mặc định `false`).
-- `app/api/documents/route.ts` — thêm `maybeClarify()`, gọi trong nhánh SSE trước `runByFormat()`.
-- `app/api/documents/clarify/[jobId]/route.ts` (mới) — `GET` (lấy lại câu hỏi đang chờ, cho
-  trường hợp reload trang) + `PATCH` (gửi câu trả lời, resolve session).
-- `components/useDocumentGenerationChat.ts` — thêm `ClarificationQuestion`/`clarification` vào
-  `ChatItem`, tách vòng lặp đọc SSE thành `consumeStream()` dùng chung cho lần gọi đầu và lần tiếp
-  tục sau `answerClarification()`; lưu `reader` đang mở theo `botId` trong `pendingReadersRef`.
-- `components/ClarificationQuestionForm.tsx` (mới) — render câu hỏi, nút gửi disabled khi còn field
-  `required` chưa trả lời, nút "Bỏ qua câu này" LUÔN hiện khi `!required` (Outcome 2, mục 3.2).
-  `tests/unit/clarification-question-form.test.tsx` (7 test, bao gồm Ví dụ 4 field hỗn hợp).
-- `components/ChatMessageItem.tsx`, `components/ChatAssistant.tsx` — nối `ClarificationQuestionForm`
-  vào nhánh render `status === "awaiting_clarification"`.
+> **Toàn bộ § 6.4/6.5/6.6 ở trên mô tả kiến trúc CŨ, ĐÃ BỊ THAY THẾ.** Giữ lại nguyên văn làm bằng
+> chứng quá trình quyết định (đặc biệt § 6.6 — bug TTL đã dẫn trực tiếp tới quyết định redesign
+> này), KHÔNG xoá lịch sử. Mọi mô tả code cụ thể (`lib/clarification/session.ts` Promise-based,
+> `SESSION_TTL_MS` export, `useCountdown` hook...) ở § 6.4-6.6 **không còn đúng với code hiện tại**
+> — xem lại nội dung dưới đây để biết trạng thái thật.
 
-**Bằng chứng end-to-end thật** (`tests/integration/api-documents-clarify.test.ts`, 4 test) — gọi
-ĐÚNG route SSE thật (`POST /api/documents` với `Accept: text/event-stream`), verify TRỰC TIẾP câu
-hỏi "hệ thống có hỏi lại user không":
-1. `recommendedAction: "clarify"` → route gửi `awaiting_user_input` với đúng câu hỏi, generation
-   THỰC SỰ DỪNG (không có event `complete` cho tới khi trả lời).
-2. `PATCH /api/documents/clarify/[jobId]` với câu trả lời → generation TIẾP TỤC trong CÙNG 1 SSE
-   stream (không mở stream mới), document được tạo với description đã enrich câu trả lời.
-3. `recommendedAction: "generate"` → không có `awaiting_user_input`, hành vi giống hệt trước E7.
-4. `CLARIFICATION_ENABLED=false` (mặc định) → không gọi `understandRequest()` — nếu route lỡ gọi,
-   test tự throw ngay (`currentPlanOverride` không được set), tự động phát hiện regression.
+**Lý do đổi (do user đề xuất, không phải agent tự phát hiện):** Sau khi sửa bug TTL ở § 6.6 (thêm
+đếm ngược + tự disable), user đặt câu hỏi thẳng vào bản chất thiết kế: *"nếu hết thời gian thì vẫn
+đợi user trả lời, khi bấm done thì tiến hành kết nối lại để tiếp tục chat chứ nhỉ?"* — nghĩa là
+không chấp nhận giới hạn 5 phút làm mốc "phải trả lời trước, nếu không coi như bỏ". Điều này đúng
+đắn về UX (người dùng có thể cần suy nghĩ lâu, tìm đề bài, hỏi người khác...) nhưng kiến trúc cũ
+(1 Promise treo trong closure của 1 SSE stream đang mở) **không hỗ trợ được về mặt kỹ thuật** —
+Promise một khi `reject()` là kết thúc vĩnh viễn, và giữ 1 kết nối HTTP mở vô thời hạn (ngày/tuần)
+là rủi ro tài nguyên không giới hạn (nếu user bỏ đi hẳn, không bao giờ trả lời).
+
+3 phương án đã đưa ra và user chọn **[C]**:
+- **[A] Bỏ TTL hoàn toàn:** đợi vô thời hạn trong CÙNG kết nối — đơn giản nhưng rủi ro resource
+  không giới hạn nếu user bỏ đi hẳn.
+- **[B] Giữ TTL nhưng gia hạn theo yêu cầu:** phức tạp hơn, cần cơ chế "xin thêm giờ" — không giải
+  quyết triệt để vì vẫn ràng buộc với 1 kết nối còn sống.
+- **[C] (ĐÃ CHỌN) Bỏ hẳn việc giữ kết nối mở:** đóng SSE ngay khi hỏi, lưu đủ dữ liệu để RESTART
+  generate từ đầu ở một request hoàn toàn độc lập, bất kể bao lâu sau.
+
+**3 quyết định con của [C], đã hỏi lại user xác nhận trước khi code:**
+1. **Nơi lưu bền:** Supabase Postgres (bảng mới `clarification_sessions`, cùng convention RLS với
+   `documents`) khi `STORE_BACKEND=supabase`; file JSON trong `DATA_DIR` khi `STORE_BACKEND=file`
+   (mặc định dev) — theo đúng facade pattern đã có cho document store, KHÔNG thêm Redis/dependency
+   mới nào (project không có hạ tầng cache/session nào khác).
+2. **"Tiếp tục chat" nghĩa là gì:** user xác nhận rõ — là **tiếp tục QUY TRÌNH TẠO DOCUMENT** (một
+   luồng generate mới hoàn toàn, tạo document mới), KHÔNG phải "sửa tiếp" một document đã có sẵn
+   (vì document chưa từng được tạo lúc hỏi — đúng thiết kế cũ, generate chỉ xảy ra SAU khi đủ info).
+3. **TTL còn ý nghĩa gì:** vẫn còn 1 `expiresAt` (mặc định 5 phút) nhưng **chỉ để validate LƯỜI
+   (lazy) tại thời điểm resume**, KHÔNG có `setTimeout`/cron nào tự động làm gì cả. Nếu user resume
+   sau khi đã quá `expiresAt`, request đó nhận lỗi rõ ràng (`410 Gone`) — session vẫn CÒN trong
+   DB/file (không tự xoá), chỉ đổi `status` từ `'pending'` sang `'expired'` ngay lúc đọc/answer.
+   *(Ghi chú: TTL 5 phút này có thể cần tăng lên đáng kể nếu mục tiêu thật là "đợi vài ngày" — giá
+   trị 5 phút hiện tại kế thừa từ thiết kế cũ, CHƯA được user xác nhận lại con số cụ thể cho ngữ
+   cảnh mới; xem đây là điểm cần hỏi lại nếu 5 phút vẫn quá ngắn trong thực tế sử dụng.)*
+
+**Kiến trúc mới — luồng dữ liệu:**
+
+```
+POST /api/documents (SSE)
+  → understandRequest() → cần clarify?
+      NO  → generate như cũ (không đổi)
+      YES → createSession() [Postgres/file] → enqueue("awaiting_user_input", {jobId, questions, reason})
+            → controller.close()  ← ĐÓNG NGAY, không await gì thêm
+
+            ... (bất kỳ khoảng thời gian nào — giây, giờ, ngày) ...
+
+POST /api/documents/clarify/[jobId]/resume (SSE MỚI, độc lập hoàn toàn)
+  → getSession(jobId) → status 'expired'? → 410
+                       → status 'answered'? → 409 (đã dùng trước đó)
+  → answerSession(jobId) → đánh dấu 'answered' NGAY (chặn double-submit)
+  → enrich description với answers → runByFormat() từ đầu → SSE MỚI → tạo document MỚI → 'complete'
+```
+
+**File đã tạo/sửa/xoá (redesign lần 2, tất cả qua `npx vitest run` — 300/300 pass, `npx tsc
+--noEmit` — 0 lỗi mới, `npx eslint` — sạch):**
+
+Mới:
+- `supabase/migrations/0002_clarification_sessions.sql` — bảng `clarification_sessions` (RLS,
+  trigger `updated_at`, KHÔNG có policy DELETE — không cron dọn dẹp theo quyết định #3 trên).
+- `lib/clarification/types.ts` — `ClarificationSession` (serializable thuần, KHÔNG còn
+  `resolve`/`reject`/`timeoutHandle` như thiết kế Promise cũ).
+- `lib/clarification/session-store-file.ts` / `session-store-supabase.ts` / `session-store.ts`
+  (facade) — CRUD tối giản (`createSession`/`getSession`/`answerSession`), theo đúng pattern
+  `file-document-store.ts`/`supabase-document-store.ts`/`documentStore.ts` đã có. Lazy-expiry áp
+  dụng NGAY khi đọc/answer, không polling/cron.
+- `app/api/documents/clarify/[jobId]/resume/route.ts` (POST) — route generate MỚI hoàn toàn, cấu
+  trúc SSE giống `route.ts` chính (có cả nhánh SSE và non-SSE).
+
+Sửa:
+- `app/api/documents/route.ts::maybeClarify()` — viết lại hoàn toàn, trả `MaybeClarifyResult`
+  union (`needsClarification: true | false`) thay vì `await` một `Promise` treo. Khi `true`, route
+  `enqueue` + `controller.close()` + `return` ngay, KHÔNG tiếp tục `runByFormat()`.
+- `components/useDocumentGenerationChat.ts` — viết lại hoàn toàn. `runSSERequest(botId, url, body,
+  signal)` là hàm chung cho cả `send()` VÀ `answerClarification()` — cả hai đều "mở 1 SSE mới, đọc
+  tới hết", không còn khái niệm "tiếp tục đọc reader cũ" (`pendingReadersRef`/`consumeStream` của
+  thiết kế cũ đã bỏ hoàn toàn).
+- `components/ClarificationQuestionForm.tsx` — bỏ hoàn toàn `useCountdown`/`expiresAt` prop/tự
+  disable khi hết hạn (§ 6.6 thêm, giờ không cần nữa vì session không còn hết hạn theo nghĩa "phải
+  trả lời trước X phút để không mất session"). Nút gửi luôn bấm được, lỗi thật (410/409) hiển thị
+  qua `ChatItem.status === "error"` ở tầng cha khi submit thật, không phải component tự đoán trước.
+- `components/ChatMessageItem.tsx` — bỏ prop `expiresAt` khi gọi `ClarificationQuestionForm`.
+
+Xoá (không dùng nữa):
+- `app/api/documents/clarify/[jobId]/route.ts` (PATCH cũ) — thay bằng `resume/route.ts`.
+- `lib/clarification/session.ts` (Promise-based, in-memory) — thay bằng `session-store*.ts`.
+- `tests/unit/clarification-session.test.ts` — thay bằng
+  `tests/unit/clarification-session-store-file.test.ts`.
+
+**Test bổ sung/viết lại:**
+- `tests/unit/clarification-session-store-file.test.ts` (7 test, mới) — CRUD thật với `DATA_DIR`
+  tạm, bao gồm lazy-expiry (session quá hạn tự chuyển `'expired'` khi đọc), double-answer bị chặn.
+- `tests/unit/clarification-question-form.test.tsx` (9 test, viết lại hoàn toàn) — bỏ mọi test
+  liên quan countdown, thêm 2 test xác nhận KHÔNG còn bất kỳ UI đếm ngược/hết hạn nào.
+- `tests/integration/api-documents-clarify.test.ts` (6 test, viết lại hoàn toàn) — bằng chứng quan
+  trọng nhất: gọi route đầu, `await` đọc SSE **tới khi đóng hoàn toàn** (mô phỏng đúng việc kết nối
+  đã kết thúc), RỒI MỚI gọi route resume như 1 request độc lập tuyệt đối — xác nhận generate vẫn
+  hoạt động đúng mà không cần bất kỳ state nào sống sót từ request đầu ngoài `jobId`. Cũng xác nhận
+  double-resume bị 409, resume sai `jobId` bị 404, và 2 case cũ (generate path, flag off) không đổi.
+
+**Không viết test riêng cho `session-store-supabase.ts`** — xác nhận đây đúng convention đã có của
+project (`supabase-document-store.ts` cũng không có test riêng, do cần mock `next/headers` phức
+tạp; facade pattern đảm bảo cùng interface nên tin tưởng logic đã test qua file backend là đủ).
+
+**Việc CHƯA làm / có thể cần xem lại sau:**
+- Giá trị TTL 5 phút (`CLARIFICATION_SESSION_TTL_MS`, `app/api/documents/route.ts`) chưa được xác
+  nhận lại — nếu mục tiêu thật là hỗ trợ "vài ngày", nên tăng lên đáng kể hoặc bỏ hẳn khái niệm hết
+  hạn (đổi UI để không nói "hết hạn" mà chỉ có lỗi khi thực sự dùng session đã trả lời rồi).
+- Không có cơ chế dọn rác cho session `'expired'`/`'answered'` tồn đọng lâu dài trong DB/file (theo
+  đúng quyết định "không cần cron" — nhưng nếu về sau cần, đây là điểm bổ sung).
