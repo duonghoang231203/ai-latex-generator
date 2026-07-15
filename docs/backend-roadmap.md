@@ -127,12 +127,13 @@ template đã có.*
 
 - **BE-5.1 `[Platform]`:** Hoàn thiện luồng CI/CD (GitHub Actions): Chạy unit tests, chạy E6 prompt evals mỗi khi có PR.
 - **BE-5.2 `[Platform]`:** Cấu hình Docker cho Orchestrator và tách biệt hoàn toàn `compile-service` sang một môi trường an toàn cao (GCP Cloud Run / AWS Fargate) vì đây là sandbox chạy mã untrusted.
-- **BE-5.3 `[Platform]`:** 🔄 **3/8 task con đã xong (2026-07-15)** — mở rộng
+- **BE-5.3 `[Platform]`:** 🔄 **5/8 task con đã xong (2026-07-15)** — mở rộng
   chi tiết bên dưới. Nền tối giản đã tồn tại (`lib/log.ts` — JSON structured log, tự động redact
-  field nhạy cảm), độ phủ đã tăng đáng kể sau BE-5.3.1/5.3.2/5.3.3 (từ 6 điểm `log.*()` rời rạc,
-  không `requestId`, lên có `requestId` xuyên suốt + 5 event mới ở tầng orchestrator/clarification)
-  nhưng **vẫn không có APM/error tracking thật** — cần làm rõ scope trước khi cam kết "Sentry,
-  Datadog" (BE-5.3.6/5.3.7, câu gốc quá chung, chưa đủ để bàn giao).
+  field nhạy cảm), độ phủ đã tăng đáng kể sau BE-5.3.1/5.3.2/5.3.3/5.3.4/5.3.5 (từ 6 điểm `log.*()`
+  rời rạc, không `requestId`, luôn ghi cả 3 mức, lên có `requestId` xuyên suốt generate/repair/
+  compile + 5 event mới + log level filter production-ready) nhưng **vẫn không có APM/error
+  tracking thật** — cần làm rõ scope trước khi cam kết "Sentry, Datadog" (BE-5.3.6/5.3.7, câu gốc
+  quá chung, chưa đủ để bàn giao).
 
   > **Bối cảnh phát hiện (khi debug E7 thật 2026-07-14):** user hỏi mô tả mơ hồ ("Giải bài này giúp
   > tôi") qua AI thật (`AI_PROVIDER=sotatek-anthropic`), kỳ vọng hệ thống hỏi lại nhưng KHÔNG thấy
@@ -202,11 +203,40 @@ template đã có.*
   npx tsc --noEmit: 0 lỗi mới (4 lỗi pre-existing không liên quan, đã biết từ trước). npx vitest
   run: 306/306 pass (300 cũ + 6 mới). npx eslint: sạch trên toàn bộ file sửa/tạo.
 
-  - [ ] **BE-5.3.4** Bổ sung log vào `lib/compile/client.ts` (gọi compile-service qua HTTP): latency
-        thật, status code, có phải lỗi network/timeout hay lỗi biên dịch LaTeX (2 loại khác nhau,
-        cần phân biệt rõ trong log để biết nên sửa prompt hay sửa infra).
-  - [ ] **BE-5.3.5** Thêm log level filter qua biến môi trường (`LOG_LEVEL`, mặc định `info`) —
-        hiện `lib/log.ts` luôn ghi cả 3 mức, production nên tắt `info` ồn ào, giữ `warn`/`error`.
+  - [x] **BE-5.3.4** ✅ **Hoàn thành (2026-07-15).** Log trong `lib/compile/client.ts::postCompile()`
+        — cùng cơ chế DI như `OrchestratorDeps.logger` (`CompileClientOptions.logger?`, optional,
+        mặc định không log gì — `lib/prompt-eval/scorers/compile-success.ts` không cần sửa).
+        `buildOrchestratorDeps(requestId)` truyền cùng `logger` đã dùng cho orchestrator, nên
+        `compile.request` cũng mang `requestId` giống các event khác của request đó. Event
+        `compile.request`, fields: `latencyMs` (đo bằng `Date.now()` trước/sau `fetch`), `outcome`
+        (`success` | `compile_error` | `infra_error`), `status` (khi có response — infra_error do
+        network/abort/timeout thì KHÔNG có `status`, chỉ có `message`). Phân biệt rõ `compile_error`
+        (JSON `{success:false,log}` — lỗi NỘI DUNG LaTeX, nên sửa prompt) với `infra_error` (status
+        bất thường hoặc network — nên sửa infra), đúng mục tiêu ban đầu. **Lưu ý phạm vi (Option A
+        đã chọn):** CHỈ log trong `postCompile()`, KHÔNG mở rộng `requestId` sang route
+        `PATCH /api/documents/[id]` (user tự sửa LaTeX thủ công rồi recompile) — route đó gọi
+        `compileLatex()` trực tiếp, không qua `OrchestratorDeps`, nên hiện chưa có `requestId`
+        (ghi nhận là việc CHƯA làm, không phải lỗi — xem "Việc CHƯA làm" cuối mục này).
+        Verify bằng 5 test mới (`tests/unit/compile-client-logger.test.ts`).
+  - [x] **BE-5.3.5** ✅ **Hoàn thành (2026-07-15).** `lib/config.ts` thêm `logLevel: "info"|"warn"|
+        "error"` (đọc `LOG_LEVEL`, validate 3 giá trị hợp lệ, sai/thiếu ⇒ fallback `"info"` —
+        KHÔNG throw). `lib/log.ts::emit()` bỏ qua ghi nếu `LEVEL_ORDER[level] <
+        LEVEL_ORDER[logLevel]` (đặt filter TRONG `emit()`, không phải `buildLogRecord()` — giữ
+        `buildLogRecord()` là hàm thuần, không phụ thuộc `console`/`config`, để test cũ gọi trực
+        tiếp không bị ảnh hưởng). Verify bằng 4 test mới (`tests/unit/log.test.ts`, dùng
+        `vi.resetModules()` + dynamic import để buộc `getConfig()` đọc lại `process.env.LOG_LEVEL`
+        mỗi lần).
+
+  npx tsc --noEmit: 0 lỗi mới. npx vitest run: 315/315 pass (306 sau BE-5.3.1-3 + 9 mới). npx
+  eslint: sạch trên toàn bộ file sửa/tạo.
+
+  > **Việc CHƯA làm (phát hiện trong lúc làm BE-5.3.4, chưa xử lý — Option A đã chọn có chủ ý):**
+  > `app/api/documents/[id]/route.ts` (PATCH, user tự sửa LaTeX thủ công) là route THỨ TƯ gọi
+  > `compileLatex()` nhưng KHÔNG đi qua `buildOrchestratorDeps()`/`OrchestratorDeps` — không có
+  > `requestId`, không có `deps.logger`. Nếu cần trace đầy đủ mọi đường compile trong hệ thống,
+  > route này cần được nối vào cùng cơ chế. Cũng phát hiện `.env.example` được `README.md` dẫn tới
+  > nhưng **không tồn tại trong repo** — ngoài phạm vi BE-5.3, cần xử lý riêng.
+
   - [ ] **BE-5.3.6** Quyết định + tích hợp **error tracking thật** (Sentry hoặc tương đương) —
         CHỈ cho `error` level (exception thật, không phải business failure như "repair loop hết
         lượt" — đó vẫn là HTTP 200 theo thiết kế hiện tại, xem `DocumentError`). Cần audit kỹ
