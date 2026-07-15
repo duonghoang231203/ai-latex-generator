@@ -257,4 +257,35 @@ describe("E7 redesign lần 2 — server ĐÓNG SSE ngay khi cần hỏi, resume
     expect(events).not.toContain("awaiting_user_input");
     expect(events).toContain("complete");
   });
+
+  it("BE-5.3.1/5.3.3 — mọi log.info của MỘT request đều mang CÙNG requestId, kể cả clarification.understood (log THÀNH CÔNG)", async () => {
+    currentPlanOverride = clarifyPlan();
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+    try {
+      const { POST } = await import("@/app/api/documents/route");
+      const res = await POST(
+        sseReq("http://localhost/api/documents", {
+          description: "Giải bài toán đạo hàm giúp tôi",
+          docType: "article",
+          template: "math",
+        }),
+      );
+      await collectSSE(res);
+
+      const records = logSpy.mock.calls.map(([line]) => JSON.parse(line as string));
+      const understood = records.find((r) => r.event === "clarification.understood");
+      expect(understood).toBeTruthy();
+      expect(understood.recommendedAction).toBe("clarify");
+      expect(understood.questionCount).toBe(1);
+      expect(typeof understood.requestId).toBe("string");
+      expect(understood.requestId.length).toBeGreaterThan(0);
+
+      // Không có log.info nào khác trong request này (chỉ có awaiting_user_input, không generate
+      // tới document.create) — nhưng NẾU có, phải mang đúng CÙNG requestId (trace xuyên request).
+      const allRequestIds = new Set(records.map((r) => r.requestId).filter(Boolean));
+      expect(allRequestIds.size).toBe(1);
+    } finally {
+      logSpy.mockRestore();
+    }
+  });
 });
