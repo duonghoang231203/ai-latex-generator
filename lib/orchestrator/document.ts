@@ -24,6 +24,8 @@ import { truncateLog } from "@/lib/orchestrator/truncateLog";
 import { getTemplate, wrapBodyInTemplate } from "@/lib/templates/registry";
 import { convertMarkdownToLatexBody } from "@/lib/markdown/markdown-to-latex";
 import { validateProject } from "@/lib/store/project-document";
+import { detectErrorType } from "@/lib/ai/prompts/repair-latex";
+import type { LogFields } from "@/lib/log";
 
 export interface OrchestratorDeps {
   provider: LatexProvider;
@@ -41,6 +43,14 @@ export interface OrchestratorDeps {
     description: string,
     sources: SourceFile[],
   ) => Promise<RetrievedChunk[] | null>;
+  /**
+   * Observability (BE-5.3.2, optional — mặc định không log gì, giữ hành vi hiện tại cho mọi test/
+   * eval tooling không truyền field này). Route (caller) tự quyết định requestId được gắn thế nào
+   * (xem buildOrchestratorDeps(requestId) ở lib/orchestrator/deps.ts) — orchestrator chỉ biết gọi
+   * deps.logger?.(event, fields), không biết/không cần biết requestId là gì (DI, tách rời tầng
+   * "quyết định log cái gì" khỏi tầng "quyết định log đi đâu/kèm gì").
+   */
+  logger?: (event: string, fields: LogFields) => void;
 }
 
 function toBase64(bytes: Uint8Array): string {
@@ -88,6 +98,7 @@ export async function generateWithTruncationRecovery(
   provider: LatexProvider,
   baseInput: GenerateInput,
   baseMaxTokens: number = DEFAULT_BASE_MAX_TOKENS,
+  logger?: (event: string, fields: LogFields) => void,
 ): Promise<GenerateOutcome> {
   let currentMaxTokens = baseMaxTokens;
   let outcome = await provider.generate(baseInput);
@@ -96,6 +107,11 @@ export async function generateWithTruncationRecovery(
   while (outcome.finishReason === "length" && retries < MAX_TRUNCATION_RETRIES) {
     retries += 1;
     currentMaxTokens = Math.round(currentMaxTokens * TRUNCATION_TOKEN_MULTIPLIER);
+    logger?.("orchestrator.truncation_retry", {
+      retries,
+      currentMaxTokens,
+      finishReason: outcome.finishReason,
+    });
     outcome = await provider.generate({
       ...baseInput,
       maxTokensOverride: currentMaxTokens,
@@ -168,6 +184,7 @@ async function runRepairLoop(
       // 2) Compile (final source of truth).
       const c = await compile(latex);
       if (c.success) {
+        deps.logger?.("orchestrator.repair_success", { attempts, docType });
         return {
           latex,
           pdfBase64: toBase64(c.pdf),
@@ -178,8 +195,14 @@ async function runRepairLoop(
       lastLog = truncateLog(c.log);
     }
 
+    deps.logger?.("orchestrator.repair_attempt", {
+      attempts,
+      errorType: detectErrorType(lastLog),
+    });
+
     // Out of attempts → business failure (HTTP 200 at route).
     if (attempts >= maxAttempts) {
+      deps.logger?.("orchestrator.repair_exhausted", { attempts, docType });
       return {
         error:
           "Không tạo được PDF sau nhiều lần thử. Bạn có thể chỉnh mã LaTeX dưới đây hoặc thử lại.",
@@ -216,14 +239,19 @@ export async function runDocument(
   const templateRepairHints = tpl?.repairHints;
 
   const initial = (
-    await generateWithTruncationRecovery(deps.provider, {
-      description: req.description,
-      docType: req.docType,
-      template: req.template,
-      sources: req.sources,
-      retrievedSources,
-      onChunk,
-    })
+    await generateWithTruncationRecovery(
+      deps.provider,
+      {
+        description: req.description,
+        docType: req.docType,
+        template: req.template,
+        sources: req.sources,
+        retrievedSources,
+        onChunk,
+      },
+      undefined,
+      deps.logger,
+    )
   ).latex;
 
   onCompileStart?.();
@@ -232,15 +260,20 @@ export async function runDocument(
     initial,
     async (previousLatex, errorLog) =>
       (
-        await generateWithTruncationRecovery(deps.provider, {
-          description: req.description,
-          docType: req.docType,
-          template: req.template,
-          sources: req.sources,
-          retrievedSources,
-          errorContext: { previousLatex, errorLog },
-          templateRepairHints,
-        })
+        await generateWithTruncationRecovery(
+          deps.provider,
+          {
+            description: req.description,
+            docType: req.docType,
+            template: req.template,
+            sources: req.sources,
+            retrievedSources,
+            errorContext: { previousLatex, errorLog },
+            templateRepairHints,
+          },
+          undefined,
+          deps.logger,
+        )
       ).latex,
     req.docType,
     deps,
@@ -288,14 +321,19 @@ export async function runDocumentFromMarkdown(
     initial,
     async (previousLatex, errorLog) =>
       (
-        await generateWithTruncationRecovery(deps.provider, {
-          description: "",
-          docType: req.docType,
-          template: req.template,
-          errorContext: { previousLatex, errorLog },
-          templateRepairHints,
-          onChunk,
-        })
+        await generateWithTruncationRecovery(
+          deps.provider,
+          {
+            description: "",
+            docType: req.docType,
+            template: req.template,
+            errorContext: { previousLatex, errorLog },
+            templateRepairHints,
+            onChunk,
+          },
+          undefined,
+          deps.logger,
+        )
       ).latex,
     req.docType,
     deps,
@@ -350,14 +388,19 @@ export async function runProject(
     rootLatex,
     async (previousLatex, errorLog) =>
       (
-        await generateWithTruncationRecovery(deps.provider, {
-          description: "",
-          docType: req.docType,
-          template: req.template,
-          errorContext: { previousLatex, errorLog },
-          templateRepairHints,
-          onChunk,
-        })
+        await generateWithTruncationRecovery(
+          deps.provider,
+          {
+            description: "",
+            docType: req.docType,
+            template: req.template,
+            errorContext: { previousLatex, errorLog },
+            templateRepairHints,
+            onChunk,
+          },
+          undefined,
+          deps.logger,
+        )
       ).latex,
     req.docType,
     deps,
@@ -381,16 +424,21 @@ export async function runEdit(
   const templateRepairHints = tpl?.repairHints;
 
   const initial = (
-    await generateWithTruncationRecovery(deps.provider, {
-      description: "",
-      docType: req.docType,
-      template: req.template,
-      editContext: {
-        currentLatex: req.currentLatex,
-        instruction: req.instruction,
+    await generateWithTruncationRecovery(
+      deps.provider,
+      {
+        description: "",
+        docType: req.docType,
+        template: req.template,
+        editContext: {
+          currentLatex: req.currentLatex,
+          instruction: req.instruction,
+        },
+        onChunk,
       },
-      onChunk,
-    })
+      undefined,
+      deps.logger,
+    )
   ).latex;
 
   onCompileStart?.();
@@ -399,13 +447,18 @@ export async function runEdit(
     initial,
     async (previousLatex, errorLog) =>
       (
-        await generateWithTruncationRecovery(deps.provider, {
-          description: "",
-          docType: req.docType,
-          template: req.template,
-          errorContext: { previousLatex, errorLog },
-          templateRepairHints,
-        })
+        await generateWithTruncationRecovery(
+          deps.provider,
+          {
+            description: "",
+            docType: req.docType,
+            template: req.template,
+            errorContext: { previousLatex, errorLog },
+            templateRepairHints,
+          },
+          undefined,
+          deps.logger,
+        )
       ).latex,
     req.docType,
     deps,

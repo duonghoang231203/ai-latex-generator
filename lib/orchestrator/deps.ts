@@ -9,12 +9,23 @@ import type { ProjectFile, RetrievedChunk, SourceFile } from "@/lib/types/docume
 import { getEmbeddingProvider } from "@/lib/ai/embedding-factory";
 import { retrieveRelevantSources } from "@/lib/rag/retrieve-relevant-sources";
 import { FileEmbeddingCache } from "@/lib/rag/embedding-cache";
+import { log, type LogFields } from "@/lib/log";
 
-export function buildOrchestratorDeps(): OrchestratorDeps {
+/**
+ * `requestId` BẮT BUỘC (BE-5.3.1) — mỗi route tự sinh (`crypto.randomUUID()`) MỘT LẦN ở đầu
+ * handler và truyền vào đây, để mọi dòng log phát sinh từ orchestrator cho request đó (generate,
+ * mỗi lần repair, truncation retry...) đều mang cùng `requestId` — cho phép lọc/trace log của một
+ * request cụ thể xuyên suốt nhiều dòng rời rạc. Bắt buộc (không optional) có chủ đích: tránh
+ * trường hợp quên truyền rồi log thiếu requestId mà không ai phát hiện ra.
+ */
+export function buildOrchestratorDeps(requestId: string): OrchestratorDeps {
   const cfg = getConfig();
+  const logger = (event: string, fields: LogFields) =>
+    log.info(event, { requestId, ...fields });
   return {
     provider: getProvider(),
     maxAttempts: cfg.maxRepairAttempts,
+    logger,
     compile: (latex) =>
       compileLatex(latex, {
         serviceUrl: cfg.compileServiceUrl,
