@@ -127,10 +127,12 @@ template đã có.*
 
 - **BE-5.1 `[Platform]`:** Hoàn thiện luồng CI/CD (GitHub Actions): Chạy unit tests, chạy E6 prompt evals mỗi khi có PR.
 - **BE-5.2 `[Platform]`:** Cấu hình Docker cho Orchestrator và tách biệt hoàn toàn `compile-service` sang một môi trường an toàn cao (GCP Cloud Run / AWS Fargate) vì đây là sandbox chạy mã untrusted.
-- **BE-5.3 `[Platform]`:** 🔄 **Một phần đã có (2026-07-14, khảo sát bằng code thật)** — mở rộng
+- **BE-5.3 `[Platform]`:** 🔄 **3/8 task con đã xong (2026-07-15)** — mở rộng
   chi tiết bên dưới. Nền tối giản đã tồn tại (`lib/log.ts` — JSON structured log, tự động redact
-  field nhạy cảm), nhưng **độ phủ rất thấp** và **không có APM/error tracking thật** — cần làm rõ
-  scope trước khi cam kết "Sentry, Datadog" (câu gốc quá chung, chưa đủ để bàn giao).
+  field nhạy cảm), độ phủ đã tăng đáng kể sau BE-5.3.1/5.3.2/5.3.3 (từ 6 điểm `log.*()` rời rạc,
+  không `requestId`, lên có `requestId` xuyên suốt + 5 event mới ở tầng orchestrator/clarification)
+  nhưng **vẫn không có APM/error tracking thật** — cần làm rõ scope trước khi cam kết "Sentry,
+  Datadog" (BE-5.3.6/5.3.7, câu gốc quá chung, chưa đủ để bàn giao).
 
   > **Bối cảnh phát hiện (khi debug E7 thật 2026-07-14):** user hỏi mô tả mơ hồ ("Giải bài này giúp
   > tôi") qua AI thật (`AI_PROVIDER=sotatek-anthropic`), kỳ vọng hệ thống hỏi lại nhưng KHÔNG thấy
@@ -162,20 +164,44 @@ template đã có.*
 
   **Task con (đúng 8 hạng mục, theo thứ tự rủi ro/effort tăng dần — làm được độc lập từng cái):**
 
-  - [ ] **BE-5.3.1** Thêm `requestId`/`jobId` xuyên suốt 1 request — sinh 1 lần ở đầu route
-        (`crypto.randomUUID()`, đã có sẵn pattern tương tự ở `lib/clarification/session.ts`), gắn
-        vào MỌI dòng log của request đó (generate → validate → compile → repair → lưu trữ). Không
-        có cái này thì không thể "trace" 1 request cụ thể qua nhiều dòng log rời rạc — nên làm
-        ĐẦU TIÊN vì mọi task sau đều cần nó để log hữu ích.
-  - [ ] **BE-5.3.2** Bổ sung log vào `lib/orchestrator/document.ts` (`runDocument`/
-        `runDocumentFromMarkdown`/`runProject`/`runEdit`/`runRepairLoop`): số `attempts` hiện tại,
-        `finishReason` mỗi lượt generate, tóm tắt lỗi validate/compile trước khi vào repair (không
-        log toàn bộ `errorLog` dài — chỉ 1-2 dòng đầu hoặc `ErrorType` đã có từ `detectErrorType()`
-        của E6). Đây là chỗ hiện tại "mù" nhất — không log gì suốt cả vòng lặp repair.
-  - [ ] **BE-5.3.3** Bổ sung log vào `lib/clarification/understand-request.ts`/`maybeClarify()`
-        (`app/api/documents/route.ts`): log THÀNH CÔNG (không chỉ lỗi) — `recommendedAction`,
-        số field trong `missingInformation`, `ambiguity`, `confidence` — đây trực tiếp giải quyết
-        vấn đề đã gặp thật ở trên (không debug được vì thiếu chính xác log này).
+  - [x] **BE-5.3.1** ✅ **Hoàn thành (2026-07-15).** `requestId`/`jobId` xuyên suốt 1 request — mỗi
+        route (`app/api/documents/route.ts`, `.../clarify/[jobId]/resume/route.ts`,
+        `.../[id]/chat/route.ts`) tự sinh `crypto.randomUUID()` MỘT LẦN ở đầu `POST()`, truyền vào
+        `buildOrchestratorDeps(requestId)` (đã đổi thành **bắt buộc** nhận tham số này — có chủ ý,
+        để tránh quên truyền rồi log thiếu `requestId` mà không ai phát hiện ra). Verify bằng test
+        thật (`tests/integration/api-documents-clarify.test.ts`, spy `console.log`): `requestId`
+        xuất hiện GIỐNG NHAU xuyên suốt `clarification.understood` → `orchestrator.repair_success`
+        → `document.create` của cùng 1 request.
+  - [x] **BE-5.3.2** ✅ **Hoàn thành (2026-07-15).** Log trong `lib/orchestrator/document.ts` qua
+        cơ chế **DI** (không import `lib/log.ts` trực tiếp vào orchestrator) —
+        `OrchestratorDeps.logger?: (event, fields: LogFields) => void` (optional, mặc định không
+        log gì — mọi test/eval tooling hiện có không cần sửa). `buildOrchestratorDeps(requestId)`
+        (`lib/orchestrator/deps.ts`) gán `logger = (event, fields) => log.info(event, {requestId,
+        ...fields})`. 4 event mới:
+        - `orchestrator.truncation_retry` (trong `generateWithTruncationRecovery`, mỗi lần retry
+          do `finishReason:"length"`) — fields: `retries`, `currentMaxTokens`, `finishReason`.
+        - `orchestrator.repair_attempt` (trong `runRepairLoop`, mỗi lần validate/compile fail, kể
+          cả lần cuối trước khi exhausted) — fields: `attempts`, `errorType` (dùng lại
+          `detectErrorType()` đã có từ E6, KHÔNG log toàn bộ `errorLog` dài).
+        - `orchestrator.repair_exhausted` (khi hết `maxAttempts`) — fields: `attempts`, `docType`.
+        - `orchestrator.repair_success` (khi compile OK) — fields: `attempts`, `docType`.
+        Verify bằng 5 test mới (`tests/unit/orchestrator-logger.test.ts`, spy `deps.logger` qua
+        `vi.fn()`): đúng thứ tự/số lần mỗi event cho 4 scenario (happy/repair 1 lần/exhausted 3
+        lần/truncation-retry) + xác nhận không truyền `logger` vẫn hoạt động đúng (optional thật).
+  - [x] **BE-5.3.3** ✅ **Hoàn thành (2026-07-15).** Log THÀNH CÔNG (không chỉ lỗi) trong
+        `maybeClarify()` (`app/api/documents/route.ts`) — event MỚI `clarification.understood`,
+        fields: `recommendedAction`, `questionCount`, `ambiguity`, `confidence`, `jobId` (khi có
+        session). Đây trực tiếp giải quyết vấn đề đã gặp thật ở trên (log lỗi (`understand_failed`)
+        đã có từ trước, nhưng KHÔNG có gì khi AI trả lời hợp lệ — giờ luôn log dù kết quả là
+        `generate` hay `clarify`). **Phát hiện phụ trong lúc sửa:** logic cũ đọc
+        `result.decision.questions.length` khi `action === "generate"` chỉ an toàn nhờ
+        short-circuit `||` (kiểu `ClarificationDecision` là discriminated union, nhánh
+        `{action:"generate"}` không có field `questions`) — đã viết lại bằng `if/else` tường minh
+        để TypeScript tự narrow đúng, không còn phụ thuộc thứ tự đánh giá của `||`.
+
+  npx tsc --noEmit: 0 lỗi mới (4 lỗi pre-existing không liên quan, đã biết từ trước). npx vitest
+  run: 306/306 pass (300 cũ + 6 mới). npx eslint: sạch trên toàn bộ file sửa/tạo.
+
   - [ ] **BE-5.3.4** Bổ sung log vào `lib/compile/client.ts` (gọi compile-service qua HTTP): latency
         thật, status code, có phải lỗi network/timeout hay lỗi biên dịch LaTeX (2 loại khác nhau,
         cần phân biệt rõ trong log để biết nên sửa prompt hay sửa infra).
