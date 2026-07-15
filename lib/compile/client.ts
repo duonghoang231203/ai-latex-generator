@@ -1,5 +1,6 @@
 import type { CompileResult, ProjectFile } from "@/lib/types/document";
 import { sanitizeProjectPath } from "@/lib/compile/project-path";
+import type { LogFields } from "@/lib/log";
 
 export class CompileServiceError extends Error {
   constructor(message: string) {
@@ -11,6 +12,13 @@ export class CompileServiceError extends Error {
 export interface CompileClientOptions {
   serviceUrl: string;
   timeoutMs: number;
+  /**
+   * Observability (BE-5.3.4, optional — mặc định không log gì, giữ hành vi hiện tại cho mọi
+   * caller không truyền field này, vd. lib/prompt-eval/scorers/compile-success.ts). Cùng cơ chế
+   * DI đã dùng cho OrchestratorDeps.logger (BE-5.3.2/5.3.3) — caller quyết định requestId gắn thế
+   * nào, postCompile() chỉ gọi logger?.(event, fields).
+   */
+  logger?: (event: string, fields: LogFields) => void;
 }
 
 /** POST một body tới compile-service; trả PDF binary (success) hoặc {success:false,log}. */
@@ -20,6 +28,7 @@ async function postCompile(
 ): Promise<CompileResult> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), opts.timeoutMs);
+  const startedAt = Date.now();
   try {
     const res = await fetch(`${opts.serviceUrl}/compile`, {
       method: "POST",
@@ -27,21 +36,44 @@ async function postCompile(
       headers: { "content-type": "application/json" },
       body: JSON.stringify(body),
     });
+    const latencyMs = Date.now() - startedAt;
     const contentType = res.headers.get("content-type") ?? "";
     if (res.ok && contentType.includes("application/pdf")) {
       const buf = new Uint8Array(await res.arrayBuffer());
+      opts.logger?.("compile.request", {
+        outcome: "success",
+        latencyMs,
+        status: res.status,
+      });
       return { success: true, pdf: buf };
     }
-    // Trường hợp compile lỗi trả JSON.
+    // Trường hợp compile lỗi trả JSON — lỗi NỘI DUNG LaTeX (không phải hạ tầng), phân biệt rõ với
+    // lỗi network/timeout/status bất thường bên dưới (khác nhau ở việc nên sửa prompt hay sửa infra).
     if (contentType.includes("application/json")) {
       const data = (await res.json()) as { log?: string };
+      opts.logger?.("compile.request", {
+        outcome: "compile_error",
+        latencyMs,
+        status: res.status,
+      });
       return { success: false, log: data.log ?? "Compile thất bại (không có log)" };
     }
+    opts.logger?.("compile.request", {
+      outcome: "infra_error",
+      latencyMs,
+      status: res.status,
+    });
     throw new CompileServiceError(
       `Compile service phản hồi bất thường: ${res.status}`,
     );
   } catch (e) {
     if (e instanceof CompileServiceError) throw e;
+    // Lỗi network/abort (timeout) — KHÔNG có res.status (fetch chưa từng nhận response).
+    opts.logger?.("compile.request", {
+      outcome: "infra_error",
+      latencyMs: Date.now() - startedAt,
+      message: e instanceof Error ? e.message : "unknown",
+    });
     throw new CompileServiceError(
       e instanceof Error ? e.message : "Không gọi được compile service",
     );

@@ -30,12 +30,14 @@ export function buildOrchestratorDeps(requestId: string): OrchestratorDeps {
       compileLatex(latex, {
         serviceUrl: cfg.compileServiceUrl,
         timeoutMs: cfg.requestTimeoutMs,
+        logger,
       }),
     // Multi-file (E1): compile cả dự án từ file gốc (path-guard trong client + compile-service).
     compileProject: (files: ProjectFile[], rootFile: string) =>
       compileProject(files, rootFile, {
         serviceUrl: cfg.compileServiceUrl,
         timeoutMs: cfg.requestTimeoutMs,
+        logger,
       }),
     // RAG chỉ bật khi RAG_ENABLED=true (mặc định tắt → hành vi y như trước).
     retrieve: cfg.ragEnabled
