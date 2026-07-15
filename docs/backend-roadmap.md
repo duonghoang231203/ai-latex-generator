@@ -127,13 +127,14 @@ template đã có.*
 
 - **BE-5.1 `[Platform]`:** Hoàn thiện luồng CI/CD (GitHub Actions): Chạy unit tests, chạy E6 prompt evals mỗi khi có PR.
 - **BE-5.2 `[Platform]`:** Cấu hình Docker cho Orchestrator và tách biệt hoàn toàn `compile-service` sang một môi trường an toàn cao (GCP Cloud Run / AWS Fargate) vì đây là sandbox chạy mã untrusted.
-- **BE-5.3 `[Platform]`:** 🔄 **5/8 task con đã xong (2026-07-15)** — mở rộng
-  chi tiết bên dưới. Nền tối giản đã tồn tại (`lib/log.ts` — JSON structured log, tự động redact
-  field nhạy cảm), độ phủ đã tăng đáng kể sau BE-5.3.1/5.3.2/5.3.3/5.3.4/5.3.5 (từ 6 điểm `log.*()`
-  rời rạc, không `requestId`, luôn ghi cả 3 mức, lên có `requestId` xuyên suốt generate/repair/
-  compile + 5 event mới + log level filter production-ready) nhưng **vẫn không có APM/error
-  tracking thật** — cần làm rõ scope trước khi cam kết "Sentry, Datadog" (BE-5.3.6/5.3.7, câu gốc
-  quá chung, chưa đủ để bàn giao).
+- **BE-5.3 `[Platform]`:** ✅ **Đóng lại ở 5/8 task con (2026-07-15) — 3 task còn lại `#deferred`
+  có chủ ý, xem ghi chú trong mục con.** Nền tối giản đã tồn tại (`lib/log.ts` — JSON structured
+  log, tự động redact field nhạy cảm), độ phủ đã tăng đáng kể sau BE-5.3.1/5.3.2/5.3.3/5.3.4/5.3.5
+  (từ 6 điểm `log.*()` rời rạc, không `requestId`, luôn ghi cả 3 mức, lên có `requestId` xuyên
+  suốt generate/repair/compile + 5 event mới + log level filter production-ready) — **đủ để giải
+  quyết mục tiêu gốc** (debug được luồng generate/clarify thật). 3 task còn lại (Sentry/Datadog/log
+  driver) là hạ tầng production cần vendor/audit riêng, **chưa cần khi chưa lên production thật**
+  — không tiếp tục thêm việc vào mục này chỉ vì còn checkbox trống.
 
   > **Bối cảnh phát hiện (khi debug E7 thật 2026-07-14):** user hỏi mô tả mơ hồ ("Giải bài này giúp
   > tôi") qua AI thật (`AI_PROVIDER=sotatek-anthropic`), kỳ vọng hệ thống hỏi lại nhưng KHÔNG thấy
@@ -237,25 +238,35 @@ template đã có.*
   > route này cần được nối vào cùng cơ chế. Cũng phát hiện `.env.example` được `README.md` dẫn tới
   > nhưng **không tồn tại trong repo** — ngoài phạm vi BE-5.3, cần xử lý riêng.
 
-  - [ ] **BE-5.3.6** Quyết định + tích hợp **error tracking thật** (Sentry hoặc tương đương) —
+  > ⏸️ **DỪNG LẠI Ở ĐÂY (2026-07-15) — 3 task còn lại `#deferred`, không phải "đang làm".** Sau
+  > 5.3.1-5.3.5, user đặt câu hỏi thẳng: việc này có đang over-engineering không? Nhìn lại: mục
+  > tiêu gốc là "đủ log để debug được bug thật đã gặp" — 5.3.1-5.3.5 đã đạt mục tiêu đó (bằng chứng:
+  > test end-to-end cho thấy 1 `requestId` trace được xuyên suốt understand→generate→repair→
+  > compile). Cả 3 task dưới đây (Sentry, APM, log driver) đều là hạ tầng **production** cần vendor/
+  > audit riêng — **chưa cần** khi hệ thống chưa lên production thật và chưa có ai thực sự dùng log
+  > hiện có để debug việc gì. Tiếp tục thêm task mới vào mục này mới chính là over-engineering, nên
+  > **dừng ở 5/8, không làm 3 task dưới đây cho tới khi có nhu cầu thật (sự cố production cần
+  > alerting, hoặc quyết định vendor cụ thể)** — giữ nguyên mô tả dưới đây làm tài liệu tham khảo,
+  > không xoá.
+
+  - [ ] **BE-5.3.6** `#deferred` Quyết định + tích hợp **error tracking thật** (Sentry hoặc tương đương) —
         CHỈ cho `error` level (exception thật, không phải business failure như "repair loop hết
         lượt" — đó vẫn là HTTP 200 theo thiết kế hiện tại, xem `DocumentError`). Cần audit kỹ
         trước khi thêm SDK: Sentry SDK có thể tự động capture request body — PHẢI cấu hình
         `beforeSend`/scrubbing để không vô tình gửi `description`/`latex` (nội dung user) lên
         bên thứ 3, đây là rủi ro privacy thật, không phải lý thuyết (dữ liệu người dùng nhập).
-  - [ ] **BE-5.3.7** Quyết định + tích hợp **metrics/APM** (Datadog hoặc tương đương) cho số liệu
+  - [ ] **BE-5.3.7** `#deferred` Quyết định + tích hợp **metrics/APM** (Datadog hoặc tương đương) cho số liệu
         tổng hợp (compile success rate theo template, thời gian trung bình generate→PDF, tần suất
         `awaiting_user_input` thật của E7 — chính số liệu "eval data thực tế" mà E7 đang thiếu để
         quyết định có nên bật `CLARIFICATION_ENABLED` cho user thật hay không, xem
         `docs/features/e7-clarification-layer/explainer.md` § 5/§ 6.5).
-  - [ ] **BE-5.3.8** Log driver cho container (`docker-compose`) — thu log ra ngoài container
+  - [ ] **BE-5.3.8** `#deferred` Log driver cho container (`docker-compose`) — thu log ra ngoài container
         (hiện chỉ `console.log` ra stdout, mất khi container restart nếu không có driver thu lại
         bên ngoài) — cần khảo sát Caddy/next-app hiện đang log ra đâu trước khi quyết định driver.
 
-  **Thứ tự làm đề xuất:** 5.3.1 (nền tảng, bắt buộc trước mọi task khác) → 5.3.2/5.3.3 (điền chỗ
-  trống quan trọng nhất, chi phí thấp — không cần dependency mới) → 5.3.4/5.3.5 (tương tự) →
-  5.3.6/5.3.7 (cần audit privacy + quyết định vendor trước khi thêm SDK ngoài) → 5.3.8 (hạ tầng,
-  làm khi gần production thật).
+  **Thứ tự làm đề xuất (chỉ áp dụng NẾU/KHI quay lại 3 task `#deferred` trên):** 5.3.6/5.3.7 (cần
+  audit privacy + quyết định vendor trước khi thêm SDK ngoài) → 5.3.8 (hạ tầng, làm khi gần
+  production thật). 5.3.1-5.3.5 đã hoàn thành theo đúng thứ tự này.
 
 ---
 
