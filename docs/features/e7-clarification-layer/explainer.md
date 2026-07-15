@@ -758,8 +758,9 @@ project (`supabase-document-store.ts` cũng không có test riêng, do cần moc
 tạp; facade pattern đảm bảo cùng interface nên tin tưởng logic đã test qua file backend là đủ).
 
 **Việc CHƯA làm / có thể cần xem lại sau:**
-- Giá trị TTL 5 phút (`CLARIFICATION_SESSION_TTL_MS`, `app/api/documents/route.ts`) chưa được xác
-  nhận lại — nếu mục tiêu thật là hỗ trợ "vài ngày", nên tăng lên đáng kể hoặc bỏ hẳn khái niệm hết
-  hạn (đổi UI để không nói "hết hạn" mà chỉ có lỗi khi thực sự dùng session đã trả lời rồi).
+- ~~Giá trị TTL 5 phút chưa được xác nhận lại~~ — **đã xác nhận và sửa (2026-07-15):** user chọn
+  **24 giờ** khi được hỏi trực tiếp (gợi ý 24h/72h/7 ngày). `CLARIFICATION_SESSION_TTL_MS`
+  (`app/api/documents/route.ts`) giờ là `24 * 60 * 60 * 1000`. Hành vi khi hết hạn KHÔNG đổi —
+  vẫn chỉ là lazy-check tại thời điểm resume (`410 Gone`), không có gì tự động xảy ra.
 - Không có cơ chế dọn rác cho session `'expired'`/`'answered'` tồn đọng lâu dài trong DB/file (theo
   đúng quyết định "không cần cron" — nhưng nếu về sau cần, đây là điểm bổ sung).

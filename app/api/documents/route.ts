@@ -15,12 +15,14 @@ import { understandRequest } from "@/lib/clarification/understand-request";
 import { createSession } from "@/lib/clarification/session-store";
 import type { LatexProvider } from "@/lib/ai/types";
 
-/** TTL cho session hỏi-đáp E7 — 5 phút để bắt đầu trả lời, nhưng KHÔNG chặn user quá thời hạn này:
- *  đây chỉ là mốc "sau bao lâu coi là hết hạn nếu resume" — session vẫn nằm trong DB/file vô thời
- *  hạn (không có cron xoá), user resume SAU mốc này chỉ nhận lỗi rõ ràng "đã hết hạn", KHÔNG mất
- *  dữ liệu đã hỏi. Xem docs/features/e7-clarification-layer/explainer.md § 6.7 cho toàn bộ lý do
- *  đổi kiến trúc (bỏ Promise-treo-trong-RAM, không còn tự generate im lặng khi hết hạn). */
-const CLARIFICATION_SESSION_TTL_MS = 5 * 60 * 1000;
+/** TTL cho session hỏi-đáp E7 — 24 giờ để bắt đầu trả lời (tăng từ 5 phút ban đầu, theo yêu cầu
+ *  người dùng — 5 phút không đủ cho use case "đợi vài ngày" đã xác nhận ở redesign § 6.7), nhưng
+ *  KHÔNG chặn user quá thời hạn này: đây chỉ là mốc "sau bao lâu coi là hết hạn nếu resume" —
+ *  session vẫn nằm trong DB/file vô thời hạn (không có cron xoá), user resume SAU mốc này chỉ
+ *  nhận lỗi rõ ràng "đã hết hạn", KHÔNG mất dữ liệu đã hỏi. Xem
+ *  docs/features/e7-clarification-layer/explainer.md § 6.7 cho toàn bộ lý do đổi kiến trúc (bỏ
+ *  Promise-treo-trong-RAM, không còn tự generate im lặng khi hết hạn). */
+const CLARIFICATION_SESSION_TTL_MS = 24 * 60 * 60 * 1000;
 
 export type MaybeClarifyResult =
   | { needsClarification: false; req: DocumentRequest }
