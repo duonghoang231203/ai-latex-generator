@@ -1,8 +1,12 @@
 // lib/log.ts
 // Logger tối giản, có cấu trúc (JSON dòng) ra stdout/stderr. KHÔNG log secret.
 // Chỉ nhận các trường an toàn (event + số liệu/nhãn); không nhận nội dung/khoá.
+import { getConfig } from "@/lib/config";
 
 export type LogLevel = "info" | "warn" | "error";
+
+/** Thứ tự nghiêm trọng tăng dần — dùng để so sánh với ngưỡng LOG_LEVEL (BE-5.3.5). */
+const LEVEL_ORDER: Record<LogLevel, number> = { info: 0, warn: 1, error: 2 };
 
 export interface LogFields {
   [key: string]: string | number | boolean | undefined;
@@ -51,6 +55,11 @@ export function buildLogRecord(
 }
 
 function emit(level: LogLevel, event: string, fields: LogFields = {}): void {
+  // BE-5.3.5 — chỉ ghi nếu level >= ngưỡng LOG_LEVEL (mặc định "info", nghĩa là ghi cả 3 mức như
+  // trước khi có filter). Đặt Ở ĐÂY (không phải trong buildLogRecord()) để giữ buildLogRecord()
+  // là hàm THUẦN, không phụ thuộc console/config — test hiện có (tests/unit/log.test.ts) gọi
+  // buildLogRecord() trực tiếp và không nên bị ảnh hưởng bởi LOG_LEVEL.
+  if (LEVEL_ORDER[level] < LEVEL_ORDER[getConfig().logLevel]) return;
   const record = buildLogRecord(level, event, fields);
   const line = JSON.stringify(record);
   if (level === "error") console.error(line);

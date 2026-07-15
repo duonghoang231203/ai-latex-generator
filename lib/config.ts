@@ -1,6 +1,12 @@
 // lib/config.ts
 // Đọc & chuẩn hoá cấu hình từ biến môi trường (server-side). Không log giá trị secret.
 
+/** Chuẩn hoá LOG_LEVEL — chỉ nhận 3 giá trị hợp lệ, sai/thiếu ⇒ "info" (giữ hành vi hiện tại). */
+function parseLogLevel(value: string | undefined): "info" | "warn" | "error" {
+  if (value === "info" || value === "warn" || value === "error") return value;
+  return "info";
+}
+
 export interface AppConfig {
   aiProvider: string; // 'anthropic' | 'openai' | 'mock'
   aiModel: string;
@@ -22,6 +28,7 @@ export interface AppConfig {
   markdownInputEnabled: boolean; // bật chế độ soạn Markdown → LaTeX (E5)
   ragEnabled: boolean; // bật RAG (retrieval nguồn theo liên quan) — E3
   clarificationEnabled: boolean; // bật E7 Request Understanding + hỏi lại user trước generate
+  logLevel: "info" | "warn" | "error"; // BE-5.3.5 — ngưỡng ghi log (info < warn < error)
   embeddingProvider: string; // 'mock' | 'transformers' | 'openai'
   embeddingModel: string; // model embedding (vd 'Xenova/multilingual-e5-small')
   embeddingCacheDir: string; // cache vector theo hash nội dung
@@ -64,6 +71,7 @@ export function getConfig(): AppConfig {
     // render câu hỏi, cả hai đều chưa hoàn thiện (Task 6/8, xem explainer.md § 6). Bật nhầm cho
     // user thật khi chưa có UI xử lý sẽ làm SSE "kẹt" ở awaiting_user_input không ai trả lời được.
     clarificationEnabled: (process.env.CLARIFICATION_ENABLED ?? "false").toLowerCase() === "true",
+    logLevel: parseLogLevel(process.env.LOG_LEVEL),
     embeddingProvider: process.env.EMBEDDING_PROVIDER ?? "mock",
     embeddingModel: process.env.EMBEDDING_MODEL ?? "Xenova/multilingual-e5-small",
     embeddingCacheDir:
