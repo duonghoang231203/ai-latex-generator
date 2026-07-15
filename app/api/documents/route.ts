@@ -12,8 +12,25 @@ import { isDocumentError, type DocumentRequest, type DocumentResult } from "@/li
 import type { OrchestratorDeps } from "@/lib/orchestrator/document";
 import { log } from "@/lib/log";
 import { understandRequest } from "@/lib/clarification/understand-request";
-import { createPendingSession, SessionTimeoutError, SESSION_TTL_MS } from "@/lib/clarification/session";
+import { createSession } from "@/lib/clarification/session-store";
 import type { LatexProvider } from "@/lib/ai/types";
+
+/** TTL cho session hỏi-đáp E7 — 5 phút để bắt đầu trả lời, nhưng KHÔNG chặn user quá thời hạn này:
+ *  đây chỉ là mốc "sau bao lâu coi là hết hạn nếu resume" — session vẫn nằm trong DB/file vô thời
+ *  hạn (không có cron xoá), user resume SAU mốc này chỉ nhận lỗi rõ ràng "đã hết hạn", KHÔNG mất
+ *  dữ liệu đã hỏi. Xem docs/features/e7-clarification-layer/explainer.md § 6.7 cho toàn bộ lý do
+ *  đổi kiến trúc (bỏ Promise-treo-trong-RAM, không còn tự generate im lặng khi hết hạn). */
+const CLARIFICATION_SESSION_TTL_MS = 5 * 60 * 1000;
+
+export type MaybeClarifyResult =
+  | { needsClarification: false; req: DocumentRequest }
+  | {
+      needsClarification: true;
+      jobId: string;
+      questions: import("@/lib/clarification/policy").PendingQuestion[];
+      reason: string;
+      expiresAt: string;
+    };
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -32,31 +49,27 @@ function runByFormat(
 }
 
 /**
- * E7 (docs/features/e7-clarification-layer/explainer.md § 6, Task 5+7) — chạy Request
- * Understanding TRƯỚC generate, chỉ khi bật `CLARIFICATION_ENABLED=true` VÀ request có `template`
- * (clarificationFields gắn với template — không áp dụng khi không chọn template).
+ * E7 (docs/features/e7-clarification-layer/explainer.md § 6.7, redesign lần 2) — chạy Request
+ * Understanding TRƯỚC generate, chỉ khi bật `CLARIFICATION_ENABLED=true` VÀ request có `template`.
  *
- * QUYẾT ĐỊNH THIẾT KẾ (khác với mô tả gốc "gọi TRONG runDocument" ở mục 3.6/Task 5 — xem lý do đầy
- * đủ trong explainer.md § 6.4): tách HOÀN TOÀN khỏi runDocument()/DocumentResult để không đổi
- * signature của 4 orchestrator entrypoint (10 call site hiện có, bao gồm 8 file test) — an toàn
- * hơn nhiều so với thêm 1 union case thứ 3 vào DocumentResult (rủi ro: isDocumentError() ở 2 route
- * khác sẽ coi case mới là "không lỗi" và cố lưu như document thành công).
- *
- * `enqueue` được truyền vào để gửi 2 SSE event mới (`understanding`, `awaiting_user_input`) ngay
- * trong closure của stream ĐANG MỞ — route KHÔNG mở stream thứ 2. Nếu user trả lời trước khi hết
- * TTL, trả về answers đã merge; nếu hết hạn, ném SessionTimeoutError để caller xử lý (đóng stream
- * bằng event lỗi rõ ràng thay vì treo vô hạn).
- *
- * Trả về mô tả bổ sung để nhồi vào `description` gốc trước khi generate — cách đơn giản nhất để
- * "enrich context" (mục 3.3 luồng dữ liệu) mà không cần đổi GenerateInput/DocumentRequest.
+ * KIẾN TRÚC MỚI (thay hoàn toàn cách cũ giữ SSE mở + Promise treo trong RAM — xem § 6.7 để biết
+ * đầy đủ lý do): hàm này KHÔNG còn `await` chờ user trả lời. Nếu cần hỏi, nó tạo 1
+ * `ClarificationSession` BỀN (Postgres/file theo `STORE_BACKEND`, xem `session-store.ts`) rồi trả
+ * về NGAY `{ needsClarification: true, ... }` — route (caller) tự quyết định đóng SSE stream tại
+ * đó, KHÔNG tiếp tục generate. User có thể trả lời bất cứ lúc nào sau đó (5 phút hay 5 ngày) qua
+ * route mới `POST /api/documents/clarify/[jobId]/resume`, route đó tự mở 1 SSE stream HOÀN TOÀN
+ * MỚI để generate — không có gì "tiếp tục" từ request cũ.
  */
 async function maybeClarify(
   req: DocumentRequest,
   provider: LatexProvider,
+  ownerId: string,
   enqueue: (event: string, data: unknown) => void,
-): Promise<DocumentRequest> {
+): Promise<MaybeClarifyResult> {
   const cfg = getConfig();
-  if (!cfg.clarificationEnabled || !req.template) return req;
+  if (!cfg.clarificationEnabled || !req.template) {
+    return { needsClarification: false, req };
+  }
 
   enqueue("status", { status: "understanding" });
 
@@ -73,44 +86,30 @@ async function maybeClarify(
       template: req.template,
       message: e instanceof Error ? e.message : String(e),
     });
-    return req;
+    return { needsClarification: false, req };
   }
 
   if (result.decision.action === "generate" || result.decision.questions.length === 0) {
-    return req;
+    return { needsClarification: false, req };
   }
 
-  const { jobId, wait } = createPendingSession(result.decision.questions);
-  enqueue("awaiting_user_input", {
-    jobId,
+  const session = await createSession({
+    ownerId,
+    description: req.description,
+    docType: req.docType,
+    template: req.template,
+    inputFormat: req.inputFormat,
+    markdown: req.markdown,
     questions: result.decision.questions,
-    reason: result.plan.intent,
-    // Timestamp TUYỆT ĐỐI (không phải "còn bao nhiêu ms") — tránh sai lệch do độ trễ network giữa
-    // lúc server tạo session và lúc client nhận được event này. Client tự tính "còn lại" bằng
-    // Date.now() so với giá trị này, không cần đồng bộ đồng hồ tuyệt đối (đủ chính xác cho UX
-    // đếm ngược, sai lệch vài giây không quan trọng ở đây).
-    expiresAt: new Date(Date.now() + SESSION_TTL_MS).toISOString(),
+    expiresAt: new Date(Date.now() + CLARIFICATION_SESSION_TTL_MS).toISOString(),
   });
 
-  let answers: Record<string, string>;
-  try {
-    answers = await wait;
-  } catch (e) {
-    if (e instanceof SessionTimeoutError) {
-      // Hết TTL không có trả lời — KHÔNG chặn generate vô thời hạn: tiếp tục với description gốc
-      // (giống case field optional bị skip), thay vì để SSE treo mãi.
-      log.info("clarification.timeout", { template: req.template });
-      return req;
-    }
-    throw e;
-  }
-
-  const enrichment = Object.entries(answers)
-    .map(([field, value]) => `${field}: ${value}`)
-    .join("\n");
   return {
-    ...req,
-    description: `${req.description}\n\n[Thông tin bổ sung từ người dùng]\n${enrichment}`,
+    needsClarification: true,
+    jobId: session.id,
+    questions: session.questions,
+    reason: result.plan.intent,
+    expiresAt: session.expiresAt,
   };
 }
 
@@ -198,7 +197,7 @@ export async function POST(request: Request): Promise<Response> {
 
         try {
           const deps = buildOrchestratorDeps();
-          const clarifiedReq = await maybeClarify(
+          const clarifyResult = await maybeClarify(
             {
               description: parsed.value.description,
               docType: parsed.value.docType,
@@ -208,11 +207,25 @@ export async function POST(request: Request): Promise<Response> {
               markdown: parsed.value.markdown,
             },
             deps.provider,
+            userId,
             enqueue,
           );
 
+          if (clarifyResult.needsClarification) {
+            // ĐÓNG stream NGAY — KHÔNG giữ mở chờ user trả lời (kiến trúc mới, xem § 6.7). User
+            // resume qua POST /api/documents/clarify/[jobId]/resume, route đó tự mở SSE MỚI.
+            enqueue("awaiting_user_input", {
+              jobId: clarifyResult.jobId,
+              questions: clarifyResult.questions,
+              reason: clarifyResult.reason,
+              expiresAt: clarifyResult.expiresAt,
+            });
+            controller.close();
+            return;
+          }
+
           const result = await runByFormat(
-            clarifiedReq,
+            clarifyResult.req,
             deps,
             (chunk) => {
               enqueue("chunk", { text: chunk });

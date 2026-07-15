@@ -2,6 +2,12 @@
 
 // Hook điều phối hội thoại của Trợ lý AI: quản lý danh sách lượt chat và
 // stream sinh tài liệu qua endpoint SSE sẵn có POST /api/documents.
+//
+// E7 (redesign lần 2, 2026-07-14 — xem docs/features/e7-clarification-layer/explainer.md § 6.7):
+// khi server hỏi lại (awaiting_user_input), nó ĐÓNG SSE stream ngay — hook KHÔNG còn giữ 1 reader
+// "đang chờ" nào để tiếp tục đọc sau này. answerClarification() giờ gọi 1 route HOÀN TOÀN KHÁC
+// (POST /api/documents/clarify/[jobId]/resume) và TỰ MỞ 1 SSE stream MỚI, xử lý y hệt send() ban
+// đầu — không có khái niệm "tiếp tục" nữa, chỉ có "bắt đầu lại với câu trả lời đã có".
 import { useCallback, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { InputFormat, SourceFile, TemplateId } from "@/lib/types/document";
@@ -34,12 +40,12 @@ export interface ChatItem {
   hasPdf?: boolean;
   /** Thông báo lỗi (khi thất bại). */
   error?: string;
-  /** E7 — có mặt khi status === "awaiting_clarification": jobId để PATCH câu trả lời, và danh
-   *  sách câu hỏi cần render (mỗi câu tự quyết required — "Question helpful ≠ Question required",
-   *  xem docs/features/e7-clarification-layer/explainer.md § 3.2). `expiresAt` (ISO string) — thời
-   *  điểm session hết hạn ở server (SESSION_TTL_MS, lib/clarification/session.ts) — dùng để hiển
-   *  thị đếm ngược và tự phát hiện hết hạn ở client (thay vì chỉ biết qua lỗi 404 khó hiểu khi PATCH). */
-  clarification?: { jobId: string; questions: ClarificationQuestion[]; expiresAt: string };
+  /** E7 — có mặt khi status === "awaiting_clarification": jobId để POST resume, và danh sách câu
+   *  hỏi cần render (mỗi câu tự quyết required — "Question helpful ≠ Question required", xem
+   *  docs/features/e7-clarification-layer/explainer.md § 3.2). Không còn `expiresAt` chặn UI —
+   *  session không hết hạn theo nghĩa "phải trả lời trước X phút", chỉ báo lỗi rõ ràng nếu server
+   *  từ chối lúc submit thật (xem ClarificationQuestionForm). */
+  clarification?: { jobId: string; questions: ClarificationQuestion[] };
 }
 
 let idCounter = 0;
@@ -64,43 +70,46 @@ export function useDocumentGenerationChat() {
   const [items, setItems] = useState<ChatItem[]>([GREETING]);
   const [busy, setBusy] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
-  // E7 — reader của stream ĐANG MỞ, chờ answerClarification() tiếp tục đọc sau khi PATCH resume
-  // (route KHÔNG mở stream mới — xem lib/clarification/session.ts quyết định kiến trúc #2).
-  // Key theo botId vì user về lý thuyết có thể có nhiều lượt chat song song (dù UI hiện tại chặn
-  // gửi mới khi busy=true, giữ theo id để không giả định chỉ có 1 lượt đang chạy).
-  const pendingReadersRef = useRef<
-    Map<string, { reader: ReadableStreamDefaultReader<Uint8Array>; decoder: TextDecoder; buffer: string; acc: string }>
-  >(new Map());
 
   const reset = useCallback(() => {
     abortRef.current?.abort();
     abortRef.current = null;
     setBusy(false);
     setItems([GREETING]);
-    pendingReadersRef.current.clear();
   }, []);
 
   /**
-   * Đọc tiếp SSE stream cho `botId`, xử lý từng `data: ` event tới khi stream đóng hoặc gặp
-   * `awaiting_user_input` (dừng đọc, chờ user trả lời — KHÔNG coi là lỗi/kết thúc).
-   * Dùng chung cho lần gọi ĐẦU (trong send()) và lần TIẾP TỤC (trong answerClarification()) —
-   * cùng 1 vòng lặp, chỉ khác điểm bắt đầu.
+   * Đọc TOÀN BỘ 1 SSE stream MỚI (từ đầu tới `complete`/`error`/đóng bất thường) cho `botId`,
+   * dùng chung cho cả `send()` (lần đầu) và `answerClarification()` (sau khi resume) — cả 2 đều
+   * là "mở 1 kết nối SSE mới, đọc tới hết", chỉ khác URL/body gọi tới.
    */
-  const consumeStream = useCallback(
-    async (
-      botId: string,
-      reader: ReadableStreamDefaultReader<Uint8Array>,
-      decoder: TextDecoder,
-      initialBuffer: string,
-      initialAcc: string,
-    ) => {
+  const runSSERequest = useCallback(
+    async (botId: string, url: string, body: unknown, signal: AbortSignal) => {
       const patch = (updates: Partial<ChatItem>) =>
         setItems((prev) => prev.map((it) => (it.id === botId ? { ...it, ...updates } : it)));
 
-      let buffer = initialBuffer;
-      let acc = initialAcc;
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "content-type": "application/json", accept: "text/event-stream" },
+        body: JSON.stringify(body),
+        signal,
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        patch({ status: "error", error: data.error ?? `Lỗi ${res.status}`, clarification: undefined });
+        return;
+      }
+      if (!res.body) {
+        patch({ status: "error", error: "Không nhận được dữ liệu từ máy chủ.", clarification: undefined });
+        return;
+      }
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let acc = "";
       let settled = false;
-      let awaitingClarification = false;
 
       while (true) {
         const { done, value } = await reader.read();
@@ -115,20 +124,14 @@ export function useDocumentGenerationChat() {
           try {
             const data = JSON.parse(dataStr);
             if (data.jobId && Array.isArray(data.questions)) {
-              // E7 — awaiting_user_input. Lưu reader để answerClarification() tiếp tục đọc SAU
-              // khi PATCH resolve session — KHÔNG đóng reader, KHÔNG setBusy(false) theo nghĩa
-              // "xong việc" (vẫn đang chờ, chỉ không còn streaming text).
-              awaitingClarification = true;
-              pendingReadersRef.current.set(botId, { reader, decoder, buffer, acc });
+              // Server đã ĐÓNG stream ngay sau event này (kiến trúc mới) — ngừng đọc HOÀN TOÀN,
+              // KHÔNG lưu reader lại (khác thiết kế cũ). `settled = true` để không báo lỗi
+              // "kết nối gián đoạn" khi loop kết thúc ngay sau đây.
+              settled = true;
               patch({
                 status: "awaiting_clarification",
-                clarification: {
-                  jobId: data.jobId,
-                  questions: data.questions,
-                  expiresAt: data.expiresAt,
-                },
+                clarification: { jobId: data.jobId, questions: data.questions },
               });
-              return; // dừng vòng lặp NGAY — KHÔNG đọc thêm cho tới khi user trả lời.
             } else if (data.text) {
               acc += data.text;
               patch({ streamedLatex: acc });
@@ -159,7 +162,7 @@ export function useDocumentGenerationChat() {
         }
       }
 
-      if (!awaitingClarification && !settled) {
+      if (!settled) {
         patch({ status: "error", error: "Kết nối bị gián đoạn trước khi hoàn tất." });
       }
     },
@@ -196,108 +199,73 @@ export function useDocumentGenerationChat() {
       const controller = new AbortController();
       abortRef.current = controller;
 
-      const patch = (updates: Partial<ChatItem>) =>
-        setItems((prev) =>
-          prev.map((it) => (it.id === botId ? { ...it, ...updates } : it)),
-        );
-
       try {
-        const res = await fetch("/api/documents", {
-          method: "POST",
-          headers: { "content-type": "application/json", accept: "text/event-stream" },
-          body: JSON.stringify(
-            inputFormat === "markdown"
-              ? { inputFormat, markdown: prompt, template, sources: [] }
-              : { description: prompt, template, sources },
-          ),
-          signal: controller.signal,
-        });
-
-        if (!res.ok) {
-          const data = await res.json().catch(() => ({}));
-          patch({ status: "error", error: data.error ?? `Lỗi ${res.status}` });
-          return;
-        }
-        if (!res.body) {
-          patch({ status: "error", error: "Không nhận được dữ liệu từ máy chủ." });
-          return;
-        }
-
-        const reader = res.body.getReader();
-        const decoder = new TextDecoder();
-        await consumeStream(botId, reader, decoder, "", "");
+        await runSSERequest(
+          botId,
+          "/api/documents",
+          inputFormat === "markdown"
+            ? { inputFormat, markdown: prompt, template, sources: [] }
+            : { description: prompt, template, sources },
+          controller.signal,
+        );
       } catch (e) {
         if ((e as Error)?.name === "AbortError") return;
-        patch({ status: "error", error: "Không kết nối được máy chủ. Vui lòng thử lại." });
+        setItems((prev) =>
+          prev.map((it) =>
+            it.id === botId
+              ? { ...it, status: "error", error: "Không kết nối được máy chủ. Vui lòng thử lại." }
+              : it,
+          ),
+        );
       } finally {
-        // KHÔNG setBusy(false) nếu đang chờ clarification — user vẫn cần trả lời trước khi có
-        // thể gửi lượt mới (giữ nguyên hành vi "1 lượt tại một thời điểm" hiện có của UI).
-        if (!pendingReadersRef.current.has(botId)) {
-          setBusy(false);
-          abortRef.current = null;
-        }
+        setBusy(false);
+        abortRef.current = null;
       }
     },
-    [busy, consumeStream],
+    [busy, runSSERequest],
   );
 
   /**
-   * Gửi câu trả lời cho MỘT câu hỏi đang chờ (hoặc bỏ qua nếu `answers` rỗng và câu hỏi đó không
-   * `required` — UI phải tự chặn gửi rỗng cho câu required, xem ClarificationQuestionForm).
-   * PATCH .../clarify/[jobId] → resolveSession() ở server → SSE stream gốc (đang mở, lưu trong
-   * pendingReadersRef) tự động tiếp tục — hàm này gọi lại consumeStream() để đọc phần còn lại.
+   * Gửi câu trả lời cho MỘT session đang chờ, BẮT ĐẦU LẠI luồng generate từ đầu qua 1 SSE MỚI
+   * (POST /api/documents/clarify/[jobId]/resume) — không có gì "tiếp tục" từ request cũ (đã đóng
+   * từ lâu). Có thể gọi bất cứ lúc nào sau khi thấy câu hỏi, không giới hạn bởi 1 kết nối HTTP
+   * còn sống (khác thiết kế cũ) — chỉ giới hạn bởi TÍNH HỢP LỆ của session phía server (hết hạn/
+   * đã trả lời trước đó), báo lỗi rõ ràng nếu server từ chối.
    */
   const answerClarification = useCallback(
     async (botId: string, jobId: string, answers: Record<string, string>) => {
-      const pending = pendingReadersRef.current.get(botId);
-      if (!pending) return; // đã bị dọn dẹp (vd. reset()) — không còn gì để tiếp tục.
+      setBusy(true);
+      setItems((prev) =>
+        prev.map((it) =>
+          it.id === botId ? { ...it, status: "streaming", clarification: undefined } : it,
+        ),
+      );
 
-      const patch = (updates: Partial<ChatItem>) =>
-        setItems((prev) => prev.map((it) => (it.id === botId ? { ...it, ...updates } : it)));
+      const controller = new AbortController();
+      abortRef.current = controller;
 
       try {
-        const res = await fetch(`/api/documents/clarify/${jobId}`, {
-          method: "PATCH",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ answers }),
-        });
-        if (!res.ok) {
-          if (res.status === 404) {
-            // Session đã hết hạn (SESSION_TTL_MS, mặc định 5 phút) HOẶC đã được trả lời trước đó
-            // — server đã TỰ generate với mô tả gốc từ lâu (xem SessionTimeoutError trong
-            // maybeClarify(), app/api/documents/route.ts) và có thể đã gửi 'complete' trong lúc
-            // tab này không lắng nghe (vd. chuyển sang tab khác). Không coi là lỗi kỹ thuật —
-            // giải thích rõ nguyên nhân thay vì hiển thị message 404 khó hiểu từ server.
-            patch({
-              status: "error",
-              error:
-                "Phiên hỏi đáp đã hết hạn (quá 5 phút không có câu trả lời). Hệ thống đã tự tạo " +
-                "tài liệu bằng mô tả ban đầu — kiểm tra danh sách tài liệu, hoặc gửi lại yêu cầu " +
-                "mới nếu cần bổ sung thông tin.",
-            });
-            router.refresh();
-          } else {
-            const data = await res.json().catch(() => ({}));
-            patch({ status: "error", error: data.error ?? `Lỗi ${res.status}` });
-          }
-          pendingReadersRef.current.delete(botId);
-          setBusy(false);
-          return;
-        }
-      } catch {
-        patch({ status: "error", error: "Không gửi được câu trả lời. Vui lòng thử lại." });
-        pendingReadersRef.current.delete(botId);
+        await runSSERequest(
+          botId,
+          `/api/documents/clarify/${jobId}/resume`,
+          { answers },
+          controller.signal,
+        );
+      } catch (e) {
+        if ((e as Error)?.name === "AbortError") return;
+        setItems((prev) =>
+          prev.map((it) =>
+            it.id === botId
+              ? { ...it, status: "error", error: "Không kết nối được máy chủ. Vui lòng thử lại." }
+              : it,
+          ),
+        );
+      } finally {
         setBusy(false);
-        return;
+        abortRef.current = null;
       }
-
-      pendingReadersRef.current.delete(botId);
-      patch({ status: "streaming", clarification: undefined });
-      await consumeStream(botId, pending.reader, pending.decoder, pending.buffer, pending.acc);
-      setBusy(false);
-      abortRef.current = null;
     },
-    [consumeStream, router],
+    [runSSERequest],
   );
 
   return { items, busy, send, reset, answerClarification };
