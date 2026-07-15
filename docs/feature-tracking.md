@@ -216,47 +216,47 @@ Các đầu việc cụ thể được trích xuất từ [`project-roadmap.md`]
 
 #### E7 · Clarification Layer — *Request understanding (human-in-the-loop, trước generate)* `#flag-off`
 >
-> 📄 Giải thích (thiết kế): [`features/e7-clarification-layer/explainer.md`](./features/e7-clarification-layer/explainer.md) · ⚠️ chưa implement
+> 📄 Giải thích (thiết kế + toàn bộ lịch sử implementation/redesign): [`features/e7-clarification-layer/explainer.md`](./features/e7-clarification-layer/explainer.md)
 >
-> **Chưa bắt đầu — 1/2 điều kiện đã đáp ứng, còn 1 điều kiện cần dữ liệu thực tế:**
+> ⚠️ **Sửa mâu thuẫn tài liệu (2026-07-15):** block dưới đây trước ghi "Chưa bắt đầu — chờ eval
+> data" — SAI, không khớp với dòng tổng quan E7 ở đầu file này (đã ghi đúng "Toàn bộ đã code+test").
+> Thực tế: **user đã chủ động yêu cầu implement ngay, không đợi Bước 0/eval data** — quyết định
+> giống nguyên tắc "chờ chứng minh cần thiết" đã áp dụng ở E6, nhưng ở đây user chọn ngược lại có
+> chủ đích. Đã code xong Nhóm A (Request Understanding) + Nhóm B (SSE lifecycle/UI resume), rồi
+> qua **2 lần redesign** dựa trên phản hồi thật khi dùng: lần 1 sửa bug TTL (thêm countdown), lần 2
+> **đổi hẳn kiến trúc session** (bỏ Promise-treo-trong-RAM, lưu bền Postgres/file, đóng SSE ngay
+> khi hỏi, resume qua request độc lập hoàn toàn — xem § 6.7 của explainer.md). TTL hiện tại **24
+> giờ** (tăng từ 5 phút ban đầu, theo yêu cầu 2026-07-15). Checklist dưới đây giữ nguyên để tham
+> chiếu lịch sử, đánh dấu lại đúng theo trạng thái code thật (không suy đoán).
 >
-> 1. ✅ **Eval baseline của E6 Giai đoạn 3 đã hoàn thành** (2026-07-13, xem
->    [`e6-prompt-engineering/changelog.md`](./features/e6-prompt-engineering/changelog.md)) — Math
->    template v2 đo được **12/14 PASS (85.71%)** trên AI thật sau 4 fix P0. Có baseline để so sánh.
-> 2. 🔲 **Eval data thực tế** cho thấy tỉ lệ request mơ hồ dẫn tới chất lượng kém là vấn đề đáng kể
->    (tương tự nguyên tắc đã áp dụng khi defer `MathGenerationPlan`/`MathDocumentMode` ở E6: chờ
->    chứng minh cần thiết bằng dữ liệu thực tế trước khi implement, tránh over-engineer khi chưa có
->    consumer thực tế) — **vẫn chưa có, cần làm Bước 0 dưới đây trước khi tiếp tục.**
->
-- [ ] **Bước 0 (trước implement):** thu thập eval data — đo tỉ lệ request mơ hồ hiện tại dẫn tới tài
-      liệu cần chat-edit sửa lại do sai ý định ban đầu. Chỉ tiếp tục các bước dưới nếu số liệu cho
-      thấy đây là vấn đề đáng kể.
-- [ ] Định nghĩa schema `RequestPlan` (structured output qua `generateObject()`): `intent`,
-      `templateId`, `requirements`, `assumptions`, `missingInformation`, `ambiguity`, `confidence`,
-      `recommendedAction` (`"generate" | "clarify"`).
-- [ ] Thiết kế `ClarificationPolicy` (module code riêng, KHÔNG để AI tự quyết định): áp dụng **2
-      quyết định độc lập** (đã thách thức lại "3 cấp độ" ban đầu và sửa 2026-07-14, xem mục 3.2 của
-      explainer.md) — Quyết định A ở tầng request (`recommendedAction`: hỏi hay không) + Quyết định B
-      ở tầng từng field bị thiếu (`importance` → `required`: bắt buộc hay có thể bỏ qua). Một request
-      có thể có đồng thời field `critical` và `optional`, không ép vào một "cấp độ" duy nhất.
-- [ ] Định nghĩa tool `askUserQuestion` dùng chung (schema Zod: `question`/`reason`/`type`
-      `single_choice|multiple_choice|free_text`/`options`/`allowCustomAnswer`/`required`) — MỘT tool
-      cho mọi template, không tạo tool riêng theo từng domain.
-- [ ] Mở rộng `lib/templates/registry.ts`: thêm field `clarificationFields?: ClarificationField[]`
-      cho mỗi template (dimension quan trọng, critical/optional, predefined question, default nếu bỏ
-      qua) — theo pattern đã dùng cho `capabilities`/`repairHints` ở E6.
-- [ ] Thêm bước `understandRequest()` trong `lib/orchestrator/document.ts`, chạy TRƯỚC generate ở mọi
-      entrypoint (`runDocument`/`runDocumentFromMarkdown`/`runEdit`) — không đổi `runRepairLoop`.
-- [ ] Mở rộng SSE lifecycle: thêm state `understanding` và `awaiting_user_input` (giữa `generating`
-      hiện tại) trong `app/api/documents/route.ts` (và route edit/project tương ứng) + endpoint resume
-      nhận câu trả lời người dùng.
-- [ ] UI: component render câu hỏi theo `type` (chọn 1 / chọn nhiều / nhập tự do), luôn có lựa chọn
-      "Bỏ qua và tạo luôn" khi `required: false`.
-- [ ] Giới hạn cứng số câu hỏi mỗi lượt + tổng số lượt clarify mỗi request (né over-clarification và
-      vòng lặp vô hạn).
-- [ ] Kiểm thử: `RequestPlan` cho các case rõ ràng/mơ hồ/thiếu critical field; `ClarificationPolicy`
-      cho cả 2 quyết định độc lập (bao gồm case field hỗn hợp critical+optional cùng lúc); resume
-      flow merge câu trả lời đúng vào request context.
+- [x] ~~Bước 0 (trước implement): thu thập eval data~~ — **đã BỎ QUA có chủ đích theo yêu cầu
+      user**, không phải đã làm. Vẫn CHƯA có eval data thực tế đo tần suất `awaiting_user_input`
+      trong sử dụng thật — lý do duy nhất tính năng còn nằm sau `CLARIFICATION_ENABLED=false`.
+- [x] Định nghĩa schema `RequestPlan` — `lib/clarification/understand-request.ts` +
+      `lib/ai/prompts/understand-request.ts`, dùng `generateObject()` đúng như thiết kế.
+- [x] Thiết kế `ClarificationPolicy` (2 quyết định độc lập, request-level + field-level) — code
+      trong `maybeClarify()` (`app/api/documents/route.ts`) + `clarificationFields` per-template.
+- [x] Định nghĩa tool/schema `askUserQuestion` dùng chung — `PendingQuestion` type, MỘT schema cho
+      mọi template, không tạo riêng theo domain.
+- [x] Mở rộng `lib/templates/registry.ts`: `clarificationFields?: ClarificationField[]` — đã thêm
+      cho template `math` (ví dụ tham chiếu theo đúng mục 3.5 explainer.md).
+- [x] Thêm bước hiểu request TRƯỚC generate — `maybeClarify()` chạy trong nhánh SSE của
+      `app/api/documents/route.ts`, KHÔNG đổi `runRepairLoop`.
+- [x] SSE lifecycle — **đã đổi khác thiết kế ban đầu qua redesign § 6.7**: không còn state
+      `understanding`/`awaiting_user_input` *trong cùng 1 kết nối đang mở* — SSE **đóng ngay** khi
+      cần hỏi, resume qua route hoàn toàn mới
+      (`app/api/documents/clarify/[jobId]/resume/route.ts`) mở **SSE mới**, không phải "tiếp tục".
+- [x] UI: `components/ClarificationQuestionForm.tsx` — render theo `type`, luôn có lựa chọn bỏ qua
+      khi `!required`. (Countdown/`expiresAt` UI đã thêm ở redesign lần 1, rồi **bỏ lại hoàn toàn**
+      ở redesign lần 2 vì không còn khớp kiến trúc mới — xem § 6.6 vs § 6.7.)
+- [ ] Giới hạn cứng số câu hỏi mỗi lượt + tổng số lượt clarify mỗi request — **CHƯA làm**, không
+      nằm trong phạm vi 2 lần redesign đã qua (mỗi request hiện tại chỉ hỏi tối đa 1 vòng, chưa có
+      giới hạn tường minh nào chặn nhiều vòng liên tiếp nếu về sau mở rộng cho phép clarify nhiều
+      lần).
+- [x] Kiểm thử — 22 test hiện tại (7 unit session-store + 9 unit form + 6 integration end-to-end
+      thật) bao phủ: RequestPlan rõ ràng/mơ hồ, resume qua route độc lập, double-resume (409),
+      resume sai `jobId` (404), lazy expiry, generate path không đổi, flag off không gọi AI.
+
 
 ### ⚪ Phase 3 — Platform Maturity
 
