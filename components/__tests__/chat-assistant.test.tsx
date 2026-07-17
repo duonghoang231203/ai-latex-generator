@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { renderWithClient } from "@/tests/utils/react-query";
 
 import ChatAssistant from "@/components/ChatAssistant";
 import {
@@ -28,7 +29,7 @@ vi.mock("next/navigation", () => ({
 
 describe("ChatAssistant (Trợ lý AI Chat trang chủ)", () => {
   it("render được toàn bộ trợ lý (MessageScroller + lời chào) mà không lỗi", () => {
-    render(<ChatAssistant />);
+    renderWithClient(<ChatAssistant />);
     expect(screen.getByText(/Xin chào/)).toBeInTheDocument();
     expect(screen.getByLabelText("Mô tả tài liệu")).toBeInTheDocument();
     expect(screen.getByText("Dạng tài liệu")).toBeInTheDocument();
@@ -36,7 +37,7 @@ describe("ChatAssistant (Trợ lý AI Chat trang chủ)", () => {
 
   it("mở menu “Dạng tài liệu” hiển thị nhãn + template mà không lỗi MenuGroupContext", async () => {
     const user = userEvent.setup();
-    render(<ChatAssistant />);
+    renderWithClient(<ChatAssistant />);
     await user.click(screen.getByText("Dạng tài liệu"));
     expect(await screen.findByText("Chọn dạng tài liệu")).toBeInTheDocument();
     // Một template bất kỳ trong radio group cũng phải render.

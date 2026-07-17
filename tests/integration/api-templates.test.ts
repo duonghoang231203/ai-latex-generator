@@ -84,9 +84,89 @@ describe("tạo tài liệu theo template", () => {
     expect(doc.latex).toContain("\\titlepage");
   });
 
-  it("removed template (physics) → 400", async () => {
-    const res = await createPOST(req({ description: "x", template: "physics" }));
-    expect(res.status).toBe(400);
+  it("report: docType inferred = report, section-based (no chapter), has summary + sections", async () => {
+    const res = await createPOST(req({ description: "Báo cáo dự án Quý 3", template: "report" }));
+    expect(res.status).toBe(201);
+    const doc = (await res.json()) as StoredDocument;
+    expect(doc.template).toBe("report");
+    expect(doc.docType).toBe("report");
+    expect(doc.latex).toContain("\\documentclass{report}");
+    expect(doc.latex).toContain("\\begin{abstract}");
+    expect(doc.latex).toContain("\\section{");
+    expect(doc.latex).not.toContain("\\chapter");
+    expect(doc.pdfBase64 && doc.pdfBase64.length).toBeGreaterThan(0);
+  });
+
+  it("chemistry: docType=article, latex has mhchem + \\ce{} reactions", async () => {
+    const res = await createPOST(req({ description: "Phản ứng đốt cháy metan", template: "chemistry" }));
+    expect(res.status).toBe(201);
+    const doc = (await res.json()) as StoredDocument;
+    expect(doc.template).toBe("chemistry");
+    expect(doc.docType).toBe("article");
+    expect(doc.latex).toContain("\\usepackage{mhchem}");
+    expect(doc.latex).toContain("\\ce{");
+    expect(doc.pdfBase64 && doc.pdfBase64.length).toBeGreaterThan(0);
+  });
+
+  it("physics: docType=article, latex has siunitx + vectors + SI units", async () => {
+    const res = await createPOST(req({ description: "Định luật Newton", template: "physics" }));
+    expect(res.status).toBe(201);
+    const doc = (await res.json()) as StoredDocument;
+    expect(doc.template).toBe("physics");
+    expect(doc.docType).toBe("article");
+    expect(doc.latex).toContain("\\usepackage{siunitx}");
+    expect(doc.latex).toContain("\\vec{");
+    expect(doc.latex).toContain("\\SI{");
+    expect(doc.pdfBase64 && doc.pdfBase64.length).toBeGreaterThan(0);
+  });
+
+  it("exam: exam document class, latex has questions env + \\question + solution", async () => {
+    const res = await createPOST(req({ description: "Câu 1: giải phương trình bậc hai", template: "exam" }));
+    expect(res.status).toBe(201);
+    const doc = (await res.json()) as StoredDocument;
+    expect(doc.template).toBe("exam");
+    expect(doc.docType).toBe("article");
+    expect(doc.latex).toContain("\\documentclass{exam}");
+    expect(doc.latex).toContain("\\begin{questions}");
+    expect(doc.latex).toContain("\\question");
+    expect(doc.pdfBase64 && doc.pdfBase64.length).toBeGreaterThan(0);
+  });
+
+  it("engineering: docType=article, latex has circuitikz + siunitx units", async () => {
+    const res = await createPOST(req({ description: "Thiết kế mạch lọc RC", template: "engineering" }));
+    expect(res.status).toBe(201);
+    const doc = (await res.json()) as StoredDocument;
+    expect(doc.template).toBe("engineering");
+    expect(doc.docType).toBe("article");
+    expect(doc.latex).toContain("\\usepackage{circuitikz}");
+    expect(doc.latex).toContain("\\begin{circuitikz}");
+    expect(doc.latex).toContain("\\SI{");
+    expect(doc.pdfBase64 && doc.pdfBase64.length).toBeGreaterThan(0);
+  });
+
+  it("letter: docType=article, latex has letter env + opening/closing", async () => {
+    const res = await createPOST(req({ description: "Thư xin việc gửi công ty XYZ", template: "letter" }));
+    expect(res.status).toBe(201);
+    const doc = (await res.json()) as StoredDocument;
+    expect(doc.template).toBe("letter");
+    expect(doc.docType).toBe("article");
+    expect(doc.latex).toContain("\\documentclass{letter}");
+    expect(doc.latex).toContain("\\begin{letter}");
+    expect(doc.latex).toContain("\\opening{");
+    expect(doc.pdfBase64 && doc.pdfBase64.length).toBeGreaterThan(0);
+  });
+
+  it("cv: docType=article, self-laid-out (no moderncv / includegraphics)", async () => {
+    const res = await createPOST(req({ description: "CV cho kỹ sư phần mềm", template: "cv" }));
+    expect(res.status).toBe(201);
+    const doc = (await res.json()) as StoredDocument;
+    expect(doc.template).toBe("cv");
+    expect(doc.docType).toBe("article");
+    expect(doc.latex).toContain("\\documentclass{article}");
+    expect(doc.latex).toContain("\\section*{");
+    expect(doc.latex).not.toContain("moderncv");
+    expect(doc.latex).not.toContain("\\includegraphics");
+    expect(doc.pdfBase64 && doc.pdfBase64.length).toBeGreaterThan(0);
   });
 
   it("removed template (general) → 400", async () => {

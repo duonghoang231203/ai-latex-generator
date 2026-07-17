@@ -18,6 +18,12 @@ export interface AppConfig {
   maxInputChars: number;
   maxSourceFiles: number;
   maxSourceChars: number;
+  // ---- Multi-file project (E1a) ----
+  // Ngân sách phía Next để fail-fast TRƯỚC khi gọi compile-service (tránh round-trip vô ích cho
+  // request chắc chắn bị compile-service từ chối). Mirror mặc định của MAX_PROJECT_BYTES/
+  // MAX_PROJECT_FILES trong compile-service/compile.js — giữ 2 lớp đồng bộ, không hardcode khác giá trị.
+  maxProjectBytes: number;
+  maxProjectFiles: number;
   requestTimeoutMs: number;
   rateLimitPerMinute: number;
   dataDir: string; // thư mục lưu trữ tài liệu (file-based)
@@ -57,6 +63,8 @@ export function getConfig(): AppConfig {
     maxInputChars: num(process.env.MAX_INPUT_CHARS, 20000),
     maxSourceFiles: num(process.env.MAX_SOURCE_FILES, 10),
     maxSourceChars: num(process.env.MAX_SOURCE_CHARS, 100000),
+    maxProjectBytes: num(process.env.MAX_PROJECT_BYTES, 5_000_000),
+    maxProjectFiles: num(process.env.MAX_PROJECT_FILES, 100),
     requestTimeoutMs: num(process.env.REQUEST_TIMEOUT_MS, 60000),
     rateLimitPerMinute: num(process.env.RATE_LIMIT_PER_MINUTE, 10),
     dataDir: process.env.DATA_DIR ?? ".data",

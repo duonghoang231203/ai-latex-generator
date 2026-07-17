@@ -1,0 +1,30 @@
+# lib/prompt-eval/promptfooconfig.physics.yaml
+# Eval template `physics` bằng MockProvider (tất định, $0) — CI/regression. Theo pattern
+# promptfooconfig.chemistry.yaml. Chạy từ ROOT:
+#   npx promptfoo eval -c lib/prompt-eval/promptfooconfig.physics.yaml
+description: "Physics template — MockProvider (deterministic) trên dataset physics/"
+
+prompts:
+  - "{{description}}"
+
+providers:
+  - id: file://./providers/physics-provider.ts
+    label: physics-mock
+
+tests:
+  - file://./datasets/physics/cases.yaml
+
+defaultTest:
+  assert:
+    - type: contains
+      value: "\\documentclass{article}"
+    - type: contains
+      value: "\\usepackage{siunitx}"
+    - type: contains
+      value: "\\SI{"
+    - type: contains
+      value: "\\begin{document}"
+    - type: contains
+      value: "\\end{document}"
+    - type: javascript
+      value: file://./scorers/validate-latex.ts

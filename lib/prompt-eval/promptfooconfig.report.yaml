@@ -1,0 +1,30 @@
+# lib/prompt-eval/promptfooconfig.report.yaml
+# Eval template `report` bằng MockProvider (tất định, $0) — CI/regression. Theo pattern
+# promptfooconfig.yaml (math). KHÔNG dùng theorem-env-coverage scorer (report không có theorem env).
+#
+# Chạy từ ROOT của project:
+#   npx promptfoo eval -c lib/prompt-eval/promptfooconfig.report.yaml
+#
+# Mọi đường dẫn file:// resolve tương đối với VỊ TRÍ FILE NÀY (lib/prompt-eval/).
+description: "Report template — MockProvider (deterministic) trên dataset report/"
+
+prompts:
+  - "{{description}}"
+
+providers:
+  - id: file://./providers/report-provider.ts
+    label: report-mock
+
+tests:
+  - file://./datasets/report/cases.yaml
+
+defaultTest:
+  assert:
+    - type: contains
+      value: "\\documentclass{report}"
+    - type: contains
+      value: "\\begin{document}"
+    - type: contains
+      value: "\\end{document}"
+    - type: javascript
+      value: file://./scorers/validate-latex.ts

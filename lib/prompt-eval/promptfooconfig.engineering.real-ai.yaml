@@ -1,0 +1,34 @@
+# lib/prompt-eval/promptfooconfig.engineering.real-ai.yaml
+# Eval template `engineering` bằng AI THẬT (đọc .env qua getProvider(); AI_PROVIDER=sotatek-anthropic,
+# AI_MODEL=deepseek/deepseek-v4-pro). TỐN API QUOTA THẬT mỗi lần chạy. Theo pattern
+# promptfooconfig.physics.real-ai.yaml.
+#   npx promptfoo eval -c lib/prompt-eval/promptfooconfig.engineering.real-ai.yaml -o <out>.json
+#
+# LƯU Ý: KHÔNG bắt buộc circuitikz ở assertion (engineering rộng — không phải doc nào cũng có mạch);
+# kiểm cốt lõi = article + dùng siunitx cho đơn vị + tuân allowlist (validate-latex).
+description: "Engineering template — AI THẬT trên dataset engineering/"
+
+prompts:
+  - "{{description}}"
+
+providers:
+  - id: file://./providers/engineering-real-ai-provider.ts
+    label: engineering-real-ai
+
+tests:
+  - file://./datasets/engineering/cases.yaml
+
+defaultTest:
+  assert:
+    # regex: chấp nhận \documentclass[opt]{article}. Backslash PHẢI escape (\\).
+    - type: regex
+      value: '\\documentclass(\[[^\]]*\])?\{article\}'
+    # siunitx phải được nạp + thực sự dùng cho đơn vị (\SI/\si/\num/\qty)
+    - type: regex
+      value: '\\usepackage(\[[^\]]*\])?\{siunitx\}'
+    - type: regex
+      value: '\\(SI|si|qty|num)\{'
+    - type: contains
+      value: "\\end{document}"
+    - type: javascript
+      value: file://./scorers/validate-latex.ts

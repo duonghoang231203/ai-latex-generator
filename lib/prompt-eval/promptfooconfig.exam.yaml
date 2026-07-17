@@ -1,0 +1,28 @@
+# lib/prompt-eval/promptfooconfig.exam.yaml
+# Eval template `exam` bằng MockProvider (tất định, $0) — CI/regression. Theo pattern
+# promptfooconfig.physics.yaml. Chạy từ ROOT:
+#   npx promptfoo eval -c lib/prompt-eval/promptfooconfig.exam.yaml
+description: "Exam template — MockProvider (deterministic) trên dataset exam/"
+
+prompts:
+  - "{{description}}"
+
+providers:
+  - id: file://./providers/exam-provider.ts
+    label: exam-mock
+
+tests:
+  - file://./datasets/exam/cases.yaml
+
+defaultTest:
+  assert:
+    - type: contains
+      value: "\\documentclass{exam}"
+    - type: contains
+      value: "\\begin{questions}"
+    - type: contains
+      value: "\\question"
+    - type: contains
+      value: "\\end{document}"
+    - type: javascript
+      value: file://./scorers/validate-latex.ts

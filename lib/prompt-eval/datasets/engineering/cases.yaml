@@ -1,0 +1,29 @@
+# lib/prompt-eval/datasets/engineering/cases.yaml
+# Test case cho template `engineering` (siunitx + circuitikz + listings). Theo pattern
+# physics/exam cases.yaml. vars.templateId = "engineering" (validate-latex scorer đọc allowlist).
+# Assertion chung (article, siunitx, dùng \SI/\si, validate-latex) đặt ở defaultTest của config.
+# Case nghiêng về điện tử để kỳ vọng dùng đơn vị + mạch.
+
+- description: "rc-filter — thiết kế mạch lọc thông thấp RC (đơn vị + mạch)"
+  vars:
+    templateId: engineering
+    description: "Thiết kế và phân tích mạch lọc thông thấp RC với tần số cắt cho trước, kèm sơ đồ mạch."
+  assert: []
+
+- description: "opamp — mạch khuếch đại thuật toán"
+  vars:
+    templateId: engineering
+    description: "Trình bày mạch khuếch đại không đảo dùng op-amp, tính hệ số khuếch đại và điện trở."
+  assert: []
+
+- description: "power-budget — tính công suất tiêu thụ (đơn vị SI + bảng)"
+  vars:
+    templateId: engineering
+    description: "Báo cáo tính ngân sách công suất cho một hệ thống nhúng, có bảng số liệu và đơn vị."
+  assert: []
+
+- description: "vietnamese-embedded — tiếng Việt, mạch nguồn vi điều khiển"
+  vars:
+    templateId: engineering
+    description: "Báo cáo kỹ thuật thiết kế mạch nguồn cho vi điều khiển, có sơ đồ và thông số kỹ thuật."
+  assert: []

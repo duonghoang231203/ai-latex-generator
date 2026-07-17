@@ -8,6 +8,7 @@ import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { getConfig } from "@/lib/config";
 import { templateForDocType } from "@/lib/templates/registry";
+import { isMultiFile } from "@/lib/store/project-document";
 import type {
   ChatMessage,
   CreateDocumentInput,
@@ -64,6 +65,7 @@ function toSummary(doc: StoredDocument): DocumentSummary {
     hasPdf: Boolean(doc.pdfBase64),
     createdAt: doc.createdAt,
     updatedAt: doc.updatedAt,
+    isProject: isMultiFile(doc),
   };
 }
 

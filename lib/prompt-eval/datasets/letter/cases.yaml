@@ -1,0 +1,28 @@
+# lib/prompt-eval/datasets/letter/cases.yaml
+# Test case cho template `letter` (document class letter: \opening/\closing). Theo pattern
+# physics/exam cases.yaml. vars.templateId = "letter". Assertion chung (documentclass letter,
+# \begin{letter}, \opening/\closing, KHÔNG \section, validate-latex) đặt ở defaultTest của config.
+
+- description: "job-application — thư xin việc"
+  vars:
+    templateId: letter
+    description: "Viết thư xin việc ứng tuyển vị trí kỹ sư phần mềm tại một công ty công nghệ."
+  assert: []
+
+- description: "resignation — thư xin nghỉ việc"
+  vars:
+    templateId: letter
+    description: "Viết thư xin nghỉ việc gửi quản lý trực tiếp, thông báo trước 30 ngày."
+  assert: []
+
+- description: "recommendation — thư giới thiệu"
+  vars:
+    templateId: letter
+    description: "Viết thư giới thiệu một sinh viên xin học bổng sau đại học."
+  assert: []
+
+- description: "thank-you — thư cảm ơn trang trọng"
+  vars:
+    templateId: letter
+    description: "Viết thư cảm ơn đối tác đã hỗ trợ dự án, gửi tới giám đốc công ty."
+  assert: []

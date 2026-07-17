@@ -60,6 +60,10 @@ function groupedTemplates() {
 // LƯU Ý: preview HTML KHÁC với kết quả LaTeX cuối (chỉ để soạn thảo).
 const previewMd = new MarkdownIt({ html: false, linkify: false, typographer: false });
 
+// Nhóm template chỉ phụ thuộc listTemplates() (tĩnh) → tính MỘT LẦN ở module scope, không tính lại
+// mỗi lần render.
+const TEMPLATE_GROUPS = groupedTemplates();
+
 export default function ChatAssistant() {
   const router = useRouter();
   const { items, busy, send, reset, answerClarification } = useDocumentGenerationChat();
@@ -72,7 +76,6 @@ export default function ChatAssistant() {
   const [extractError, setExtractError] = useState<string>();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const groups = groupedTemplates();
   const active = getTemplate(template);
   // Cho gửi khi: có nội dung text, HOẶC (nhánh natural) có tệp đính kèm.
   const canSend =
@@ -156,7 +159,7 @@ export default function ChatAssistant() {
                 onValueChange={(v) => setTemplate(v as TemplateId)}
               >
                 <MenubarLabel>Chọn dạng tài liệu</MenubarLabel>
-                {groups.map((g) => (
+                {TEMPLATE_GROUPS.map((g) => (
                   <Fragment key={g.category}>
                     <MenubarSeparator />
                     <MenubarLabel inset className="text-xs font-normal text-muted-foreground">

@@ -1,0 +1,30 @@
+# lib/prompt-eval/promptfooconfig.letter.yaml
+# Eval template `letter` bằng MockProvider (tất định, $0) — CI/regression. Theo pattern
+# promptfooconfig.physics.yaml. Chạy từ ROOT:
+#   npx promptfoo eval -c lib/prompt-eval/promptfooconfig.letter.yaml
+description: "Letter template — MockProvider (deterministic) trên dataset letter/"
+
+prompts:
+  - "{{description}}"
+
+providers:
+  - id: file://./providers/letter-provider.ts
+    label: letter-mock
+
+tests:
+  - file://./datasets/letter/cases.yaml
+
+defaultTest:
+  assert:
+    - type: contains
+      value: "\\documentclass{letter}"
+    - type: contains
+      value: "\\begin{letter}"
+    - type: contains
+      value: "\\opening{"
+    - type: contains
+      value: "\\closing{"
+    - type: contains
+      value: "\\end{document}"
+    - type: javascript
+      value: file://./scorers/validate-latex.ts

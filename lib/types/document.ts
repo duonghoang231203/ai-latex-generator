@@ -12,11 +12,18 @@ export type LatexClass = "article" | "report" | "beamer" | "exam" | "letter";
  * Template cụ thể người dùng chọn để định hình format/layout/gói LaTeX.
  * `docType` (article|report) là LỚP nền coarse; `TemplateId` là DẠNG tài liệu cụ thể.
  *
- * Core set (4 templates):
+ * Core set (11 templates):
  *   academic — bài báo học thuật (article)
  *   math     — toán học/định lý (article)
- *   thesis   — luận văn/báo cáo dài (report)
+ *   thesis   — luận văn/báo cáo dài, nhiều chương (report)
+ *   report   — báo cáo chung, theo section, KHÔNG chương (report)
  *   slides   — trình chiếu Beamer (beamer)
+ *   chemistry — hóa học, phương trình phản ứng/công thức qua mhchem (article)
+ *   physics   — vật lý, vector (\vec/\bm) + đơn vị SI qua siunitx (article)
+ *   exam      — đề thi, câu hỏi/điểm/lời giải qua document class `exam`
+ *   engineering — kỹ thuật, siunitx + circuitikz (mạch) + listings (code) (article)
+ *   letter    — thư trang trọng, \opening/\closing qua document class `letter`
+ *   cv        — sơ yếu lý lịch/CV, article tự layout (KHÔNG moderncv/ảnh ngoài)
  *
  * Để thêm template mới: dùng factory `defineTemplate()` trong registry.ts.
  */
@@ -24,13 +31,27 @@ export type TemplateId =
   | "academic" // Bài báo học thuật — abstract, cite, sections chuẩn
   | "math"     // Tài liệu Toán học — theorem, proof, equation
   | "thesis"   // Luận văn/Báo cáo dài — chapter hierarchy, TOC
-  | "slides";  // Trình chiếu Beamer — frames, blocks, wow factor
+  | "report"   // Báo cáo chung — report class nhưng theo \section (không \chapter), ngắn hơn thesis
+  | "slides"   // Trình chiếu Beamer — frames, blocks, wow factor
+  | "chemistry" // Hóa học — phương trình phản ứng/công thức qua mhchem (\ce{})
+  | "physics"  // Vật lý — vector (\vec/\bm), đơn vị SI (siunitx), phương trình
+  | "exam"     // Đề thi — document class `exam`: \question/\part/\choices/\begin{solution}
+  | "engineering" // Kỹ thuật — siunitx + circuitikz (mạch) + listings (code), technical report
+  | "letter"   // Thư trang trọng — document class `letter`: \opening/\closing (KHÔNG \section)
+  | "cv"; // CV/Sơ yếu lý lịch — article tự layout (KHÔNG moderncv, KHÔNG \includegraphics ảnh)
 
 export const TEMPLATE_IDS: readonly TemplateId[] = [
   "academic",
   "math",
   "thesis",
+  "report",
   "slides",
+  "chemistry",
+  "physics",
+  "exam",
+  "engineering",
+  "letter",
+  "cv",
 ] as const;
 
 /** File nguồn người dùng tải lên (đã đọc thành text ở client). */
@@ -181,6 +202,8 @@ export interface DocumentSummary {
   hasPdf: boolean;
   createdAt: string;
   updatedAt: string;
+  /** true nếu tài liệu là dự án multi-file (E1a) — có `files[]` không rỗng. */
+  isProject: boolean;
 }
 
 // ---- Compile ----

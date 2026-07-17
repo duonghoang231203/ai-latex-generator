@@ -19,7 +19,7 @@ Bảng theo dõi tiến độ các tính năng của dự án AI LaTeX Generator
 
 | Trạng thái | Tính năng | Mô tả chi tiết | Người phụ trách / Ghi chú |
 | :---: | :--- | :--- | :--- |
-| ⏸️ | **E1 · Multi-file project support (Core)** `#deferred` | Kiến trúc lưu trữ dạng thư mục (Directory-based storage) phục vụ tài liệu lớn. Nền đã có (data model, compile-service, `runProject()`); **tạm dừng tiếp tục** — chờ ưu tiên lại. | Theme: Scale · Ưu tiên **1** (enabler) · Effort L |
+| 🔄 | **E1 · Multi-file project support (Core)** | **E1a (multi-file thủ công) ✅ 2026-07-16:** UI tab file (phẳng, chọn root, thêm/đổi tên/xoá), convert-in-place từ tài liệu single-file, `PATCH {files,rootFile}`→`compileProject` (validate ghép template-aware → compile cả dự án → đồng bộ `latex`=root), giới hạn `maxProjectBytes/Files`, badge `isProject`. Verify: 333 test + **Tectonic thật** (engine `compile.js` + HTTP boundary `server.js`, PDF thật). **E1b (hybrid AI gen: `DocumentPlan`/`generateSection`/scoped repair) + chat-edit đa file + asset nhị phân + wire vào luồng TẠO: hoãn.** Migration `0003` (cột `is_project`) đã viết, **chờ apply live**. | Theme: Scale · Ưu tiên **1** (enabler) · Effort L |
 | ✅ | **E5 · Markdown → LaTeX conversion** | Viết nháp bằng định dạng Markdown, tự động chuyển sang chuẩn LaTeX. | Theme: Authoring speed · Ưu tiên **2** (quick win) · Effort S–M · **Done** |
 | ✅ | **E3 · RAG (Retrieval-Augmented Generation)** | Truy hồi tài liệu tham khảo (upload) để AI viết nội dung chính xác, có trích dẫn nguồn. | Theme: Content accuracy · Ưu tiên **3** · Effort M–L · **Done** (mặc định tắt: `RAG_ENABLED`) |
 | 🔲 | **E2 · Agentic multi-step document assembly** `#later` | Cơ chế tạo dàn ý và tự động viết nội dung theo dạng Checklist (Human-in-the-loop). | Theme: Smart assembly · Ưu tiên **4** (sau E1) · Effort L |
@@ -44,30 +44,31 @@ Các đầu việc cụ thể được trích xuất từ [`project-roadmap.md`]
 
 ### 🟡 Phase 2 — Advanced Features
 
-#### E1 · Multi-file project support (Core) — *Scale* `#deferred`
+#### E1 · Multi-file project support (Core) — *Scale*
 >
-> ⏸️ **TẠM DỪNG (2026-07-14)** — nền tảng đã có (data model, compile-service path-guard,
-> `runProject()` ở orchestrator), nhưng chưa tiếp tục các phần còn thiếu (UI, wiring vào luồng tạo
-> tài liệu thật). Giữ nguyên trạng thái hiện tại, không phát triển thêm cho tới khi được ưu tiên
-> lại — không xoá vì phần đã làm vẫn hoạt động và có test bao phủ.
+> 🔄 **E1a XONG (2026-07-16) — E1b HOÃN.** Slice **multi-file thủ công (E1a)** đã ship + verify:
+> người dùng convert-in-place tài liệu single-file → dự án nhiều `.tex`, sửa theo tab, đặt file gốc,
+> biên dịch cả dự án. **KHÔNG** có phần AI (E1b: `DocumentPlan`/`generateSection`/scoped repair),
+> chat-edit đa file, asset nhị phân, hay wire multi-file vào luồng TẠO — các phần này vẫn hoãn (đưa
+> vào cùng E2 khi được ưu tiên). Verify không cần Docker: chạy Tectonic thật cục bộ (engine + HTTP).
 >
-> 📄 Giải thích (thiết kế): [`features/e1-multi-file-project/explainer.md`](./features/e1-multi-file-project/explainer.md) · ⚠️ chưa implement
+> 📄 Giải thích (thiết kế): [`features/e1-multi-file-project/explainer.md`](./features/e1-multi-file-project/explainer.md)
 > 🧪 Spike (đã xong 2026-07-09): [`features/e1-multi-file-project/spike-tectonic-multifile.md`](./features/e1-multi-file-project/spike-tectonic-multifile.md) — `\input`/`\include`/asset chạy được dưới Tectonic `--untrusted`; **path-guard bắt buộc**.
-> 🏗️ **Architecture Task:** [`features/e1-multi-file-project/task-hybrid-architecture.md`](./features/e1-multi-file-project/task-hybrid-architecture.md) — Chuyển từ monolithic generation sang Hybrid Generation.
+> 🏗️ **Architecture Task (E1b, chưa làm):** [`features/e1-multi-file-project/task-hybrid-architecture.md`](./features/e1-multi-file-project/task-hybrid-architecture.md) — Chuyển từ monolithic generation sang Hybrid Generation.
 
-- [ ] **Task: Design Hybrid Document Generation Architecture (Làm đầu tiên cho E1)**
+- [ ] **(E1b, HOÃN) Task: Design Hybrid Document Generation Architecture**
   - [ ] 1. Define `DocumentPlan` (structured output schema).
   - [ ] 2. Define project structure (App code owns structure, templates, assembly).
   - [ ] 3. Generate LaTeX theo từng section (`generateSection` thay vì `generateWholeDocument`).
   - [ ] 4. Deterministic assembly (App code writes files, merges project).
   - [ ] 5. Scoped repair (Identify affected scope, repair only that section, re-compile).
-- [ ] Thiết kế mô hình lưu trữ dạng thư mục: mỗi tài liệu = 1 folder chứa nhiều file `.tex` + assets (thay cho trường `latex` đơn trong `StoredDocument`). → *increment 1: đã hỗ trợ dự án multi-file **text** trong layout JSON hiện tại (`files[]`); layout thư mục cho **asset nhị phân** hoãn lại.*
-- [ ] Cập nhật `lib/store/documentStore.ts` sang cấu trúc directory-based (đọc/ghi/liệt kê nhiều file). → *đã: lưu/đọc `files[]`+`rootFile` trong JSON (migration-on-read: thiếu `rootFile` ⇒ file đầu). Directory-based vật lý (asset nhị phân) hoãn.*
+- [x] Thiết kế mô hình lưu trữ dạng thư mục: mỗi tài liệu = 1 folder chứa nhiều file `.tex` + assets (thay cho trường `latex` đơn trong `StoredDocument`). → *E1a: dự án multi-file **text** trong layout JSON (`files[]`+`rootFile`); layout thư mục cho **asset nhị phân** vẫn hoãn.*
+- [x] Cập nhật `lib/store/documentStore.ts` sang cấu trúc directory-based (đọc/ghi/liệt kê nhiều file). → *E1a: lưu/đọc `files[]`+`rootFile` trong JSON (migration-on-read: thiếu `rootFile` ⇒ file đầu); PATCH thay-thế-cả-mảng. `DocumentSummary.isProject` (file + supabase). Directory-based vật lý (asset) hoãn.*
 - [x] Mở rộng data model `lib/types/document.ts`: danh sách file, file gốc (root/main), quan hệ `\input`/`\include`. → `ProjectFile`, `StoredDocument.files?/rootFile?`, `UpdateDocumentPatch` cho phép `files/rootFile`. Cầu nối single↔multi: `lib/store/project-document.ts` (`getProjectFiles`/`getRootFile`/`validateProject`, tái dùng path-guard). Tests: `tests/unit/{project-document,store-project}.test.ts`.
-- [x] Cập nhật `compile-service` để nhận nhiều file (main + phụ) và biên dịch từ file gốc. → `compileProject(files, rootFile)` + `/compile` nhận `{files,rootFile}` (tương thích ngược `{latex}`) + **path-guard** `safeProjectPath` (chặn traversal — spike cho thấy `--untrusted` không tự chặn). Client: `lib/compile/{project-path,client}.ts`. Tests: `compile-service/test/project.test.js`, `tests/unit/{project-path,compile-client-project}.test.ts`.
-- [ ] UI: cây thư mục / tab file, chọn file gốc để biên dịch.
-- [ ] Wiring orchestrator: dùng `compileProject(getProjectFiles(doc), getRootFile(doc))` cho tài liệu multi-file (hiện `runDocument*` vẫn single-file). → *đã: `runProject()` (validate→compile cả dự án→repair file gốc, giới hạn v1) + `OrchestratorDeps.compileProject` + `/api/compile` nhận `{files,rootFile}`. Tests: `tests/unit/project-orchestrator.test.ts`, `tests/integration/api-compile-project.test.ts`. Còn: móc vào luồng TẠO tài liệu (chờ UI/E2 sinh multi-file) + rebuild image compile-service để HTTP e2e dùng code mới.*
-- [ ] Migration: chuyển tài liệu single-file hiện có sang cấu trúc mới. → *một phần: đọc tương thích đã có; chưa cần chuyển đổi vật lý vì vẫn dùng JSON.*
+- [x] Cập nhật `compile-service` để nhận nhiều file (main + phụ) và biên dịch từ file gốc. → `compileProject(files, rootFile)` + `/compile` nhận `{files,rootFile}` (tương thích ngược `{latex}`) + **path-guard** `safeProjectPath` (chặn traversal — spike cho thấy `--untrusted` không tự chặn). Client: `lib/compile/{project-path,client}.ts`. Tests: `compile-service/test/project.test.js`, `tests/unit/{project-path,compile-client-project}.test.ts`. **Verify Tectonic thật 2026-07-16** (cục bộ, không Docker): multi-file `\input` sibling+subdir → PDF thật; qua HTTP `server.js` → `200 application/pdf`; traversal bị chặn.
+- [x] UI: tab file + chọn file gốc để biên dịch. → *E1a: `components/ProjectFileEditor.tsx` — tab **phẳng** (root đầu, ★), thêm/đổi tên/xoá file, "đặt làm file gốc", draft từng file (`useState Record<path,string>`), một nút "Lưu & biên dịch" (PATCH cả mảng). Convert-in-place + ẩn chat-edit cho dự án ở `DocumentWorkspace.tsx`. **Cây thư mục lồng (tree) hoãn** — flat đủ cho vài file.*
+- [~] Wiring orchestrator: dùng `compileProject(getProjectFiles(doc), getRootFile(doc))` cho tài liệu multi-file. → *E1a: nhánh **sửa thủ công** đã wire — `PATCH /api/documents/[id]` gọi thẳng `compileProject` (validate ghép template-aware → compile → đồng bộ `latex`=root), không qua AI. `runProject()` (validate→compile→repair file gốc) + `OrchestratorDeps.compileProject` vẫn có sẵn cho E1b. **Còn (HOÃN): móc multi-file vào luồng TẠO tài liệu** (chờ E1b/E2 sinh multi-file). Rebuild image compile-service chỉ cần cho deploy Docker — code đã verify bằng Tectonic thật cục bộ.*
+- [x] Migration: chuyển tài liệu single-file hiện có sang cấu trúc mới. → *đọc tương thích (single-file coi như 1 file `main.tex`); convert-in-place chuyển thủ công khi user bấm "+ Thêm file". Supabase: `supabase/migrations/0003_documents_is_project_column.sql` (cột suy diễn `is_project`) — **đã viết, CHƯA apply live** (không có DB/credential trong môi trường; apply qua Dashboard SQL hoặc `supabase db push`).*
 
 #### E5 · Markdown → LaTeX conversion — *Authoring speed*
 >
@@ -134,13 +135,16 @@ Các đầu việc cụ thể được trích xuất từ [`project-roadmap.md`]
       (`project-overview-pdr.md`: "reports, academic, math/physics/chemistry, engineering, thesis,
       Beamer, letters/CVs, exams") mà không verify lại với code. 4 template hiện có đã được chuẩn
       hoá đủ (schema 5-field cố định, xem `DocumentTemplate.promptGuidance` trong `registry.ts`).
-- [ ] **`#later` — Task bàn giao: Mở rộng 7 template mới** (epic riêng, KHÔNG phải "chuẩn hoá" — đây
+- [x] **`#later` — Task bàn giao: Mở rộng 7 template mới** ✅ **HOÀN TẤT (2026-07-17)** (epic riêng, KHÔNG phải "chuẩn hoá" — đây
       là thêm `TemplateId` mới, effort ước tính tương đương thêm 1 template = ~0.5–1 ngày/template
       nếu theo đúng pattern 4 template hiện có). Xem chi tiết đầy đủ (phạm vi kỹ thuật, checklist per
       template, thứ tự làm đề xuất) tại
       [`docs/backend-roadmap.md` § Phase 6](./backend-roadmap.md#-phase-6-mở-rộng-template-tag-later).
       7 template cần thêm, theo đúng ý định sản phẩm ban đầu:
-      `report`, `physics`, `chemistry`, `engineering`, `letter`, `cv`, `exam`.
+      ~~`report`~~ ✅ + ~~`chemistry`~~ ✅ + ~~`physics`~~ ✅ + ~~`exam`~~ ✅ + ~~`engineering`~~ ✅
+      + ~~`letter`~~ ✅ + ~~`cv`~~ ✅ **(HOÀN TẤT 7/7 — 2026-07-17; verify bằng test + compile Tectonic
+      thật + eval Promptfoo; kèm fix DRY inject allowlist vào prompt chung mọi template — xem
+      `docs/backend-roadmap.md` § Phase 6)**. **Tổng 11 template trong code (4 gốc + 7).**
 - [ ] `#later` Thiết kế prompt cho E2 Agentic assembly: `generate-outline.ts`, `generate-section.ts`.
 - [ ] `#later` Structured output schema cho outline/diagnosis dùng `generateObject()` (`lib/ai/schemas/`).
 - [ ] `#later` Thêm `promptVersion` vào response metadata để debug theo từng request.

@@ -1,0 +1,30 @@
+# lib/prompt-eval/promptfooconfig.cv.yaml
+# Eval template `cv` bằng MockProvider (tất định, $0) — CI/regression. Theo pattern
+# promptfooconfig.letter.yaml. Chạy từ ROOT:
+#   npx promptfoo eval -c lib/prompt-eval/promptfooconfig.cv.yaml
+description: "CV template — MockProvider (deterministic) trên dataset cv/"
+
+prompts:
+  - "{{description}}"
+
+providers:
+  - id: file://./providers/cv-provider.ts
+    label: cv-mock
+
+tests:
+  - file://./datasets/cv/cases.yaml
+
+defaultTest:
+  assert:
+    - type: contains
+      value: "\\documentclass{article}"
+    - type: contains
+      value: "\\section*{"
+    - type: not-contains
+      value: "moderncv"
+    - type: not-contains
+      value: "\\includegraphics"
+    - type: contains
+      value: "\\end{document}"
+    - type: javascript
+      value: file://./scorers/validate-latex.ts

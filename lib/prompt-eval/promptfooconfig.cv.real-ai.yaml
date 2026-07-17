@@ -1,0 +1,35 @@
+# lib/prompt-eval/promptfooconfig.cv.real-ai.yaml
+# Eval template `cv` bằng AI THẬT (đọc .env qua getProvider(); AI_PROVIDER=sotatek-anthropic,
+# AI_MODEL=deepseek/deepseek-v4-pro). TỐN API QUOTA THẬT mỗi lần chạy. Theo pattern
+# promptfooconfig.letter.real-ai.yaml. Trọng tâm: AI có tuân "article tự layout, KHÔNG moderncv/ảnh".
+#   npx promptfoo eval -c lib/prompt-eval/promptfooconfig.cv.real-ai.yaml -o <out>.json
+description: "CV template — AI THẬT trên dataset cv/"
+
+prompts:
+  - "{{description}}"
+
+providers:
+  - id: file://./providers/cv-real-ai-provider.ts
+    label: cv-real-ai
+
+tests:
+  - file://./datasets/cv/cases.yaml
+
+defaultTest:
+  assert:
+    # regex: chấp nhận \documentclass[opt]{article}. Backslash PHẢI escape (\\).
+    - type: regex
+      value: '\\documentclass(\[[^\]]*\])?\{article\}'
+    - type: contains
+      value: "\\section"
+    # trọng tâm rủi ro cv: KHÔNG moderncv, KHÔNG lệnh moderncv, KHÔNG ảnh ngoài
+    - type: not-contains
+      value: "moderncv"
+    - type: not-contains
+      value: "\\cventry"
+    - type: not-contains
+      value: "\\includegraphics"
+    - type: contains
+      value: "\\end{document}"
+    - type: javascript
+      value: file://./scorers/validate-latex.ts

@@ -1,0 +1,31 @@
+# lib/prompt-eval/promptfooconfig.report.real-ai.yaml
+# Eval template `report` bằng AI THẬT (đọc .env qua getProvider(); hiện AI_PROVIDER=sotatek-anthropic,
+# AI_MODEL=deepseek/deepseek-v4-pro). TỐN API QUOTA THẬT mỗi lần chạy — chỉ chạy khi cần đo compliance
+# thật. Theo pattern promptfooconfig.real-ai.yaml (math).
+#
+# Chạy: npx promptfoo eval -c lib/prompt-eval/promptfooconfig.report.real-ai.yaml -o <out>.json
+description: "Report template — AI THẬT trên dataset report/"
+
+prompts:
+  - "{{description}}"
+
+providers:
+  - id: file://./providers/report-real-ai-provider.ts
+    label: report-real-ai
+
+tests:
+  - file://./datasets/report/cases.yaml
+
+defaultTest:
+  assert:
+    # regex (không phải contains) để chấp nhận cả \documentclass[12pt]{report} — AI thật hay thêm
+    # option lớp; điều quan trọng là ĐÚNG lớp `report`. Backslash phải escape (\\) trong regex —
+    # nếu viết \documentclass thì \d bị hiểu là "chữ số" khiến regex không khớp (bug đã gặp lần đầu).
+    - type: regex
+      value: '\\documentclass(\[[^\]]*\])?\{report\}'
+    - type: contains
+      value: "\\begin{document}"
+    - type: contains
+      value: "\\end{document}"
+    - type: javascript
+      value: file://./scorers/validate-latex.ts

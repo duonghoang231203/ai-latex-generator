@@ -1,14 +1,17 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
 import PdfPreview from "@/components/PdfPreview";
 import ChatEditor from "@/components/ChatEditor";
+import ProjectFileEditor from "@/components/ProjectFileEditor";
+import { useWorkspaceStore } from "@/components/stores/workspace-store";
+import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import type { StoredDocument } from "@/lib/types/document";
 import { getTemplate } from "@/lib/templates/registry";
-
-type Tab = "pdf" | "source" | "chat";
 
 export default function DocumentWorkspace({
   initialDoc,
@@ -20,12 +23,18 @@ export default function DocumentWorkspace({
   const [loadError] = useState<string | undefined>(
     initialDoc ? undefined : "Không tìm thấy tài liệu.",
   );
-  const [tab, setTab] = useState<Tab>("pdf");
+  // Tab view (pdf/source) sống trong useWorkspaceStore (persist last-active tab, global).
+  const tab = useWorkspaceStore((s) => s.tab);
+  const setTab = useWorkspaceStore((s) => s.setTab);
+
+  // Nạp tab đã lưu từ localStorage sau khi mount (store dùng skipHydration để tránh lệch hydration).
+  useEffect(() => {
+    void useWorkspaceStore.persist.rehydrate();
+  }, []);
 
   // Chỉnh sửa thủ công mã nguồn.
   const [draft, setDraft] = useState(initialDoc?.latex ?? "");
   const [saving, setSaving] = useState(false);
-  const [chatBusy, setChatBusy] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
   const [actionError, setActionError] = useState<string>();
 
@@ -43,34 +52,58 @@ export default function DocumentWorkspace({
     }
   }, [doc]);
 
-  async function saveSource() {
-    if (!doc || draft.trim().length === 0 || saving) return;
-    setSaving(true);
-    setActionError(undefined);
-    try {
+  // Auto-save nháp (FE-2.4): PATCH compile:false — CHỈ persist latex, KHÔNG biên dịch. Không đụng
+  // `draft` khi thành công (người dùng có thể đang gõ tiếp); chỉ cập nhật `doc` (doc.latex = bản đã
+  // lưu) để biết còn thay đổi chưa lưu hay không.
+  const autoSaveMutation = useMutation({
+    mutationFn: async (latex: string) => {
+      if (!doc) throw new Error("Tài liệu không tồn tại.");
       const res = await fetch(`/api/documents/${doc.id}`, {
         method: "PATCH",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ latex: draft }),
+        body: JSON.stringify({ latex, compile: false }),
       });
       const data = (await res.json()) as StoredDocument & { error?: string };
-      if (!res.ok) {
-        setActionError(data.error ?? "Lưu thất bại.");
-        return;
-      }
-      setDoc(data);
-      setDraft(data.latex);
-      if (data.pdfBase64) setTab("pdf");
-    } catch {
-      setActionError("Không kết nối được máy chủ.");
-    } finally {
-      setSaving(false);
-    }
-  }
+      if (!res.ok) throw new Error(data.error ?? "Lưu nháp thất bại.");
+      return data;
+    },
+    onSuccess: (updated) => setDoc(updated),
+  });
+
+  // Biên dịch tường minh: PATCH (compile mặc định) → validate + compile → cập nhật PDF.
+  const compileMutation = useMutation({
+    mutationFn: async (latex: string) => {
+      if (!doc) throw new Error("Tài liệu không tồn tại.");
+      const res = await fetch(`/api/documents/${doc.id}`, {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ latex }),
+      });
+      const data = (await res.json()) as StoredDocument & { error?: string };
+      if (!res.ok) throw new Error(data.error ?? "Biên dịch thất bại.");
+      return data;
+    },
+    onSuccess: (updated) => {
+      setDoc(updated);
+      setDraft(updated.latex);
+      if (updated.pdfBase64) setTab("pdf");
+    },
+    onError: (e) =>
+      setActionError(e instanceof Error ? e.message : "Biên dịch thất bại."),
+  });
+
+  // Debounce auto-save: 1500ms sau lần gõ cuối. Chỉ chạy cho tài liệu single-file, không trong khi
+  // stream chat-edit, và chỉ khi draft khác bản đã lưu (không rỗng).
+  useEffect(() => {
+    if (!doc || (doc.files && doc.files.length > 0)) return;
+    if (isStreaming) return;
+    if (draft.trim().length === 0 || draft === doc.latex) return;
+    const t = setTimeout(() => autoSaveMutation.mutate(draft), 1500);
+    return () => clearTimeout(t);
+  }, [draft, doc, isStreaming, autoSaveMutation]);
 
   async function sendChat(instruction: string) {
-    if (!doc || chatBusy || isStreaming) return;
-    setChatBusy(true);
+    if (!doc || isStreaming) return;
     setIsStreaming(true);
     setActionError(undefined);
     
@@ -199,7 +232,6 @@ export default function DocumentWorkspace({
       setActionError("Không kết nối được máy chủ.");
       await reload();
     } finally {
-      setChatBusy(false);
       setIsStreaming(false);
     }
   }
@@ -213,6 +245,39 @@ export default function DocumentWorkspace({
       else setActionError("Xoá thất bại.");
     } catch {
       setActionError("Không kết nối được máy chủ.");
+    }
+  }
+
+  // E1a — Convert-in-place: biến tài liệu single-file hiện tại thành dự án multi-file.
+  // Seed file gốc "main.tex" = nội dung latex hiện có, cộng một file mới rỗng. Một PATCH duy nhất;
+  // KHÔNG gọi AI. Sau khi thành công, doc.files sẽ có mặt ⇒ UI tự chuyển sang ProjectFileEditor.
+  async function convertToProject() {
+    if (!doc || saving) return;
+    setSaving(true);
+    setActionError(undefined);
+    try {
+      const res = await fetch(`/api/documents/${doc.id}`, {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          files: [
+            { path: "main.tex", content: doc.latex },
+            { path: "section1.tex", content: "" },
+          ],
+          rootFile: "main.tex",
+        }),
+      });
+      const data = (await res.json()) as StoredDocument & { error?: string };
+      if (!res.ok) {
+        setActionError(data.error ?? "Không chuyển được sang dự án nhiều file.");
+        return;
+      }
+      setDoc(data);
+      setTab("source");
+    } catch {
+      setActionError("Không kết nối được máy chủ.");
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -287,42 +352,80 @@ export default function DocumentWorkspace({
             ))}
 
           {tab === "source" && (
-            <div className="flex flex-col gap-2">
-              <textarea
-                aria-label="Mã LaTeX"
-                className="min-h-[55vh] w-full rounded border border-zinc-300 bg-zinc-950 p-3 font-mono text-xs text-zinc-100 dark:border-zinc-700 disabled:opacity-75"
-                value={draft}
-                onChange={(e) => setDraft(e.target.value)}
-                spellCheck={false}
-                disabled={isStreaming}
-              />
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => void saveSource()}
-                  disabled={saving || draft === doc.latex || isStreaming}
-                  className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
-                >
-                  {saving ? "Đang lưu & biên dịch..." : "Lưu & biên dịch"}
-                </button>
-                {draft !== doc.latex && (
-                  <button
+            doc.files && doc.files.length > 0 ? (
+              <ProjectFileEditor doc={doc} onSaved={(updated) => setDoc(updated)} />
+            ) : (
+              <div className="flex flex-col gap-2">
+                <textarea
+                  aria-label="Mã LaTeX"
+                  className="min-h-[55vh] w-full rounded border border-zinc-300 bg-zinc-950 p-3 font-mono text-xs text-zinc-100 dark:border-zinc-700 disabled:opacity-75"
+                  value={draft}
+                  onChange={(e) => setDraft(e.target.value)}
+                  spellCheck={false}
+                  disabled={isStreaming}
+                />
+                <div className="flex items-center gap-3">
+                  <Button
                     type="button"
-                    onClick={() => setDraft(doc.latex)}
-                    className="text-sm text-zinc-500 hover:underline"
+                    onClick={() => compileMutation.mutate(draft)}
+                    disabled={
+                      compileMutation.isPending || isStreaming || draft.trim().length === 0
+                    }
                   >
-                    Hoàn tác thay đổi
-                  </button>
-                )}
+                    {compileMutation.isPending ? (
+                      <>
+                        <Spinner /> Đang biên dịch…
+                      </>
+                    ) : (
+                      "Biên dịch"
+                    )}
+                  </Button>
+
+                  {/* Trạng thái auto-save nháp (không phải trạng thái biên dịch). */}
+                  <span
+                    className="flex items-center gap-1 text-xs text-zinc-500"
+                    aria-live="polite"
+                  >
+                    {autoSaveMutation.isPending ? (
+                      <>
+                        <Spinner className="size-3" /> Đang lưu…
+                      </>
+                    ) : autoSaveMutation.isError ? (
+                      <span className="text-red-600">Lưu nháp lỗi</span>
+                    ) : draft !== doc.latex ? (
+                      "Chưa lưu"
+                    ) : (
+                      "Đã lưu"
+                    )}
+                  </span>
+
+                  <Button
+                    type="button"
+                    variant="link"
+                    size="sm"
+                    onClick={() => void convertToProject()}
+                    disabled={saving}
+                    className="ml-auto"
+                    title="Chuyển tài liệu này sang dự án nhiều file .tex"
+                  >
+                    + Thêm file (chuyển sang dự án nhiều file)
+                  </Button>
+                </div>
               </div>
-            </div>
+            )
           )}
         </section>
 
         <section className="flex min-h-[55vh] flex-col">
           <h2 className="mb-2 text-sm font-semibold">Chat chỉnh sửa</h2>
           <div className="flex-1">
-            <ChatEditor messages={doc.messages} onSend={sendChat} busy={chatBusy || isStreaming} />
+            {doc.files && doc.files.length > 0 ? (
+              <p className="rounded border border-zinc-200 p-3 text-sm text-zinc-500 dark:border-zinc-800">
+                Chat-edit chưa hỗ trợ dự án nhiều file. Hãy chỉnh sửa trực tiếp trong tab Mã nguồn.
+              </p>
+            ) : (
+              <ChatEditor messages={doc.messages} onSend={sendChat} busy={isStreaming} />
+            )}
           </div>
         </section>
       </div>

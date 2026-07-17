@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
+import Providers from "@/components/providers";
 import { ThemeToggle } from "@/components/theme-toggle";
 import AuthStatus from "@/components/AuthStatus";
 
@@ -34,23 +35,25 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <header className="flex items-center justify-between gap-4 border-b px-4 py-2">
-            <Link href="/" className="text-sm font-semibold">
-              AI LaTeX Generator
-            </Link>
-            <div className="flex items-center gap-4">
-              <AuthStatus />
-              <ThemeToggle />
-            </div>
-          </header>
-          {children}
-        </ThemeProvider>
+        <Providers>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <header className="flex items-center justify-between gap-4 border-b px-4 py-2">
+              <Link href="/" className="text-sm font-semibold">
+                AI LaTeX Generator
+              </Link>
+              <div className="flex items-center gap-4">
+                <AuthStatus />
+                <ThemeToggle />
+              </div>
+            </header>
+            {children}
+          </ThemeProvider>
+        </Providers>
       </body>
     </html>
   );

@@ -10,6 +10,8 @@
 // đầu — không có khái niệm "tiếp tục" nữa, chỉ có "bắt đầu lại với câu trả lời đã có".
 import { useCallback, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
+import { DOCUMENTS_QUERY_KEY } from "@/lib/query-keys";
 import type { InputFormat, SourceFile, TemplateId } from "@/lib/types/document";
 
 export type ChatItemStatus = "streaming" | "done" | "error" | "awaiting_clarification";
@@ -67,6 +69,7 @@ const GREETING: ChatItem = {
 /** Trả về state hội thoại + hành động gửi/đặt lại cho Trợ lý AI. */
 export function useDocumentGenerationChat() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [items, setItems] = useState<ChatItem[]>([GREETING]);
   const [busy, setBusy] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
@@ -152,6 +155,10 @@ export function useDocumentGenerationChat() {
                   : `Đã tạo xong tài liệu “${data.doc.title}”. Nhấn để mở và xem PDF.${warnNote}`,
               });
               router.refresh();
+              // Invalidate cache danh sách client (React Query): user ở lại trang chủ sau khi tạo
+              // (không auto-navigate); chỉ router.refresh() thì useQuery với initialData bỏ qua dữ
+              // liệu mới (cache đã có) → DocumentList không hiện tài liệu vừa tạo.
+              void queryClient.invalidateQueries({ queryKey: DOCUMENTS_QUERY_KEY });
             } else if (data.message) {
               settled = true;
               patch({ status: "error", error: data.message });
@@ -166,7 +173,7 @@ export function useDocumentGenerationChat() {
         patch({ status: "error", error: "Kết nối bị gián đoạn trước khi hoàn tất." });
       }
     },
-    [router],
+    [router, queryClient],
   );
 
   const send = useCallback(

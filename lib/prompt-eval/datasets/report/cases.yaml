@@ -1,0 +1,47 @@
+# lib/prompt-eval/datasets/report/cases.yaml
+# Test case cho template `report` (báo cáo chung, SECTION-based). Theo pattern math/cases.yaml.
+# Mỗi case: vars.description = prompt gửi provider; vars.templateId = "report" (validate-latex scorer
+# đọc để lấy đúng packageAllowlist của template). Dùng chung cho:
+#   - promptfooconfig.report.yaml         (MockProvider — tất định, $0, CI/regression)
+#   - promptfooconfig.report.real-ai.yaml (AI thật — đo compliance thật, tốn quota)
+#
+# Đặc trưng cần enforce của `report`: theo \section (KHÔNG \chapter như thesis), report class.
+# Với MockProvider skeleton luôn đạt; với AI thật, các assert dưới đo mức tuân thủ prompt thật.
+#
+# LƯU Ý FORMAT: array test case TRỰC TIẾP ở root (không bọc key `tests:`) — đúng chuẩn Promptfoo khi
+# include qua `tests: [file://datasets/report/cases.yaml]`. Đường dẫn file:// trong assertion được
+# resolve tương đối với vị trí promptfooconfig.*.yaml (không phải file dataset này).
+
+- description: "basic-report — báo cáo ngắn: phải dùng \\section, KHÔNG \\chapter"
+  vars:
+    templateId: report
+    description: "Viết báo cáo ngắn về kết quả khảo sát mức độ hài lòng của khách hàng quý 3."
+  assert:
+    - type: contains
+      value: "\\section"
+    - type: not-contains
+      value: "\\chapter"
+
+- description: "technical-report — báo cáo kỹ thuật kèm bảng số liệu"
+  vars:
+    templateId: report
+    description: "Báo cáo kỹ thuật đánh giá hiệu năng hệ thống, kèm bảng số liệu benchmark."
+  assert:
+    - type: not-contains
+      value: "\\chapter"
+
+- description: "project-summary — báo cáo tổng kết dự án (mục tiêu/tiến độ/rủi ro/kiến nghị)"
+  vars:
+    templateId: report
+    description: "Báo cáo tổng kết dự án phần mềm gồm mục tiêu, tiến độ, rủi ro và kiến nghị."
+  assert:
+    - type: not-contains
+      value: "\\chapter"
+
+- description: "vietnamese-report — tiếng Việt có dấu đầy đủ (Unicode + font)"
+  vars:
+    templateId: report
+    description: "Báo cáo thực tập: giới thiệu đơn vị, công việc đã làm, và bài học kinh nghiệm."
+  assert:
+    - type: not-contains
+      value: "\\chapter"

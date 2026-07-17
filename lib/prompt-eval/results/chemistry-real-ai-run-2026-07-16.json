@@ -1,0 +1,827 @@
+{
+  "evalId": "eval-vhw-2026-07-16T10:22:08",
+  "results": {
+    "version": 3,
+    "timestamp": "2026-07-16T10:22:08.049Z",
+    "prompts": [
+      {
+        "id": "1e6bd1d5aab4bf787795c1f9955d1ac1cc90fa253cfff6883a3c44dd53037d25",
+        "raw": "{{description}}",
+        "label": "{{description}}",
+        "provider": "chemistry-real-ai",
+        "metrics": {
+          "score": 4,
+          "testPassCount": 4,
+          "testFailCount": 0,
+          "testErrorCount": 0,
+          "assertPassCount": 20,
+          "assertFailCount": 0,
+          "totalLatencyMs": 529389,
+          "tokenUsage": {
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "total": 0,
+            "numRequests": 4,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            },
+            "assertions": {
+              "total": 0,
+              "prompt": 0,
+              "completion": 0,
+              "cached": 0,
+              "numRequests": 0,
+              "completionDetails": {
+                "reasoning": 0,
+                "acceptedPrediction": 0,
+                "rejectedPrediction": 0,
+                "cacheReadInputTokens": 0,
+                "cacheCreationInputTokens": 0
+              }
+            }
+          },
+          "namedScores": {},
+          "namedScoresCount": {},
+          "namedScoreWeights": {},
+          "cost": 0
+        }
+      }
+    ],
+    "results": [
+      {
+        "cost": 0,
+        "gradingResult": {
+          "pass": true,
+          "score": 1,
+          "reason": "All assertions passed",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0
+          },
+          "componentResults": [
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "regex",
+                "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{article\\}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "regex",
+                "value": "\\\\usepackage(\\[[^\\]]*\\])?\\{mhchem\\}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\ce{"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\end{document}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "validateLatex: OK — không có diagnostic.",
+              "assertion": {
+                "type": "javascript",
+                "value": "file://./scorers/validate-latex.ts"
+              }
+            }
+          ]
+        },
+        "id": "6b7b0a3b-26dd-4c71-aaba-9fd1c9915d83",
+        "latencyMs": 91120,
+        "namedScores": {},
+        "prompt": {
+          "raw": "Viết tài liệu về phản ứng đốt cháy khí metan, kèm phương trình phản ứng cân bằng.",
+          "label": "{{description}}",
+          "config": {}
+        },
+        "promptId": "1e6bd1d5aab4bf787795c1f9955d1ac1cc90fa253cfff6883a3c44dd53037d25",
+        "promptIdx": 0,
+        "provider": {
+          "id": "chemistry-real-ai-provider",
+          "label": "chemistry-real-ai"
+        },
+        "response": {
+          "output": "\\documentclass[a4paper,12pt]{article}\n\n% Font and encoding (XeLaTeX + fontspec)\n\\usepackage{fontspec}\n\n%%% ALLOWED PACKAGES\n\\usepackage{geometry}\n\\geometry{left=2.5cm, right=2.5cm, top=2.5cm, bottom=2.5cm}\n\n\\usepackage{amsmath}\n\\usepackage{amssymb}\n\\usepackage[version=4]{mhchem}   % chemical formulas and equations\n\\usepackage{siunitx}            % units and quantities\n\\sisetup{\n  per-mode = symbol,\n  inter-unit-product = \\ensuremath{{}\\cdot{}},\n  output-decimal-marker = {,}   % decimal comma (VN style)\n}\n\n\\usepackage{graphicx}           % for potential use (but no external images)\n\\usepackage{xcolor}\n\\usepackage{tikz}\n\\usetikzlibrary{calc,arrows.meta,positioning}\n\n\\usepackage{booktabs}\n\\usepackage{array}\n\\usepackage{longtable}\n\\usepackage{tabularx}\n\\usepackage{multirow}\n\\usepackage{caption}\n\\usepackage{float}\n\\usepackage{hyperref}\n\\hypersetup{\n  colorlinks=true,\n  linkcolor=blue,\n  citecolor=blue,\n  urlcolor=blue,\n  pdfencoding=unicode\n}\n\n% For Vietnamese, we do NOT use babel or polyglossia; the default Latin Modern supports\n% all Vietnamese diacritics thanks to fontspec. We only provide some aliases for convenience.\n\\newcommand{\\vietnamese}[1]{#1}\n\n%%% TITLE\n\\title{\\textbf{Phản ứng đốt cháy khí metan:\\\\ Phương trình cân bằng và các khía cạnh hóa học}}\n\\author{Tác giả}\n\\date{\\today}\n\n\\begin{document}\n\\maketitle\n\n\\begin{abstract}\nPhản ứng đốt cháy hoàn toàn khí metan (\\ce{CH4}) với oxy (\\ce{O2}) là một trong những phản ứng hóa học cơ bản nhất, đóng vai trò nền tảng trong nhiều quá trình công nghiệp và sinh hoạt. Bài viết này trình bày chi tiết phương trình phản ứng cân bằng, cơ chế gốc tự do, các thông số nhiệt động và động học, cũng như những ứng dụng thực tiễn và tác động môi trường. Đặc biệt nhấn mạnh vai trò của phản ứng này trong sản xuất năng lượng sạch và kiểm soát phát thải khí nhà kính. Mọi công thức hóa học đều được biểu diễn theo tiêu chuẩn hiện đại bằng gói \\texttt{mhchem} nhằm đảm bảo tính chính xác và trực quan.\n\\end{abstract}\n\n\\section{Giới thiệu}\nMetan (\\ce{CH4}) là hydrocarbon đơn giản nhất, thành phần chính của khí thiên nhiên, khí biogas và khí hydrate. Với trữ lượng dồi dào và hàm lượng hydro cao, metan được xem là nguồn nhiên liệu hóa thạch “sạch” nhất nhờ sinh ra ít \\ce{CO2} trên mỗi đơn vị năng lượng so với than đá hay dầu mỏ. Phản ứng đốt cháy hoàn toàn metan trong oxy (hay không khí) giải phóng một lượng nhiệt lớn và tạo ra carbon dioxide cùng nước. Phản ứng này không chỉ là mô hình lý tưởng để giảng dạy về cân bằng phương trình hóa học, nhiệt hóa học và cơ chế phản ứng, mà còn là cốt lõi của các nhà máy nhiệt điện khí, hệ thống sưởi dân dụng và nhiều quy trình tổng hợp hóa học.\n\nTrong tài liệu này, chúng ta sẽ khảo sát toàn diện phản ứng đốt cháy metan, bắt đầu từ phương trình cân bằng, qua các yếu tố nhiệt động và động học, cho đến những ứng dụng thực tế và các biện pháp giảm thiểu tác động tiêu cực tới môi trường.\n\n\\section{Phương trình phản ứng cân bằng}\nKhi đốt cháy hoàn toàn, metan phản ứng với oxy trong điều kiện cung cấp đủ \\ce{O2}:\n\\begin{equation}\n\\ce{CH4 (g) + 2 O2 (g) -> CO2 (g) + 2 H2O (g)}\n\\label{eq:hoantoan}\n\\end{equation}\n\nNếu lượng oxy không đủ (cháy không hoàn toàn), có thể hình thành carbon monoxide (\\ce{CO}) và muội carbon:\n\\begin{align}\n\\ce{2 CH4 (g) + 3 O2 (g) &-> 2 CO (g) + 4 H2O (g)} \\label{eq:khonghoantoan1}\\\\\n\\ce{CH4 (g) + O2 (g) &-> C (s) + 2 H2O (g)} \\label{eq:khonghoantoan2}\n\\end{align}\n\nTrong thực tế, quá trình cháy thường xảy ra trong không khí (chứa \\SI{21}{\\percent} \\ce{O2} và \\SI{79}{\\percent} \\ce{N2} theo thể tích). Khi đó, \\ce{N2} không tham gia phản ứng nhưng làm loãng hỗn hợp và hấp thụ một phần nhiệt. Phương trình tổng quát khi đốt trong không khí có thể viết:\n\\begin{equation}\n\\ce{CH4 (g) + 2 O2 (g) + 7.52 N2 (g) -> CO2 (g) + 2 H2O (g) + 7.52 N2 (g)}\n\\label{eq:trongkhongkhi}\n\\end{equation}\n\nTất cả các phương trình trên đều được cân bằng về số nguyên tử mỗi nguyên tố (C, H, O, N) và điện tích. Đặc biệt, hệ số tỉ lượng của \\ce{N2} (7.52) được tính từ tỉ lệ \\ce{O2} trong không khí: cứ 1 mol \\ce{O2} cần \\(\\frac{79}{21} \\approx 3.76\\) mol \\ce{N2}; do đó 2 mol \\ce{O2} đi kèm \\(2 \\times 3.76 = 7.52\\) mol \\ce{N2}.\n\n\\section{Cơ chế phản ứng}\nPhản ứng đốt cháy metan là một phản ứng dây chuyền gốc tự do phức tạp, diễn ra qua hàng trăm phản ứng sơ cấp. Mô hình cơ bản gồm ba giai đoạn: khơi mào, phát triển mạch và ngắt mạch.\n\n\\subsection{Khơi mào}\nLiên kết \\ce{C-H} trong \\ce{CH4} bị phân cắt dưới tác dụng của nhiệt độ cao hoặc tia lửa điện, tạo ra gốc methyl (\\ce{CH3*}) và gốc hydro (\\ce{H*}):\n\\begin{equation}\n\\ce{CH4 ->[\\Delta] CH3* + H*}\n\\end{equation}\n\n\\subsection{Phát triển mạch}\nCác gốc tự do phản ứng mạnh với \\ce{O2} và các phân tử trung gian, sinh ra nhiệt và các gốc mới:\n\\begin{align}\n\\ce{CH3* + O2 &-> CH2O + OH*}\\\\\n\\ce{H* + O2 &-> OH* + O*}\\\\\n\\ce{OH* + CH4 &-> H2O + CH3*}\\\\\n\\ce{O* + CH4 &-> OH* + CH3*}\n\\end{align}\nGốc hydroxyl (\\ce{OH*}) là tác nhân oxi hóa chính trong ngọn lửa, tấn công vào \\ce{CH4} để tái tạo \\ce{CH3*} và tạo nước. Quá trình này tự duy trì và khuếch đại mạch phản ứng.\n\n\\subsection{Ngắt mạch}\nCác gốc tự do kết hợp với nhau hoặc va chạm vào thành bình, tạo thành sản phẩm bền:\n\\begin{align}\n\\ce{2 CH3* &-> C2H6}\\\\\n\\ce{H* + OH* &-> H2O}\\\\\n\\ce{OH* + OH* &-> H2O2}\n\\end{align}\n\nTrong điều kiện thực, phản ứng còn phụ thuộc vào tỉ lệ không khí/nhiên liệu (hệ số dư lượng không khí \\(\\lambda\\)). Khi \\(\\lambda \\ge 1\\) (đủ hoặc dư oxy), quá trình cháy gần như hoàn toàn; khi \\(\\lambda < 1\\), sản phẩm có thể chứa \\ce{CO}, \\ce{H2} và muội carbon. Các mô hình chi tiết như GRI‑Mech 3.0 bao gồm hơn 325 phản ứng và 53 chất để mô phỏng chính xác ngọn lửa metan.\n\n\\section{Nhiệt động học và động học}\n\\subsection{Nhiệt phản ứng}\nNhiệt lượng tỏa ra khi đốt cháy hoàn toàn một mol metan ở điều kiện tiêu chuẩn (\\(\\SI{298.15}{K}, \\SI{1}{atm}\\)) được xác định từ enthalpy tạo thành:\n\\begin{equation}\n\\Delta H_{\\text{pứ}} = \\sum \\Delta H_f^\\circ(\\text{sản phẩm}) - \\sum \\Delta H_f^\\circ(\\text{tác chất})\n\\end{equation}\n\nCác giá trị nhiệt tạo thành tiêu chuẩn (kJ/mol):\n\\begin{align}\n\\Delta H_f^\\circ (\\ce{CH4 (g)}) &= \\SI{-74.8}{kJ/mol}\\\\\n\\Delta H_f^\\circ (\\ce{O2 (g)})   &= 0\\\\\n\\Delta H_f^\\circ (\\ce{CO2 (g)})  &= \\SI{-393.5}{kJ/mol}\\\\\n\\Delta H_f^\\circ (\\ce{H2O (g)})  &= \\SI{-241.8}{kJ/mol}\n\\end{align}\n\nThay vào:\n\\[\n\\Delta H_{\\text{pứ}} = [(-393.5) + 2(-241.8)] - [(-74.8) + 2 \\times 0] = \\SI{-802.3}{kJ/mol}\n\\]\n\nVới nước ở trạng thái lỏng (\\(\\Delta H_f^\\circ(\\ce{H2O (l)}) = \\SI{-285.8}{kJ/mol}\\)), nhiệt cháy cao hơn:\n\\[\n\\Delta H_{\\text{pứ}} = \\SI{-890.3}{kJ/mol}\n\\]\nĐây chính là giá trị \\emph{nhiệt trị cao} (HHV) của metan, thường được dùng trong tính toán hiệu suất nồi hơi và động cơ đốt trong.\n\nBảng~\\ref{tab:nhietluong} tóm tắt một số thông số nhiệt động của phản ứng.\n\\begin{table}[H]\n\\centering\n\\caption{Một số thông số nhiệt động của phản ứng đốt cháy metan ở \\SI{298.15}{K}, \\SI{1}{atm}}\n\\label{tab:nhietluong}\n\\begin{tabular}{@{}l l l@{}}\n\\toprule\n\\textbf{Đại lượng} & \\textbf{Giá trị} & \\textbf{Đơn vị}\\\\ \n\\midrule\n\\(\\Delta H_{\\text{pứ}}^\\circ\\) (hơi nước) & -802.3 & kJ/mol \\\\\n\\(\\Delta H_{\\text{pứ}}^\\circ\\) (nước lỏng) & -890.3 & kJ/mol \\\\\n\\(\\Delta G_{\\text{pứ}}^\\circ\\) (hơi nước) & -800.7 & kJ/mol \\\\\n\\(\\Delta S_{\\text{pứ}}^\\circ\\) & -5.4 & J/(mol·K) \\\\\nNhiệt độ ngọn lửa đoạn nhiệt (stoichiometric, không khí) & ~2220 & K \\\\\n\\bottomrule\n\\end{tabular}\n\\end{table}\n\nBiến thiên năng lượng tự do Gibbs âm lớn cho thấy phản ứng xảy ra mạnh mẽ và gần như hoàn toàn về phía sản phẩm. Tuy nhiên, ở nhiệt độ cao, phản ứng phân hủy của \\ce{CO2} và \\ce{H2O} trở nên đáng kể, ảnh hưởng đến thành phần cân bằng cuối cùng.\n\n\\subsection{Động học vĩ mô}\nTốc độ phản ứng tổng thể có thể được mô tả bằng định luật Arrhenius mở rộng. Một biểu thức động học toàn cục thường dùng cho quá trình cháy metan trong điều kiện nghèo nhiên liệu là:\n\\begin{equation}\nr = k [\\ce{CH4}]^a [\\ce{O2}]^b, \\quad k = A \\exp\\left(-\\frac{E_a}{RT}\\right)\n\\end{equation}\nVới các tham số thực nghiệm tiêu biểu: \\(A \\approx 1.3 \\times 10^9\\) (đơn vị phù hợp), \\(a \\approx 1\\), \\(b \\approx 0.5\\), và năng lượng hoạt hóa biểu kiến \\(E_a \\approx \\SI{200}{kJ/mol}\\). Bậc phản ứng lẻ cho thấy cơ chế phức tạp và vai trò của các gốc tự do.\n\n\\section{Ứng dụng và tác động môi trường}\n\\subsection{Ứng dụng thực tiễn}\n\\begin{itemize}\n    \\item \\textbf{Sản xuất điện:} Các nhà máy điện chu trình hỗn hợp (Combined Cycle Gas Turbine – CCGT) sử dụng khí thiên nhiên (chủ yếu \\ce{CH4}) đạt hiệu suất trên \\SI{60}{\\percent}, phát thải \\ce{CO2} thấp hơn khoảng \\SI{50}{\\percent} so với nhà máy than.\n    \\item \\textbf{Nhiệt dân dụng và công nghiệp:} Lò hơi, lò sưởi gas, bếp gas đều dựa trên phản ứng \\ce{CH4 + 2 O2 -> CO2 + 2 H2O}.\n    \\item \\textbf{Hóa học tổng hợp:} Metan là nguyên liệu cho sản xuất hydro qua phản ứng cải tạo hơi nước (\\ce{CH4 + H2O -> CO + 3 H2}) và tổng hợp methanol, amoniac.\n    \\item \\textbf{Phương tiện giao thông:} Khí tự nhiên nén (CNG) và khí tự nhiên hóa lỏng (LNG) được dùng cho ô tô, xe buýt, giảm phát thải so với xăng dầu.\n\\end{itemize}\n\n\\subsection{Tác động môi trường}\nMặc dù đốt metan sinh ra \\ce{CO2} – khí nhà kính, nhưng hệ số phát thải \\ce{CO2} trên mỗi đơn vị năng lượng thấp hơn so với than và dầu. Tuy nhiên, bản thân metan là khí nhà kính mạnh (GWP\\textsubscript{100} = 28--34 lần \\ce{CO2}). Rò rỉ metan trong quá trình khai thác, vận chuyển và phân phối khí tự nhiên có thể làm giảm đáng kể lợi ích khí hậu. Do đó, kiểm soát rò rỉ và chuyển đổi metan thành \\ce{CO2} qua đốt cháy hiệu quả là ưu tiên hàng đầu.\n\nĐể giảm thiểu \\ce{CO2}, các công nghệ thu giữ và lưu trữ carbon (CCS) có thể được tích hợp. Ngoài ra, việc đồng đốt metan với hydro xanh hoặc chuyển sang biogas (metan tái tạo) cũng là hướng phát triển bền vững.\n\n\\subsection{Mô hình hóa phản ứng}\nTrong nghiên cứu và công nghiệp, sơ đồ mạng phản ứng thường được mô tả bằng đồ thị các chất và phản ứng. Hình~\\ref{fig:mangphanung} minh họa một phần nhỏ của mạng lưới gốc tự do trong quá trình cháy metan, vẽ bằng TikZ.\n\n\\begin{figure}[H]\n\\centering\n\\begin{tikzpicture}[\n    node distance=2cm and 3cm,\n    every node/.style={draw, rounded corners, minimum width=2.5cm},\n    arrow/.style={->, >=Stealth, thick}\n    ]\n    \\node (CH4)                     {\\ce{CH4}};\n    \\node (CH3)  [right=of CH4]     {\\ce{CH3*}};\n    \\node (CH2O) [above right=of CH3] {\\ce{CH2O}};\n    \\node (OH)   [below right=of CH3] {\\ce{OH*}};\n    \\node (H2O)  [below=of OH]      {\\ce{H2O}};\n    \\node (CO)   [right=of CH2O]    {\\ce{CO}};\n    \\node (CO2)  [right=of CO]      {\\ce{CO2}};\n\n    \\draw[arrow] (CH4) -- node[above,draw=none] {\\ce{+OH*/O*}} (CH3);\n    \\draw[arrow] (CH3) -- node[above,draw=none] {\\ce{+O2}} (CH2O);\n    \\draw[arrow] (CH2O) -- node[above,draw=none] {\\ce{+OH*/O*}} (CO);\n    \\draw[arrow] (CO)  -- node[above,draw=none] {\\ce{+OH*}} (CO2);\n    \\draw[arrow] (CH3.west) |- node[pos=0.7,left,draw=none] {\\ce{+O2}} (OH);\n    \\draw[arrow] (OH) -- node[right,draw=none] {\\ce{+CH4}} (H2O);\n    \\draw[arrow, dashed] (H2O.east) -- ++(0.5,0) |- (OH.east);\n\\end{tikzpicture}\n\\caption{Một phần sơ đồ mạng phản ứng gốc tự do trong quá trình oxi hóa metan. Các mũi tên nét liền biểu diễn phản ứng tiến, mũi tên nét đứt chỉ sự tái tạo gốc \\ce{OH*} từ nước (phản ứng phân ly ở nhiệt độ cao).}\n\\label{fig:mangphanung}\n\\end{figure}\n\n\\section{Kết luận}\nPhản ứng đốt cháy hoàn toàn metan, \\ce{CH4 + 2 O2 -> CO2 + 2 H2O}, là một trong những phản ứng kinh điển nhất, vừa có ý nghĩa nền tảng trong giảng dạy, vừa là trụ cột của hệ thống năng lượng hiện đại. Với nhiệt cháy cao, sản phẩm tương đối sạch và nguồn nguyên liệu phong phú, metan sẽ còn tiếp tục giữ vai trò quan trọng trong quá trình chuyển đổi năng lượng toàn cầu. Tuy nhiên, để đảm bảo lợi ích khí hậu thực sự, cần khống chế rò rỉ metan và phát triển các công nghệ đồng hành: thu giữ carbon, phối trộn hydro, và nâng cao hiệu suất cháy.\n\nHiểu rõ cơ chế phản ứng, các yếu tố nhiệt động và động học cho phép kiểm soát tốt hơn quá trình đốt, giảm phát thải độc hại và mở rộng phạm vi ứng dụng. Những kiến thức này là nền tảng cho việc phát triển các lò phản ứng thế hệ mới, động cơ đốt trong sạch hơn và các quy trình tổng hợp hóa học bền vững.\n\n\\begin{thebibliography}{99}\n\\bibitem{atkins} Atkins, P., de Paula, J. (2014). \\textit{Physical Chemistry}, 10th ed. Oxford University Press.\n\\bibitem{turns} Turns, S.R. (2012). \\textit{An Introduction to Combustion: Concepts and Applications}, 3rd ed. McGraw-Hill.\n\\bibitem{gri} Smith, G.P. et al. (1999). \\textit{GRI-Mech 3.0}. Gas Research Institute.\n\\bibitem{ipcc} IPCC (2021). \\textit{Climate Change 2021: The Physical Science Basis}. Cambridge University Press.\n\\bibitem{vn_energy} Bộ Công Thương (2023). \\textit{Báo cáo năng lượng Việt Nam 2023}.\n\\end{thebibliography}\n\n\\end{document}\n",
+          "metadata": {
+            "finishReason": "stop",
+            "rawFinishReason": "end_turn",
+            "usage": {
+              "inputTokens": 1217,
+              "outputTokens": 5688,
+              "totalTokens": 6905
+            }
+          }
+        },
+        "score": 1,
+        "success": true,
+        "testCase": {
+          "description": "combustion — phản ứng đốt cháy metan",
+          "vars": {
+            "templateId": "chemistry",
+            "description": "Viết tài liệu về phản ứng đốt cháy khí metan, kèm phương trình phản ứng cân bằng."
+          },
+          "assert": [
+            {
+              "type": "regex",
+              "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{article\\}"
+            },
+            {
+              "type": "regex",
+              "value": "\\\\usepackage(\\[[^\\]]*\\])?\\{mhchem\\}"
+            },
+            {
+              "type": "contains",
+              "value": "\\ce{"
+            },
+            {
+              "type": "contains",
+              "value": "\\end{document}"
+            },
+            {
+              "type": "javascript",
+              "value": "file://./scorers/validate-latex.ts"
+            }
+          ],
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 0,
+        "tokenUsage": {
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "total": 0,
+          "numRequests": 1,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          },
+          "assertions": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          }
+        },
+        "vars": {
+          "templateId": "chemistry",
+          "description": "Viết tài liệu về phản ứng đốt cháy khí metan, kèm phương trình phản ứng cân bằng."
+        },
+        "metadata": {
+          "finishReason": "stop",
+          "rawFinishReason": "end_turn",
+          "usage": {
+            "inputTokens": 1217,
+            "outputTokens": 5688,
+            "totalTokens": 6905
+          },
+          "_promptfooFileMetadata": {}
+        },
+        "failureReason": 0
+      },
+      {
+        "cost": 0,
+        "gradingResult": {
+          "pass": true,
+          "score": 1,
+          "reason": "All assertions passed",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0
+          },
+          "componentResults": [
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "regex",
+                "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{article\\}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "regex",
+                "value": "\\\\usepackage(\\[[^\\]]*\\])?\\{mhchem\\}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\ce{"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\end{document}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "validateLatex: OK — không có diagnostic.",
+              "assertion": {
+                "type": "javascript",
+                "value": "file://./scorers/validate-latex.ts"
+              }
+            }
+          ]
+        },
+        "id": "0172d9af-9add-48f3-b6b1-4655ddd4ef36",
+        "latencyMs": 221737,
+        "namedScores": {},
+        "prompt": {
+          "raw": "Trình bày phản ứng tổng hợp amoniac theo quy trình Haber và trạng thái cân bằng.",
+          "label": "{{description}}",
+          "config": {}
+        },
+        "promptId": "1e6bd1d5aab4bf787795c1f9955d1ac1cc90fa253cfff6883a3c44dd53037d25",
+        "promptIdx": 0,
+        "provider": {
+          "id": "chemistry-real-ai-provider",
+          "label": "chemistry-real-ai"
+        },
+        "response": {
+          "output": "\\documentclass{article}\n\\usepackage{geometry}\n\\geometry{a4paper, left=2.5cm, right=2.5cm, top=2.5cm, bottom=2.5cm}\n\\usepackage{amsmath}\n\\usepackage{amssymb}\n\\usepackage{mhchem}\n\\usepackage{siunitx}\n\\usepackage{graphicx}\n\\usepackage{xcolor}\n\\usepackage{tikz}\n\\usepackage{booktabs}\n\\usepackage{array}\n\\usepackage{float}\n\\usepackage{caption}\n\\usepackage{hyperref}\n\\hypersetup{\n    colorlinks=true,\n    linkcolor=blue,\n    citecolor=blue,\n    urlcolor=blue\n}\n\n\\title{\\textbf{Phản ứng Tổng hợp Amoniac theo Quy trình Haber\\\\ và Trạng thái Cân bằng Hóa học}}\n\\author{Nguyễn Văn Hóa \\and Trần Thị Phân Tích}\n\\date{}\n\n\\begin{document}\n\n\\maketitle\n\n\\begin{abstract}\nAmoniac (\\ce{NH3}) là một trong những hóa chất công nghiệp quan trọng nhất, chủ yếu được sản xuất thông qua quy trình Haber–Bosch, trong đó khí nitơ và khí hiđro phản ứng thuận nghịch trên xúc tác sắt ở nhiệt độ và áp suất cao. Bài báo này trình bày cơ sở nhiệt động học, động học và các yếu tố ảnh hưởng đến trạng thái cân bằng của phản ứng tổng hợp amoniac. Chúng tôi phân tích chi tiết các điều kiện vận hành tối ưu (nhiệt độ, áp suất, tỉ lệ phản ứng, xúc tác) dưới góc độ nguyên lý Le Chatelier, đồng thời minh họa bằng các số liệu định lượng và sơ đồ phản ứng. Vai trò của amoniac trong sản xuất phân bón và các ứng dụng khác cũng được đề cập nhằm nhấn mạnh tầm quan trọng của quá trình này đối với an ninh lương thực toàn cầu.\n\\end{abstract}\n\n\\section{Giới thiệu}\nAmoniac là hợp chất của nitơ và hiđro với công thức hóa học \\ce{NH3}. Trong tự nhiên, amoniac được sinh ra từ quá trình phân hủy các chất hữu cơ chứa nitơ, nhưng để đáp ứng nhu cầu công nghiệp khổng lồ, loài người đã phát triển các phương pháp tổng hợp nhân tạo. Đầu thế kỷ 20, nhà hóa học người Đức Fritz Haber đã thành công trong việc tổng hợp amoniac trực tiếp từ các nguyên tố nitơ và hiđro, và sau đó Carl Bosch đã chuyển quy trình này sang quy mô công nghiệp. Quy trình Haber–Bosch được coi là một trong những phát minh có tầm ảnh hưởng nhất thế kỷ 20, vì nó đã mở ra kỷ nguyên sản xuất phân đạm tổng hợp, góp phần nuôi sống hàng tỉ người.\n\nTrọng tâm của hóa học đằng sau quy trình này là một phản ứng thuận nghịch đạt trạng thái cân bằng hóa học:\n\\begin{equation}\n\\ce{N2(g) + 3H2(g) <=> 2NH3(g)} \\quad \\Delta H^\\circ_{298} = -92.4\\ \\text{kJ/mol}\n\\label{eq:haber}\n\\end{equation}\nĐây là phản ứng tỏa nhiệt và có sự giảm số mol khí (từ 4 mol khí phản ứng tạo thành 2 mol khí sản phẩm). Do đó, trạng thái cân bằng của phản ứng này chịu ảnh hưởng mạnh mẽ bởi nhiệt độ, áp suất và thành phần hỗn hợp phản ứng. Việc hiểu rõ các yếu tố này không chỉ mang tính học thuật mà còn có ý nghĩa thực tiễn trong việc thiết kế và vận hành các nhà máy sản xuất amoniac hiện đại với hiệu suất cao.\n\n\\section{Cơ sở nhiệt động học của phản ứng tổng hợp amoniac}\n\\subsection{Biến thiên enthalpy và entropy}\nPhản ứng (\\ref{eq:haber}) có biến thiên enthalpy chuẩn $\\Delta H^\\circ_{298} = \\SI{-92.4}{\\kilo\\joule\\per\\mole}$. Điều này có nghĩa là phản ứng tỏa nhiệt về phía tạo thành amoniac. Về mặt nhiệt động học, một phản ứng tỏa nhiệt được thuận lợi ở nhiệt độ thấp. Tuy nhiên, biến thiên entropy chuẩn $\\Delta S^\\circ$ của phản ứng cũng là một yếu tố quan trọng. Tính toán dựa trên dữ liệu entropy mol chuẩn cho thấy:\n\\begin{align}\nS^\\circ(\\ce{N2(g)}) &= \\SI{191.6}{\\joule\\per\\mole\\per\\kelvin} \\nonumber\\\\\nS^\\circ(\\ce{H2(g)}) &= \\SI{130.7}{\\joule\\per\\mole\\per\\kelvin} \\nonumber\\\\\nS^\\circ(\\ce{NH3(g)}) &= \\SI{192.8}{\\joule\\per\\mole\\per\\kelvin} \\nonumber\n\\end{align}\nTừ đó, $\\Delta S^\\circ_{298} = 2(192.8) - [191.6 + 3(130.7)] \\approx \\SI{-198.6}{\\joule\\per\\mole\\per\\kelvin}$. Phản ứng có $\\Delta S^\\circ < 0$ vì số mol khí giảm, dẫn đến sự hỗn loạn của hệ giảm. Hệ quả là ở nhiệt độ cao, số hạng $-T\\Delta S^\\circ$ trở nên dương và đủ lớn, làm cho $\\Delta G^\\circ$ trở nên ít âm hơn hẳn, thậm chí dương. Do đó về mặt nhiệt động, phản ứng tổng hợp amoniac được ưu tiên ở nhiệt độ thấp.\n\n\\subsection{Năng lượng tự do Gibbs và hằng số cân bằng}\nMối liên hệ giữa biến thiên năng lượng tự do Gibbs chuẩn và hằng số cân bằng $K_p$ được cho bởi:\n\\begin{equation}\n\\Delta G^\\circ_T = -RT\\ln K_p\n\\end{equation}\nTại \\SI{298}{\\kelvin}, $\\Delta G^\\circ_{298} \\approx \\SI{-32.9}{\\kilo\\joule\\per\\mole}$, tương ứng với $K_p \\approx 6.8\\times 10^{5}$. Điều này cho thấy ở nhiệt độ phòng, cân bằng chuyển dịch hẳn về phía sản phẩm. Tuy nhiên, tốc độ phản ứng ở nhiệt độ này cực kỳ chậm do năng lượng hoạt hóa cao. Để tăng tốc độ phản ứng lên mức khả thi công nghiệp, cần nâng nhiệt độ, nhưng điều đó lại làm giảm mạnh $K_p$. Chẳng hạn ở \\SI{400}{\\celsius} (khoảng \\SI{673}{\\kelvin}), $\\Delta G^\\circ_{673}$ trở nên dương, $K_p$ suy giảm mạnh. Bảng~\\ref{tab:kp} liệt kê giá trị $K_p$ gần đúng tại các nhiệt độ khác nhau dưới áp suất đẳng nhiệt.\n\n\\begin{table}[H]\n\\centering\n\\caption{Ảnh hưởng của nhiệt độ đến hằng số cân bằng $K_p$ của phản ứng \\ce{N2 + 3H2 <=> 2NH3}. Giá trị mang tính minh họa dựa trên xu hướng nhiệt động học.}\n\\label{tab:kp}\n\\begin{tabular}{c c}\n\\toprule\nNhiệt độ (\\si{\\celsius}) & $K_p$ (ước tính) \\\\\n\\midrule\n25  & $10^{5}$ -- $10^{6}$ \\\\\n200 & $\\approx 10^{3}$    \\\\\n300 & $\\approx 10^{1}$    \\\\\n400 & $\\approx 10^{-1}$   \\\\\n500 & $\\approx 10^{-2}$   \\\\\n600 & $\\approx 10^{-3}$   \\\\\n\\bottomrule\n\\end{tabular}\n\\end{table}\n\nRõ ràng, việc chọn nhiệt độ vận hành là một sự dung hòa giữa động học (cần nhiệt độ cao để đạt tốc độ) và nhiệt động học (cần nhiệt độ thấp để có hiệu suất chuyển hóa cao). Thực tế, quy trình Haber–Bosch công nghiệp vận hành ở khoảng \\SI{400}{\\celsius} -- \\SI{500}{\\celsius}.\n\n\\section{Yếu tố ảnh hưởng đến trạng thái cân bằng và hiệu suất}\n\\subsection{Nguyên lý Le Chatelier và áp suất}\nPhản ứng có sự giảm số mol khí ($\\Delta n = 2-4 = -2$), do đó theo nguyên lý Le Chatelier, tăng áp suất sẽ làm cân bằng chuyển dịch theo chiều thuận (tạo \\ce{NH3}) để giảm áp suất. Điều này thể hiện qua biểu thức hằng số cân bằng theo áp suất riêng phần:\n\\begin{equation}\nK_p = \\frac{(p_{\\ce{NH3}})^2}{p_{\\ce{N2}}\\cdot (p_{\\ce{H2}})^3}\n\\end{equation}\nKhi tăng áp suất tổng $P$, thành phần mol của các chất thay đổi sao cho số mol khí giảm sẽ được tăng cường. Kết quả là độ chuyển hóa amoniac tăng lên khi áp suất tăng. Hình~\\ref{fig:pressure_effect} minh họa xu hướng này.\n\n\\begin{figure}[H]\n\\centering\n\\begin{tikzpicture}[scale=0.8]\n  \\draw[->] (0,0) -- (6.5,0) node[below] {\\small Áp suất (atm)};\n  \\draw[->] (0,0) -- (0,5) node[left] {\\small \\% \\ce{NH3} lúc cân bằng};\n  \\draw[thick, blue] plot[smooth, tension=0.8] coordinates {\n    (1,0.2) (1.5,0.8) (2,1.5) (2.5,2.5) (3,3.5) (3.5,4.8) (4,5.5) (4.5,7.5) (5,8.8) (5.5,10.2) (6,11.5) (6.5,12.5)\n  };\n  \\node[blue] at (4,6) { \\textbf{Tăng áp suất} };\n  \\draw[->, blue, thick] (5.5,11) -- (6.2,12.2);\n  \\foreach \\x in {1,2,3,4,5,6} {\n    \\draw (\\x,0.1) -- (\\x,-0.1) node[below] {\\footnotesize \\x00};\n  }\n  \\foreach \\y in {0,5,10} {\n    \\draw (0.1,\\y/2) -- (-0.1,\\y/2) node[left] {\\footnotesize \\y};\n  }\n  \\node at (5.5,12) {$\\approx 13\\%$ ở 600 atm};\n\\end{tikzpicture}\n\\caption{Ảnh hưởng của áp suất đến tỉ lệ amoniac khi đạt cân bằng ở một nhiệt độ cố định (minh họa định tính cho \\SI{500}{\\celsius}). Trong công nghiệp, áp suất thường dùng là \\SI{150}{\\atm} – \\SI{300}{\\atm}.}\n\\label{fig:pressure_effect}\n\\end{figure}\n\nÁp suất cao có lợi cho hiệu suất nhưng cũng làm tăng chi phí thiết bị và an toàn. Do đó, các nhà máy thường vận hành ở áp suất khoảng \\SI{150}{\\atm} – \\SI{300}{\\atm}.\n\n\\subsection{Nhiệt độ và sự đánh đổi động học}\nNhư đã phân tích, nhiệt độ cao làm giảm $K_p$, tức giảm hiệu suất tạo amoniac. Tuy nhiên, nếu không có nhiệt độ đủ cao, phản ứng sẽ diễn ra quá chậm vì phải vượt qua năng lượng hoạt hóa đáng kể để phá vỡ liên kết ba bền vững của \\ce{N2} ($E_a \\approx \\SI{945}{\\kilo\\joule\\per\\mole}$). Chính vì vậy, việc sử dụng chất xúc tác rắn (sắt hoạt hóa với các chất trợ xúc tác như \\ce{Al2O3}, \\ce{K2O}) là bắt buộc nhằm giảm năng lượng hoạt hóa mà không ảnh hưởng đến vị trí cân bằng. Xúc tác chỉ làm hệ nhanh chóng đạt cân bằng hơn.\n\nSơ đồ năng lượng của phản ứng có và không có xúc tác được minh họa trong Hình~\\ref{fig:catalyst}.\n\n\\begin{figure}[H]\n\\centering\n\\begin{tikzpicture}[scale=0.9]\n  \\draw[->] (0,0) -- (8,0) node[right] {Tiến trình phản ứng};\n  \\draw[->] (0,0) -- (0,5) node[above] {Năng lượng};\n  % Without catalyst\n  \\draw[thick, red] (0,0.5) .. controls (2,4.5) and (3,4) .. (4,2.5) .. controls (5,1) and (6,0.3) .. (8,0.2);\n  % With catalyst\n  \\draw[thick, blue] (0,0.5) .. controls (1.5,2) and (2.5,1.5) .. (4,1) .. controls (5.5,0.7) and (6.5,0.3) .. (8,0.2);\n  \\draw[red, thick, dashed] (2.2,4) -- (2.2,0);\n  \\node[red] at (1.8,4.2) {$E_a$ không xúc tác};\n  \\draw[blue, thick, dashed] (2.5,1.7) -- (2.5,0);\n  \\node[blue] at (2.2,1.9) {$E_a$ có xúc tác};\n  \\node at (4,-0.3) {Tọa độ phản ứng};\n  \\node at (0,0.5) [left] {\\ce{N2 + 3H2}};\n  \\node at (8,0.2) [right] {\\ce{2NH3}};\n\\end{tikzpicture}\n\\caption{Minh họa năng lượng hoạt hóa của phản ứng tổng hợp amoniac khi không có xúc tác (đỏ) và khi có xúc tác sắt (xanh). Xúc tác làm giảm $E_a$ đáng kể, cho phép phản ứng xảy ra ở nhiệt độ công nghiệp.}\n\\label{fig:catalyst}\n\\end{figure}\n\n\\subsection{Tỉ lệ mol và chiến lược tuần hoàn}\nTheo phương trình phản ứng, tỉ lệ lý tưởng là \\ce{N2}: \\ce{H2} = 1 : 3. Nếu cung cấp dư một trong hai chất phản ứng, cân bằng chuyển dịch theo chiều thuận và hiệu suất tính theo chất hết sẽ tăng. Tuy nhiên, trong sản xuất, tỉ lệ này thường được duy trì đúng tỉ lượng để đơn giản hóa khâu phân phối nguyên liệu. Do phản ứng là thuận nghịch và không bao giờ chuyển hóa hoàn toàn trong một lần qua thiết bị phản ứng, hỗn hợp sau phản ứng được làm lạnh để hóa lỏng amoniac (nhiệt độ sôi \\SI{-33.34}{\\celsius}), tách ra, còn khí chưa phản ứng được tuần hoàn trở lại. Nhờ vậy, hiệu suất tổng thể có thể đạt >98\\% dù hiệu suất một lần chuyển hóa chỉ khoảng 15--20\\% ở điều kiện thông thường.\n\n\\section{Cơ chế phản ứng và xúc tác}\nCơ chế chi tiết của phản ứng Haber trên bề mặt xúc tác sắt đã được nghiên cứu rộng rãi và được thừa nhận bao gồm các bước cơ bản sau:\n\\begin{enumerate}\n    \\item \\textbf{Hấp phụ hóa học:} Phân tử \\ce{N2} và \\ce{H2} khuếch tán tới bề mặt xúc tác sắt và bị hấp phụ hóa học. Liên kết ba trong \\ce{N2} bị suy yếu khi tương tác với các nguyên tử sắt trên bề mặt.\n    \\item \\textbf{Phân ly \\ce{H2}:} \\ce{H2(g) -> 2H_{(ads)}}. Quá trình này diễn ra nhanh chóng.\n    \\item \\textbf{Phân ly \\ce{N2}:} Đây là bước chậm, quyết định tốc độ toàn bộ phản ứng: \\ce{N2(g) -> 2N_{(ads)}}.\n    \\item \\textbf{Hình thành \\ce{NH3} từng bước:} Các nguyên tử N hấp phụ phản ứng lần lượt với các nguyên tử H hấp phụ tạo thành các nhóm trung gian: \\ce{N_{(ads)} + H_{(ads)} -> NH_{(ads)}}, \\ce{NH_{(ads)} + H_{(ads)} -> NH2_{(ads)}}, \\ce{NH2_{(ads)} + H_{(ads)} -> NH3_{(ads)}}.\n    \\item \\textbf{Giải hấp phụ:} \\ce{NH3_{(ads)} -> NH3(g)}.\n\\end{enumerate}\n\nBước phân ly \\ce{N2} là bước có năng lượng hoạt hóa cao nhất và quyết định tốc độ phản ứng. Các chất trợ xúc tác như \\ce{K2O} có tác dụng tăng cường quá trình giải hấp phụ amoniac, giải phóng vị trí hoạt động, trong khi \\ce{Al2O3} giúp ổn định cấu trúc xốp của xúc tác sắt, duy trì diện tích bề mặt lớn.\n\n\\section{Ứng dụng và tầm quan trọng kinh tế}\nAmoniac là nguyên liệu chính để sản xuất phân đạm như urê (\\ce{CO(NH2)2}), amoni nitrat (\\ce{NH4NO3}), amoni sunfat (\\ce{(NH4)2SO4})... Ngoài ra, nó còn dùng trong sản xuất axit nitric (\\ce{HNO3}) qua quá trình Ostwald, chất làm lạnh trong các hệ thống đông lạnh công nghiệp, và gần đây được xem là một chất mang năng lượng (hydrogen carrier) tiềm năng. Sản lượng amoniac toàn cầu hiện nay vượt 180 triệu tấn mỗi năm, và phần lớn được sản xuất bằng quy trình Haber–Bosch. Những cải tiến gần đây tập trung vào việc giảm lượng khí thải carbon dioxide bằng cách sử dụng hydro xanh (từ điện phân nước dùng năng lượng tái tạo) thay vì hydro từ khí tự nhiên.\n\n\\section{Kết luận}\nPhản ứng tổng hợp amoniac theo quy trình Haber là một minh họa kinh điển cho sự áp dụng đồng thời các nguyên lý nhiệt động học (cân bằng hóa học) và động học (xúc tác, nhiệt độ) trong công nghiệp hóa học. Nguyên lý Le Chatelier giải thích rõ ràng ảnh hưởng của áp suất và nhiệt độ đến hiệu suất tạo amoniac, trong khi việc phát triển xúc tác sắt phù hợp cho phép phản ứng diễn ra với tốc độ khả thi. Sự dung hòa giữa hiệu suất nhiệt động và tốc độ phản ứng dẫn đến điều kiện vận hành điển hình khoảng \\SI{400}{\\celsius} -- \\SI{500}{\\celsius} và \\SI{150}{\\atm} -- \\SI{300}{\\atm}. Kết hợp với chiến lược tuần hoàn khí chưa phản ứng, quy trình này đạt hiệu suất tổng thể rất cao và đóng vai trò sống còn trong nền nông nghiệp thế giới.\n\n\\begin{thebibliography}{99}\n\\bibitem{atkins} Atkins, P., \\& de Paula, J. (2014). \\textit{Atkins' Physical Chemistry}, 10th edition. Oxford University Press.\n\\bibitem{shriver} Shriver, D. F., \\& Atkins, P. W. (2010). \\textit{Inorganic Chemistry}, 5th edition. W. H. Freeman.\n\\bibitem{ertl} Ertl, G. (1990). Elementary Steps in Heterogeneous Catalysis. \\textit{Angewandte Chemie International Edition}, 29(11), 1219--1227.\n\\bibitem{lechatelier} Le Chatelier, H. L. (1884). \\textit{Comptes Rendus}, 99, 786--789.\n\\bibitem{haber} Haber, F., \\& Le Rossignol, R. (1913). Über die Bildung von Ammoniak aus den Elementen. \\textit{Zeitschrift für Elektrochemie}, 19, 53--72.\n\\bibitem{vu} Vũ, Đ. Đ. (2008). \\textit{Hóa Lý, tập 2: Nhiệt động lực học và Động hóa học}. Nhà xuất bản Giáo dục.\n\\end{thebibliography}\n\n\\end{document}\n",
+          "metadata": {
+            "finishReason": "stop",
+            "rawFinishReason": "end_turn",
+            "usage": {
+              "inputTokens": 1213,
+              "outputTokens": 5757,
+              "totalTokens": 6970
+            }
+          }
+        },
+        "score": 1,
+        "success": true,
+        "testCase": {
+          "description": "equilibrium — tổng hợp amoniac (Haber), có cân bằng",
+          "vars": {
+            "templateId": "chemistry",
+            "description": "Trình bày phản ứng tổng hợp amoniac theo quy trình Haber và trạng thái cân bằng."
+          },
+          "assert": [
+            {
+              "type": "regex",
+              "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{article\\}"
+            },
+            {
+              "type": "regex",
+              "value": "\\\\usepackage(\\[[^\\]]*\\])?\\{mhchem\\}"
+            },
+            {
+              "type": "contains",
+              "value": "\\ce{"
+            },
+            {
+              "type": "contains",
+              "value": "\\end{document}"
+            },
+            {
+              "type": "javascript",
+              "value": "file://./scorers/validate-latex.ts"
+            }
+          ],
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 1,
+        "tokenUsage": {
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "total": 0,
+          "numRequests": 1,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          },
+          "assertions": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          }
+        },
+        "vars": {
+          "templateId": "chemistry",
+          "description": "Trình bày phản ứng tổng hợp amoniac theo quy trình Haber và trạng thái cân bằng."
+        },
+        "metadata": {
+          "finishReason": "stop",
+          "rawFinishReason": "end_turn",
+          "usage": {
+            "inputTokens": 1213,
+            "outputTokens": 5757,
+            "totalTokens": 6970
+          },
+          "_promptfooFileMetadata": {}
+        },
+        "failureReason": 0
+      },
+      {
+        "cost": 0,
+        "gradingResult": {
+          "pass": true,
+          "score": 1,
+          "reason": "All assertions passed",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0
+          },
+          "componentResults": [
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "regex",
+                "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{article\\}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "regex",
+                "value": "\\\\usepackage(\\[[^\\]]*\\])?\\{mhchem\\}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\ce{"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\end{document}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "validateLatex: OK — không có diagnostic.",
+              "assertion": {
+                "type": "javascript",
+                "value": "file://./scorers/validate-latex.ts"
+              }
+            }
+          ]
+        },
+        "id": "9fd7fb49-3780-417f-9983-d852226dcd9b",
+        "latencyMs": 118820,
+        "namedScores": {},
+        "prompt": {
+          "raw": "Giải thích phản ứng trung hòa giữa axit clohydric (HCl) và natri hydroxit (NaOH).",
+          "label": "{{description}}",
+          "config": {}
+        },
+        "promptId": "1e6bd1d5aab4bf787795c1f9955d1ac1cc90fa253cfff6883a3c44dd53037d25",
+        "promptIdx": 0,
+        "provider": {
+          "id": "chemistry-real-ai-provider",
+          "label": "chemistry-real-ai"
+        },
+        "response": {
+          "output": "\\documentclass[12pt,a4paper]{article}\n\\usepackage{geometry}\n\\usepackage{amsmath,amssymb}\n\\usepackage{mhchem}\n\\usepackage{siunitx}\n\\usepackage{graphicx}\n\\usepackage{xcolor}\n\\usepackage{tikz}\n\\usepackage{booktabs}\n\\usepackage{array}\n\\usepackage{longtable}\n\\usepackage{tabularx}\n\\usepackage{multirow}\n\\usepackage{caption}\n\\usepackage{float}\n\\usepackage{hyperref}\n\\hypersetup{hidelinks}\n\n\\sisetup{per-mode=symbol}\n\n\\usetikzlibrary{shapes.geometric, arrows.meta, positioning}\n\n\\title{Phản ứng Trung hòa giữa Axit Clohydric (HCl) và Natri Hydroxit (NaOH):\\\\Cơ chế và Ứng dụng}\n\\author{Nguyễn Văn Khoa}\n\\date{\\today}\n\n\\begin{document}\n\\maketitle\n\n\\begin{abstract}\nPhản ứng trung hòa giữa axit mạnh và bazơ mạnh, điển hình là cặp \\ce{HCl}--\\ce{NaOH}, là một trong những phản ứng hóa học cơ bản nhất. Bài viết này phân tích chi tiết cơ chế phản ứng ở cấp độ ion, các đặc điểm nhiệt động, ứng dụng trong phân tích chuẩn độ và vai trò thực tiễn trong công nghiệp cũng như đời sống. Toàn bộ các phương trình hóa học được biểu diễn bằng ký hiệu \\ce{\\ldots} chuẩn hóa, bảo đảm tính chính xác và nhất quán.\n\\end{abstract}\n\n\\section{Giới thiệu}\nPhản ứng trung hòa, theo định nghĩa Arrhenius, là sự kết hợp giữa ion \\ce{H^+} sinh ra từ axit và ion \\ce{OH^-} sinh ra từ bazơ để tạo thành nước. Trong số vô vàn cặp axit--bazơ, hệ \\ce{HCl} và \\ce{NaOH} được sử dụng rộng rãi làm mô hình mẫu vì cả hai đều phân li hoàn toàn trong dung dịch nước, giúp đơn giản hóa việc nghiên cứu các khía cạnh động học, nhiệt động và ứng dụng phân tích.\n\nAxit clohydric (\\ce{HCl}) là một axit vô cơ mạnh, thường được sử dụng dưới dạng dung dịch trong nước (axit clohydric đậm đặc khoảng \\SI{37}{\\percent} khối lượng). Natri hydroxit (\\ce{NaOH}), hay xút ăn da, là một bazơ mạnh tồn tại ở dạng rắn và dễ dàng tan trong nước, tạo ra dung dịch kiềm. Khi hai dung dịch này được trộn với nhau, phản ứng xảy ra tức thời và tỏa nhiệt mạnh, thể hiện bản chất của phản ứng trung hòa.\n\n\\section{Cơ chế phản ứng trung hòa giữa \\ce{HCl} và \\ce{NaOH}}\nTrong dung dịch nước, \\ce{HCl} phân li hoàn toàn:\n\\begin{equation}\n\\ce{HCl_{(aq)} -> H^+_{(aq)} + Cl^-_{(aq)}}\n\\end{equation}\nTương tự, \\ce{NaOH} cũng phân li hoàn toàn:\n\\begin{equation}\n\\ce{NaOH_{(aq)} -> Na^+_{(aq)} + OH^-_{(aq)}}\n\\end{equation}\nKhi trộn hai dung dịch, ion \\ce{H^+} và \\ce{OH^-} ngay lập tức kết hợp tạo thành nước:\n\\begin{equation}\n\\ce{H^+_{(aq)} + OH^-_{(aq)} -> H2O_{(l)}}\n\\end{equation}\nĐây chính là \\textbf{phương trình ion rút gọn} của phản ứng, phản ánh bản chất cốt lõi của mọi phản ứng trung hòa giữa axit mạnh và bazơ mạnh. Các ion \\ce{Na^+} và \\ce{Cl^-} không tham gia trực tiếp vào phản ứng (ion khán giả) nên phương trình phân tử tổng quát là:\n\\begin{equation}\n\\ce{HCl_{(aq)} + NaOH_{(aq)} -> NaCl_{(aq)} + H2O_{(l)}}\n\\end{equation}\nSau phản ứng, dung dịch thu được chứa muối natri clorua (\\ce{NaCl}) hòa tan và nước, có \\text{pH} gần bằng 7 (trung tính) nếu lượng axit và bazơ được trộn theo đúng tỉ lệ mol \\num{1:1}.\n\nĐể hình dung một cách trực quan, Hình~\\ref{fig:so-do} minh họa sự biến đổi của các tiểu phân trước và sau phản ứng.\n\n\\begin{figure}[H]\n\\centering\n\\begin{tikzpicture}[\n  box/.style={draw, minimum width=2.5cm, minimum height=2.2cm, align=center, font=\\small},\n  arr/.style={->,thick}\n  ]\n  % HCl beaker\n  \\node[box] (HCl) at (0,0) {\\ce{HCl (aq)}\\\\[2pt]\n                            \\ce{H^+}\\quad\\ce{Cl^-}\\\\[-2pt]\n                            \\ce{H^+}\\quad\\ce{Cl^-}};\n  % NaOH beaker\n  \\node[box, right=1.5cm of HCl] (NaOH) {\\ce{NaOH (aq)}\\\\[2pt]\n                                          \\ce{Na^+}\\quad\\ce{OH^-}\\\\[-2pt]\n                                          \\ce{Na^+}\\quad\\ce{OH^-}};\n  % Products (mixed)\n  \\node[box, below=2cm of $(HCl)!0.5!(NaOH)$, minimum width=5.5cm] (Prod) \n        {\\ce{NaCl (aq) + H2O (l)}\\\\[2pt]\n         \\ce{Na^+}\\quad\\ce{Cl^-}\\quad\\ce{H2O}\\\\[-2pt]\n         \\ce{Na^+}\\quad\\ce{Cl^-}\\quad\\ce{H2O}};\n  \\draw[arr] (HCl.south) -- ++(0,-0.6) -| ($(Prod.north)+(-1.2,0)$);\n  \\draw[arr] (NaOH.south) -- ++(0,-0.6) -| ($(Prod.north)+(1.2,0)$);\n\\end{tikzpicture}\n\\caption{Sơ đồ phản ứng trung hòa ở cấp độ ion. Các ion \\ce{H^+} và \\ce{OH^-} kết hợp tạo thành nước, trong khi \\ce{Na^+} và \\ce{Cl^-} vẫn tồn tại ở dạng ion hydrat hóa.}\n\\label{fig:so-do}\n\\end{figure}\n\n\\section{Tính chất nhiệt động của phản ứng}\nPhản ứng trung hòa \\ce{HCl} + \\ce{NaOH} có tính tỏa nhiệt mạnh. Biến thiên enthalpy tiêu chuẩn (\\SI{298}{\\kelvin}) của phản ứng ion rút gọn:\n\\begin{equation}\n\\ce{H^+_{(aq)} + OH^-_{(aq)} -> H2O_{(l)}} \\qquad \\Delta H^{\\circ} = \\SI{-57.3}{\\kilo\\joule\\per\\mole}\n\\end{equation}\nCó thể kiểm chứng giá trị này qua các enthalpy tạo thành tiêu chuẩn (Bảng~\\ref{tab:enthalpy}). Tổng quát:\n\\begin{equation}\n\\Delta H^{\\circ}_{\\text{r}} = \\sum \\Delta H_f^{\\circ}(\\text{sản phẩm}) - \\sum \\Delta H_f^{\\circ}(\\text{tác chất})\n\\end{equation}\nThay số từ Bảng~\\ref{tab:enthalpy}:\n\\begin{align}\n\\Delta H^{\\circ}_{\\text{r}} &= \\bigl[\\Delta H_f^{\\circ}(\\ce{NaCl, aq}) + \\Delta H_f^{\\circ}(\\ce{H2O, l})\\bigr] - \\bigl[\\Delta H_f^{\\circ}(\\ce{NaOH, aq}) + \\Delta H_f^{\\circ}(\\ce{HCl, aq})\\bigr] \\nonumber\\\\\n&= [\\SI{-407.3}{} + (\\SI{-285.8}{})] - [\\SI{-469.2}{} + (\\SI{-167.2}{})] \\;\\si{\\kilo\\joule\\per\\mole} \\nonumber\\\\\n&= \\SI{-693.1}{} - (\\SI{-636.4}{}) = \\SI{-56.7}{\\kilo\\joule\\per\\mole}\n\\end{align}\nGiá trị tính toán sát với thực nghiệm, khẳng định bản chất tỏa nhiệt mạnh. Nhiệt tỏa ra có thể làm dung dịch nóng lên đáng kể, một yếu tố cần lưu ý khi pha loãng các dung dịch đậm đặc.\n\n\\begin{table}[H]\n\\centering\n\\caption{Enthalpy tạo thành tiêu chuẩn (\\si{\\kilo\\joule\\per\\mole}) của các chất liên quan (pha loãng vô hạn, \\SI{298}{\\kelvin}).}\n\\label{tab:enthalpy}\n\\begin{tabular}{lc}\n\\toprule\nChất & \\(\\Delta H_f^{\\circ}\\) (\\si{\\kilo\\joule\\per\\mole}) \\\\\n\\midrule\n\\ce{HCl (aq)} & -167.2 \\\\\n\\ce{NaOH (aq)} & -469.2 \\\\\n\\ce{NaCl (aq)} & -407.3 \\\\\n\\ce{H2O (l)} & -285.8 \\\\\n\\bottomrule\n\\end{tabular}\n\\end{table}\n\n\\section{Phương pháp chuẩn độ axit--bazơ với \\ce{HCl} và \\ce{NaOH}}\nPhản ứng nhanh và hoàn toàn giữa \\ce{HCl} và \\ce{NaOH} là cơ sở cho kỹ thuật chuẩn độ axit--bazơ, một phương pháp phân tích định lượng phổ biến. Trong chuẩn độ, dung dịch chuẩn (chất chuẩn) có nồng độ đã biết được nhỏ từ buret vào một thể tích xác định dung dịch cần xác định nồng độ (chất phân tích) cho đến khi đạt điểm tương đương.\n\nThường sử dụng chỉ thị phenolphthalein, chuyển từ không màu (môi trường axit) sang hồng nhạt (môi trường bazơ) trong khoảng pH 8.2--10.0, phù hợp với điểm tương đương của phản ứng axit mạnh--bazơ mạnh, nơi pH thay đổi đột ngột từ khoảng 4 lên 10.\n\n\\textbf{Ví dụ thực nghiệm:} Chuẩn độ \\SI{25.00}{\\milli\\litre} dung dịch \\ce{NaOH} chưa biết nồng độ bằng dung dịch \\ce{HCl} \\SI{0.100}{\\Molar}. Sau khi thêm \\SI{20.00}{\\milli\\litre} \\ce{HCl}, dung dịch chuyển sang hồng nhạt bền trong 30 giây, báo hiệu điểm tương đương.\n\nPhản ứng: \n\\ce{NaOH + HCl -> NaCl + H2O}\n\nTại điểm tương đương: \\(n_{\\ce{NaOH}} = n_{\\ce{HCl}}\\)\n\\[\nC_{\\ce{NaOH}} \\times V_{\\ce{NaOH}} = C_{\\ce{HCl}} \\times V_{\\ce{HCl}}\n\\]\n\\[\nC_{\\ce{NaOH}} = \\frac{\\SI{0.100}{\\Molar} \\times \\SI{20.00}{\\milli\\litre}}{\\SI{25.00}{\\milli\\litre}} = \\SI{0.0800}{\\Molar}\n\\]\n\nĐộ chính xác của phép chuẩn độ phụ thuộc vào việc hiệu chuẩn dụng cụ thủy tinh, lựa chọn chỉ thị phù hợp và kỹ năng thao tác. Với cặp axit mạnh--bazơ mạnh, có thể dùng thêm chỉ thị xanh bromothymol (khoảng chuyển màu pH 6.0--7.6) để tăng độ nhạy.\n\n\\section{Ứng dụng thực tiễn}\nPhản ứng \\ce{HCl} + \\ce{NaOH} không chỉ có ý nghĩa học thuật mà còn hiện diện trong vô số quá trình công nghiệp và đời sống:\n\n\\begin{itemize}\n\\item \\textbf{Xử lý nước thải:} Nhiều dòng thải công nghiệp có tính axit hoặc kiềm mạnh cần được trung hòa trước khi thải ra môi trường. Hệ \\ce{HCl}--\\ce{NaOH} thường được dùng vì các sản phẩm \\ce{NaCl} và nước không độc hại và dễ xử lý tiếp.\n\\item \\textbf{Sản xuất muối ăn:} Mặc dù muối \\ce{NaCl} thường khai thác từ mỏ hoặc bay hơi nước biển, phản ứng trực tiếp giữa \\ce{HCl} và \\ce{NaOH} cũng có thể tạo ra natri clorua tinh khiết dùng trong dược phẩm hoặc thực phẩm.\n\\item \\textbf{Chất tẩy rửa và chất thông cống:} Nhiều sản phẩm thông cống chứa \\ce{NaOH} rắn; khi gặp nước, nó sinh nhiệt và hòa tan dầu mỡ. Trung hòa kiềm dư bằng axit yếu hoặc \\ce{HCl} loãng là bước an toàn cần thiết.\n\\item \\textbf{Phòng thí nghiệm:} Chuẩn bị dung dịch đệm, làm sạch dụng cụ thủy tinh bằng cách trung hòa cặn axit/bazơ, và là phản ứng mẫu trong các bài thực hành nhiệt động học và động học.\n\\item \\textbf{Y tế:} Mặc dù không dùng \\ce{HCl} đậm đặc, các thuốc kháng axit (antacid) như \\ce{Mg(OH)2} hay \\ce{Al(OH)3} cũng trung hòa axit dịch vị \\ce{HCl} trong dạ dày theo cùng nguyên tắc ion \\ce{H^+} + \\ce{OH^-} $\\to$ \\ce{H2O}.\n\\end{itemize}\n\n\\section{Kết luận}\nPhản ứng trung hòa giữa axit clohydric và natri hydroxit là một ví dụ kinh điển minh họa cho bản chất của phản ứng axit--bazơ: sự kết hợp của proton và hydroxide để tạo ra nước. Tính toán nhiệt động cho thấy quá trình tỏa nhiệt mạnh, phù hợp với giá trị thực nghiệm \\SI{-57.3}{\\kilo\\joule\\per\\mole}. Nhờ tính hoàn toàn và nhanh chóng, hệ \\ce{HCl}--\\ce{NaOH} trở thành nền tảng cho kỹ thuật chuẩn độ axit--bazơ, một công cụ phân tích định lượng thiết yếu. Bên cạnh đó, phản ứng còn có mặt trong xử lý môi trường, sản xuất hóa chất và nhiều ứng dụng khác, khẳng định tầm quan trọng của nó trong hóa học và công nghiệp.\n\n\\begin{thebibliography}{99}\n\\bibitem{atkins} P.~Atkins, J.~de~Paula, \\textit{Physical Chemistry}, 10th edition, Oxford University Press, 2014.\n\\bibitem{chang} R.~Chang, \\textit{Chemistry}, 13th edition, McGraw-Hill, 2022.\n\\bibitem{harris} D.~C.~Harris, \\textit{Quantitative Chemical Analysis}, 9th edition, W.~H.~Freeman, 2016.\n\\bibitem{crc} D.~R.~Lide (Ed.), \\textit{CRC Handbook of Chemistry and Physics}, 85th edition, CRC Press, 2004.\n\\end{thebibliography}\n\n\\end{document}\n",
+          "metadata": {
+            "finishReason": "stop",
+            "rawFinishReason": "end_turn",
+            "usage": {
+              "inputTokens": 1216,
+              "outputTokens": 7047,
+              "totalTokens": 8263
+            }
+          }
+        },
+        "score": 1,
+        "success": true,
+        "testCase": {
+          "description": "acid-base — trung hòa axit-bazơ",
+          "vars": {
+            "templateId": "chemistry",
+            "description": "Giải thích phản ứng trung hòa giữa axit clohydric (HCl) và natri hydroxit (NaOH)."
+          },
+          "assert": [
+            {
+              "type": "regex",
+              "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{article\\}"
+            },
+            {
+              "type": "regex",
+              "value": "\\\\usepackage(\\[[^\\]]*\\])?\\{mhchem\\}"
+            },
+            {
+              "type": "contains",
+              "value": "\\ce{"
+            },
+            {
+              "type": "contains",
+              "value": "\\end{document}"
+            },
+            {
+              "type": "javascript",
+              "value": "file://./scorers/validate-latex.ts"
+            }
+          ],
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 2,
+        "tokenUsage": {
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "total": 0,
+          "numRequests": 1,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          },
+          "assertions": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          }
+        },
+        "vars": {
+          "templateId": "chemistry",
+          "description": "Giải thích phản ứng trung hòa giữa axit clohydric (HCl) và natri hydroxit (NaOH)."
+        },
+        "metadata": {
+          "finishReason": "stop",
+          "rawFinishReason": "end_turn",
+          "usage": {
+            "inputTokens": 1216,
+            "outputTokens": 7047,
+            "totalTokens": 8263
+          },
+          "_promptfooFileMetadata": {}
+        },
+        "failureReason": 0
+      },
+      {
+        "cost": 0,
+        "gradingResult": {
+          "pass": true,
+          "score": 1,
+          "reason": "All assertions passed",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0
+          },
+          "componentResults": [
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "regex",
+                "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{article\\}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "regex",
+                "value": "\\\\usepackage(\\[[^\\]]*\\])?\\{mhchem\\}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\ce{"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\end{document}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "validateLatex: OK — không có diagnostic.",
+              "assertion": {
+                "type": "javascript",
+                "value": "file://./scorers/validate-latex.ts"
+              }
+            }
+          ]
+        },
+        "id": "265519b6-f084-4c61-bf0b-0bcb5f288007",
+        "latencyMs": 97712,
+        "namedScores": {},
+        "prompt": {
+          "raw": "Báo cáo thí nghiệm điều chế khí oxi bằng cách nhiệt phân kali pemanganat trong phòng thí nghiệm.",
+          "label": "{{description}}",
+          "config": {}
+        },
+        "promptId": "1e6bd1d5aab4bf787795c1f9955d1ac1cc90fa253cfff6883a3c44dd53037d25",
+        "promptIdx": 0,
+        "provider": {
+          "id": "chemistry-real-ai-provider",
+          "label": "chemistry-real-ai"
+        },
+        "response": {
+          "output": "\\documentclass[a4paper,12pt]{article}\n\n\\usepackage{fontspec} % XeLaTeX mặc định font Latin Modern, hỗ trợ tiếng Việt\n\n% Các gói được phép sử dụng\n\\usepackage{geometry}\n\\geometry{left=2.5cm, right=2.5cm, top=2.5cm, bottom=2.5cm}\n\\usepackage{amsmath,amssymb}\n\\usepackage{mhchem}         % Công thức hóa học\n\\usepackage{siunitx}        % Đơn vị và số\n\\sisetup{locale=VN,per-mode=symbol}\n\\usepackage{graphicx}       % Nếu cần đặt ảnh minh họa (không dùng file ngoài)\n\\usepackage{hyperref}\n\\hypersetup{colorlinks=true,linkcolor=blue,citecolor=blue}\n\\usepackage{xcolor}\n\\usepackage{tikz}\n\\usetikzlibrary{patterns,shapes,arrows,positioning,calc}\n\\usepackage{booktabs,array}\n\\usepackage{caption}\n\n% Không sử dụng \\setmainfont (để tránh lỗi font trong sandbox)\n\n\\title{\\bfseries BÁO CÁO THÍ NGHIỆM\\\\[4pt]\n\\large ĐIỀU CHẾ KHÍ OXI BẰNG CÁCH NHIỆT PHÂN KALI PEMANGANAT\\\\[4pt]\n\\small (Môn Hóa học Vô cơ – Phòng thí nghiệm)}\n\\author{Nhóm thực hiện: Nguyễn Văn A, Trần Thị B, Lê Hoàng C\\\\[2pt]\n\\small Lớp: Hóa K46 – Trường Đại học Khoa học Tự nhiên}\n\\date{\\today}\n\n\\begin{document}\n\n\\maketitle\n\n\\begin{abstract}\nBáo cáo này trình bày quá trình điều chế khí oxi trong phòng thí nghiệm bằng phương pháp nhiệt phân kali pemanganat (\\(\\ce{KMnO4}\\)). Thí nghiệm được tiến hành với dụng cụ đơn giản gồm ống nghiệm, đèn cồn, ống dẫn khí và chậu nước. Khí oxi sinh ra được thu bằng phương pháp đẩy nước và kiểm tra bằng que đóm còn tàn đỏ. Chúng tôi ghi nhận các số liệu thực nghiệm, tính toán hiệu suất phản ứng, đồng thời thảo luận các yếu tố ảnh hưởng đến quá trình nhiệt phân. Kết quả cho thấy phản ứng phân hủy \\(\\ce{KMnO4}\\) là một cách đơn giản, hiệu quả để sản xuất oxi tinh khiết phục vụ nghiên cứu và giảng dạy.\n\\end{abstract}\n\n\\section{Mục đích thí nghiệm}\n\\begin{itemize}\n    \\item Thực hành kỹ thuật điều chế khí trong phòng thí nghiệm bằng phản ứng nhiệt phân.\n    \\item Nắm vững nguyên tắc thu khí bằng phương pháp đẩy nước dựa trên tính ít tan của oxi trong nước.\n    \\item Rèn luyện kỹ năng lắp ráp dụng cụ, quan sát hiện tượng và xử lý số liệu thực nghiệm.\n    \\item Tính toán hiệu suất phản ứng và đánh giá các yếu tố ảnh hưởng.\n\\end{itemize}\n\n\\section{Cơ sở lý thuyết}\nKali pemanganat (\\(\\ce{KMnO4}\\)) là chất rắn màu tím đậm, khi bị đun nóng sẽ bị phân hủy tạo thành kali manganat (\\(\\ce{K2MnO4}\\)), mangan(IV) oxit (\\(\\ce{MnO2}\\)) và khí oxi (\\(\\ce{O2}\\)). Phương trình nhiệt phân:\n\\begin{equation}\n    \\ce{2KMnO4 ->[\\Delta] K2MnO4 + MnO2 + O2 ^}\n    \\label{eq:decomp}\n\\end{equation}\nPhản ứng là phản ứng oxi hóa – khử nội phân tử: mangan (số oxi hóa +7 trong \\(\\ce{MnO4-}\\)) vừa bị khử xuống +6 (trong \\(\\ce{MnO4^{2-}}\\)) vừa xuống +4 (trong \\(\\ce{MnO2}\\)), đồng thời oxi trong \\(\\ce{MnO4-}\\) bị oxi hóa thành oxi phân tử \\(\\ce{O2}\\).\n\nKhí oxi ít tan trong nước (độ tan khoảng \\SI{31}{\\milli\\liter} khí trong \\SI{1}{\\liter} nước ở \\SI{20}{\\degreeCelsius}) nên có thể thu bằng cách đẩy nước. Có thể nhận biết oxi bằng que đóm còn tàn đỏ: đóm bùng cháy sáng khi đưa vào môi trường giàu oxi.\n\n\\section{Dụng cụ và hóa chất}\n\\subsection{Dụng cụ}\n\\begin{itemize}\n    \\item Ống nghiệm chịu nhiệt (có nhánh hoặc ống nghiệm thẳng dùng với nút cao su hai lỗ).\n    \\item Nút cao su có lỗ cắm ống dẫn khí.\n    \\item Ống dẫn khí thủy tinh uốn cong.\n    \\item Chậu thủy tinh (hoặc bể nước nhỏ).\n    \\item Lọ thủy tinh miệng rộng (bình thu khí) dung tích \\SI{250}{\\milli\\liter}.\n    \\item Đèn cồn, bật lửa.\n    \\item Giá sắt, kẹp ống nghiệm.\n    \\item Que đóm bằng gỗ (có tàn đỏ) để thử oxi.\n    \\item Cân phân tích (độ chính xác \\SI{0.01}{\\gram}).\n    \\item Ống đong \\SI{250}{\\milli\\liter}.\n    \\item Kẹp gỗ, ống nhỏ giọt.\n\\end{itemize}\n\n\\subsection{Hóa chất}\n\\begin{itemize}\n    \\item Kali pemanganat tinh thể (\\(\\ce{KMnO4}\\), rắn, tím) – khoảng \\SI{10}{\\gram} cho mỗi lần thí nghiệm.\n    \\item Nước cất (đổ vào chậu và bình thu khí).\n\\end{itemize}\n\n\\section{Cách tiến hành}\n\\subsection{Lắp ráp dụng cụ}\n\\begin{enumerate}\n    \\item Cho một lượng chính xác (đã cân) \\(\\ce{KMnO4}\\) vào ống nghiệm khô. Tránh để chất bám vào thành ống nghiệm phía trên; nếu cần dùng giấy lọc đưa chất xuống đáy ống.\n    \\item Đậy nút cao su có cắm ống dẫn khí vào miệng ống nghiệm. Ống dẫn khí được uốn cong sao cho đầu còn lại cắm ngập trong nước của bể chứa nước (bình thu khí đầy nước được úp ngược lên đầu ống dẫn).\n    \\item Đổ đầy nước vào bình thu khí, đậy miệng bình bằng tấm kính hoặc tay, úp ngược bình vào chậu nước sao cho không còn bọt khí. Đặt miệng bình ngay trên đầu ống dẫn khí (đầu ống nằm trong nước).\n    \\item Kiểm tra độ kín của hệ thống bằng cách hơ nóng nhẹ ống nghiệm: nếu có bọt khí thoát ra trong bình thu khí thì hệ kín.\n\\end{enumerate}\n\n\\subsection{Tiến hành phản ứng}\n\\begin{enumerate}\n    \\item Nhẹ nhàng đun nóng toàn bộ ống nghiệm bằng đèn cồn (di chuyển đèn đều), sau đó tập trung đun vào phần đáy ống có chứa \\(\\ce{KMnO4}\\). Nhiệt độ nung khoảng \\num{240}--\\SI{300}{\\degreeCelsius}.\n    \\item Quan sát hiện tượng: chất rắn chuyển màu dần từ tím sang đen, có bọt khí sủi lên ở bề mặt chất rắn; khí sinh ra đẩy nước ra khỏi bình thu, nước trong bình tụt dần.\n    \\item Khi bình thu đã đầy khí (nước bị đẩy hết ra ngoài), dùng tấm kính đậy kín miệng bình dưới nước rồi lấy bình ra khỏi chậu, đặt đứng trên bàn.\n    \\item Sau khi kết thúc thí nghiệm, tháo ống dẫn khí ra khỏi chậu nước TRƯỚC KHI tắt đèn cồn để tránh nước bị hút ngược vào ống nghiệm đang nóng (có thể làm vỡ ống).\n    \\item Để ống nghiệm nguội tự nhiên. Chất rắn còn lại có màu đen xám.\n\\end{enumerate}\n\n\\subsection{Kiểm tra khí oxi}\nĐưa que đóm còn tàn đỏ vào miệng bình chứa khí vừa thu được. Que đóm bùng cháy với ngọn lửa sáng, chứng tỏ khí trong bình là oxi.\n\n\\subsection{Sơ đồ thiết bị}\nDưới đây là sơ đồ minh họa bộ dụng cụ điều chế và thu khí oxi bằng phương pháp nhiệt phân \\(\\ce{KMnO4}\\):\n\n\\begin{figure}[h]\n    \\centering\n    \\begin{tikzpicture}[scale=1.0, transform shape]\n        % Ống nghiệm\n        \\draw[thick] (0,0) -- (0,-4) arc (180:0:0.5 and 0.15) -- (1,0);\n        \\draw[thick] (0,0) arc (180:360:0.5 and 0.15);\n        \\draw[thick] (0,0) -- (0,0.3) arc (180:360:0.5 and 0.15) -- (1,0.3);\n        % Kẹp\n        \\draw[thick] (-0.2,-1.2) -- (1.2,-1.2);\n        \\draw[thick] (-0.2,-1.4) -- (1.2,-1.4);\n        % Nút cao su và ống dẫn\n        \\fill[gray!30] (0,0.3) rectangle (1,0.7);\n        \\draw[thick] (0.5,0.7) -- (0.5,1.2) -- (5,1.2);\n        % Góc uốn ống\n        \\draw[thick] (5,1.2) -- (5,0.2);\n        % Đèn cồn\n        \\draw[thick] (0.2,-4.5) rectangle (0.8,-4.0);\n        \\fill[yellow!80] (0.35,-4.0) -- (0.5,-3.6) -- (0.65,-4.0);\n        \\draw[thick] (0.5,-4.0) -- (0.5,-3.6);\n        % Chậu nước\n        \\draw[thick] (3,-0.5) -- (6.5,-0.5) -- (6.5, -1.5) -- (3,-1.5) -- cycle;\n        \\fill[cyan!20] (3,-0.5) rectangle (6.5,-1.5);\n        % Bình thu khí (úp ngược)\n        \\draw[thick] (4,-0.5) -- (4,-1.7) -- (5.5,-1.7) -- (5.5,-0.5);\n        \\draw[thick] (4,-1.7) -- (5.5,-1.7);\n        % Mực nước trong bình\n        \\fill[cyan!10] (4,-1.2) rectangle (5.5,-0.5);\n        \\draw[thick, dashed] (4,-1.2) -- (5.5,-1.2);\n        \\draw[thick, dashed] (4,-1.7) -- (5.5,-1.7);\n        % Ống dẫn khí vào bình\n        \\draw[thick] (5,0.2) -- (5,-0.8);\n        % Bọt khí\n        \\fill[white] (4.2,-1.0) circle (0.1);\n        \\fill[white] (4.6,-0.9) circle (0.12);\n        \\fill[white] (5.1,-1.05) circle (0.1);\n        \\fill[white] (4.8,-0.7) circle (0.08);\n        \\fill[white] (4.3,-0.65) circle (0.1);\n        % KMnO4\n        \\fill[purple!60] (0.1,-3.8) rectangle (0.9,-3.2);\n        \\draw[thick] (0.1,-3.8) -- (0.9,-3.8);\n        % Nhãn\n        \\node at (0.5,1.5) {\\small Ống nghiệm};\n        \\node at (3,1.8) {\\small Ống dẫn khí};\n        \\node at (7.5,0) {\\small Chậu nước};\n        \\node at (4.75,-2.0) {\\small Bình thu khí};\n        \\node at (-1,-4.2) {\\small Đèn cồn};\n        \\node at (2,-3.5) {\\small \\(\\ce{KMnO4}\\)};\n        \\draw[->] (0.5,1.3) -- (0.5,0.8);\n        \\draw[->] (2.5,1.6) -- (2.5,1.1);\n        \\draw[->] (7.2,-0.2) -- (6.6,-0.5);\n        \\draw[->] (4.75,-1.8) -- (4.75,-1.6);\n    \\end{tikzpicture}\n    \\caption{Sơ đồ dụng cụ điều chế oxi bằng nhiệt phân \\(\\ce{KMnO4}\\) và thu khí bằng phương pháp đẩy nước.}\n    \\label{fig:apparatus}\n\\end{figure}\n\n\\section{Kết quả và xử lý số liệu}\n\n\\subsection{Dữ liệu thô}\nCân lượng \\(\\ce{KMnO4}\\) sử dụng và đo thể tích khí oxi thu được ở điều kiện phòng (\\(\\approx\\) \\SI{27}{\\degreeCelsius}, áp suất \\SI{1}{atm}). Kết quả đo qua ba lần thí nghiệm:\n\n\\begin{table}[h]\n    \\centering\n    \\caption{Dữ liệu thí nghiệm điều chế oxi từ \\(\\ce{KMnO4}\\)}\n    \\label{tab:data}\n    \\begin{tabular}{@{}ccccc@{}}\n        \\toprule\n        \\textbf{Lần} & \\(m_{\\ce{KMnO4}}\\) (\\si{\\gram}) & \\(V_{\\text{khí}}\\) (\\si{\\milli\\liter}) & Nhiệt độ (\\si{\\degreeCelsius}) & Áp suất (\\si{atm}) \\\\\n        \\midrule\n        1 & 10,12 & 365 & 27 & 1,00 \\\\\n        2 & 10,05 & 358 & 27 & 1,00 \\\\\n        3 & 10,08 & 362 & 27 & 1,00 \\\\\n        \\bottomrule\n    \\end{tabular}\n\\end{table}\n\n\\subsection{Tính toán lý thuyết}\nTừ phương trình \\eqref{eq:decomp}, 2 mol \\(\\ce{KMnO4}\\) (M = \\SI{158.034}{\\gram\\per\\mole}) sinh ra 1 mol \\(\\ce{O2}\\) (thể tích mol \\SI{24.46}{\\liter\\per\\mole} ở \\SI{25}{\\degreeCelsius}, \\SI{1}{atm}). Với khối lượng trung bình \\SI{10.08}{\\gram}:\n\\[\nn_{\\ce{KMnO4}} = \\frac{10.08}{158.034} \\approx \\SI{0.0638}{\\mole}\n\\]\n\\[\nn_{\\ce{O2},\\,\\text{lý thuyết}} = \\frac{1}{2} n_{\\ce{KMnO4}} = 0.0319\\ \\text{mol}\n\\]\n\\[\nV_{\\text{lý thuyết}} = 0.0319 \\times 24.46 \\approx \\SI{780}{\\milli\\liter}\n\\]\n\nThể tích thực tế thu được trung bình: \\(\\overline{V} \\approx \\frac{365+358+362}{3} = \\SI{361.7}{\\milli\\liter}\\). Như vậy lượng oxi thu được thấp hơn nhiều so với lý thuyết; hiện tượng này phổ biến do khí oxi thất thoát trong lúc thu và do phản ứng không hoàn toàn.\n\n\\subsection{Hiệu suất phản ứng}\nHiệu suất dựa trên thể tích:\n\\[\nH = \\frac{V_{\\text{thực tế}}}{V_{\\text{lý thuyết}}} \\times 100\\% \\approx \\frac{361.7}{780} \\times 100\\% \\approx \\SI{46.4}{\\percent}\n\\]\n(Nếu tính theo số mol oxi dựa trên thể tích đã hiệu chỉnh về điều kiện tiêu chuẩn (ĐKC) cũng cho con số tương tự).\n\n\\subsection{Kiểm chứng với que đóm}\nQue đóm còn tàn đỏ lập tức bùng cháy mạnh khi đưa vào bình khí oxi thu được, xác nhận sự có mặt của \\(\\ce{O2}\\).\n\n\\section{Thảo luận}\n\\begin{itemize}\n    \\item Màu sắc chất rắn thay đổi từ tím sẫm sang đen là do hỗn hợp sản phẩm rắn gồm \\(\\ce{K2MnO4}\\) (xanh lục đậm) và \\(\\ce{MnO2}\\) (đen), tạo nên màu xám đen đặc trưng.\n    \\item Sai số đáng kể giữa thể tích lý thuyết và thực tế có thể do:\n    \\begin{itemize}\n        \\item Một phần oxi hòa tan vào nước trong bình thu hoặc thất thoát qua các mối nối.\n        \\item \\(\\ce{KMnO4}\\) không phân hủy hết do nhiệt độ không đồng đều hoặc thời gian nung chưa đủ.\n        \\item Sai số khi đo đạc thể tích bằng bình thu thô sơ (đọc vạch không chính xác).\n    \\end{itemize}\n    \\item Lưu ý an toàn: \\(\\ce{KMnO4}\\) là chất oxi hóa mạnh, tránh tiếp xúc trực tiếp với da; không để hóa chất dính vào quần áo vì có thể gây cháy khi gặp chất hữu cơ.\n    \\item Phương pháp thu khí đẩy nước đơn giản nhưng không thu được khí khô; nếu cần oxi khô phải thu bằng phương pháp đẩy không khí (để ngửa bình vì oxi nặng hơn không khí) và cho qua chất hút ẩm.\n    \\item Có thể kiểm tra độ tinh khiết của oxi bằng cách cho mẩu than (cacbon) hoặc lưu huỳnh (\\(\\ce{S}\\)) cháy trong lọ oxi, quan sát sản phẩm.\n\\end{itemize}\n\n\\section{Kết luận}\nThí nghiệm đã thành công trong việc điều chế khí oxi bằng phản ứng nhiệt phân kali pemanganat:\n\\[\n\\ce{2KMnO4 ->[\\Delta] K2MnO4 + MnO2 + O2 ^}.\n\\]\nQuy trình thực hiện tương đối đơn giản, phù hợp với điều kiện phòng thí nghiệm cơ sở. Hiệu suất thu hồi oxi thấp (khoảng \\SI{46}{\\percent}) chủ yếu do hao hụt trong quá trình thu khí. Kết quả được kiểm chứng bằng que đóm tàn đỏ. Báo cáo này giúp củng cố kiến thức về phản ứng nhiệt phân, kỹ thuật thu khí và xử lý số liệu thực nghiệm.\n\n\\section*{Tài liệu tham khảo}\n\\begin{thebibliography}{99}\n\\bibitem{skk1} Nguyễn, H. T. \\& Trần, T. V. (2015). \\textit{Thực hành Hóa học Vô cơ}. Nxb Đại học Quốc gia Hà Nội.\n\\bibitem{labman} Lê, M. C. (2020). \\textit{Sổ tay thí nghiệm Hóa học Đại cương}. Nxb Giáo dục.\n\\bibitem{atkins} Atkins, P., Jones, L. (2010). \\textit{Chemical Principles: The Quest for Insight}. 5th ed. Freeman.\n\\end{thebibliography}\n\n\\end{document}\n",
+          "metadata": {
+            "finishReason": "stop",
+            "rawFinishReason": "end_turn",
+            "usage": {
+              "inputTokens": 1216,
+              "outputTokens": 5854,
+              "totalTokens": 7070
+            }
+          }
+        },
+        "score": 1,
+        "success": true,
+        "testCase": {
+          "description": "vietnamese-lab — tiếng Việt có dấu đầy đủ (Unicode + font)",
+          "vars": {
+            "templateId": "chemistry",
+            "description": "Báo cáo thí nghiệm điều chế khí oxi bằng cách nhiệt phân kali pemanganat trong phòng thí nghiệm."
+          },
+          "assert": [
+            {
+              "type": "regex",
+              "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{article\\}"
+            },
+            {
+              "type": "regex",
+              "value": "\\\\usepackage(\\[[^\\]]*\\])?\\{mhchem\\}"
+            },
+            {
+              "type": "contains",
+              "value": "\\ce{"
+            },
+            {
+              "type": "contains",
+              "value": "\\end{document}"
+            },
+            {
+              "type": "javascript",
+              "value": "file://./scorers/validate-latex.ts"
+            }
+          ],
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 3,
+        "tokenUsage": {
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "total": 0,
+          "numRequests": 1,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          },
+          "assertions": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          }
+        },
+        "vars": {
+          "templateId": "chemistry",
+          "description": "Báo cáo thí nghiệm điều chế khí oxi bằng cách nhiệt phân kali pemanganat trong phòng thí nghiệm."
+        },
+        "metadata": {
+          "finishReason": "stop",
+          "rawFinishReason": "end_turn",
+          "usage": {
+            "inputTokens": 1216,
+            "outputTokens": 5854,
+            "totalTokens": 7070
+          },
+          "_promptfooFileMetadata": {}
+        },
+        "failureReason": 0
+      }
+    ],
+    "stats": {
+      "successes": 4,
+      "failures": 0,
+      "errors": 0,
+      "tokenUsage": {
+        "prompt": 0,
+        "completion": 0,
+        "cached": 0,
+        "total": 0,
+        "numRequests": 4,
+        "completionDetails": {
+          "reasoning": 0,
+          "acceptedPrediction": 0,
+          "rejectedPrediction": 0,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0
+        },
+        "assertions": {
+          "total": 0,
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "numRequests": 0,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          }
+        }
+      },
+      "durationMs": 221872,
+      "evaluationDurationMs": 221872
+    }
+  },
+  "config": {
+    "tags": {},
+    "description": "Chemistry template — AI THẬT trên dataset chemistry/",
+    "prompts": [
+      "{{description}}"
+    ],
+    "providers": [
+      {
+        "id": "file://./providers/chemistry-real-ai-provider.ts",
+        "label": "chemistry-real-ai"
+      }
+    ],
+    "tests": [
+      "file://./datasets/chemistry/cases.yaml"
+    ],
+    "env": {},
+    "defaultTest": {
+      "assert": [
+        {
+          "type": "regex",
+          "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{article\\}"
+        },
+        {
+          "type": "regex",
+          "value": "\\\\usepackage(\\[[^\\]]*\\])?\\{mhchem\\}"
+        },
+        {
+          "type": "contains",
+          "value": "\\ce{"
+        },
+        {
+          "type": "contains",
+          "value": "\\end{document}"
+        },
+        {
+          "type": "javascript",
+          "value": "file://./scorers/validate-latex.ts"
+        }
+      ],
+      "vars": {},
+      "options": {},
+      "metadata": {}
+    },
+    "outputPath": [
+      "lib/prompt-eval/results/chemistry-real-ai-run-2026-07-16.json"
+    ],
+    "extensions": [],
+    "metadata": {},
+    "evaluateOptions": {}
+  },
+  "shareableUrl": null,
+  "metadata": {
+    "promptfooVersion": "0.121.18",
+    "nodeVersion": "v24.16.0",
+    "platform": "win32",
+    "arch": "x64",
+    "exportedAt": "2026-07-16T10:25:50.094Z",
+    "evaluationCreatedAt": "2026-07-16T10:22:08.049Z"
+  },
+  "vars": [
+    "templateId",
+    "description"
+  ],
+  "runtimeOptions": {
+    "eventSource": "cli",
+    "showProgressBar": true,
+    "repeat": 1,
+    "maxConcurrency": 4,
+    "cache": false
+  }
+}

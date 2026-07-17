@@ -12,25 +12,27 @@ import { TEMPLATE_IDS } from "@/lib/types/document";
 import { validateLatex } from "@/lib/validation/validate";
 
 describe("template registry", () => {
-  it("lists exactly the 4 core templates in TEMPLATE_IDS order", () => {
+  it("lists exactly the 11 core templates in TEMPLATE_IDS order", () => {
     expect(listTemplates().map((t) => t.id)).toEqual([...TEMPLATE_IDS]);
-    expect(TEMPLATE_IDS).toEqual(["academic", "math", "thesis", "slides"]);
+    expect(TEMPLATE_IDS).toEqual(["academic", "math", "thesis", "report", "slides", "chemistry", "physics", "exam", "engineering", "letter", "cv"]);
   });
 
   it("isTemplateId: accepts valid ids, rejects removed/unknown ones", () => {
-    // core 4 — valid
+    // core 11 — valid (4 original + 7 Phase-6 templates)
     expect(isTemplateId("academic")).toBe(true);
     expect(isTemplateId("math")).toBe(true);
     expect(isTemplateId("thesis")).toBe(true);
+    expect(isTemplateId("report")).toBe(true);
     expect(isTemplateId("slides")).toBe(true);
-    // removed templates — now invalid
-    expect(isTemplateId("physics")).toBe(false);
+    expect(isTemplateId("chemistry")).toBe(true);
+    expect(isTemplateId("physics")).toBe(true);
+    expect(isTemplateId("exam")).toBe(true);
+    expect(isTemplateId("engineering")).toBe(true);
+    expect(isTemplateId("letter")).toBe(true);
+    expect(isTemplateId("cv")).toBe(true);
+    // never-existed / unknown ids — invalid
     expect(isTemplateId("general")).toBe(false);
     expect(isTemplateId("technical")).toBe(false);
-    expect(isTemplateId("cv")).toBe(false);
-    expect(isTemplateId("letter")).toBe(false);
-    expect(isTemplateId("exam")).toBe(false);
-    expect(isTemplateId("chemistry")).toBe(false);
     // totally unknown
     expect(isTemplateId("khong-co")).toBe(false);
     expect(isTemplateId(123)).toBe(false);
@@ -59,7 +61,14 @@ describe("template registry", () => {
     expect(TEMPLATES.academic.documentClass).toBe("article");
     expect(TEMPLATES.math.documentClass).toBe("article");
     expect(TEMPLATES.thesis.documentClass).toBe("report");
+    expect(TEMPLATES.report.documentClass).toBe("report");
     expect(TEMPLATES.slides.documentClass).toBe("beamer");
+    expect(TEMPLATES.chemistry.documentClass).toBe("article");
+    expect(TEMPLATES.physics.documentClass).toBe("article");
+    expect(TEMPLATES.exam.documentClass).toBe("exam");
+    expect(TEMPLATES.engineering.documentClass).toBe("article");
+    expect(TEMPLATES.letter.documentClass).toBe("letter");
+    expect(TEMPLATES.cv.documentClass).toBe("article");
   });
 
   it("academic: has amsmath + hyperref packages; renders abstract + thebibliography", () => {
@@ -85,6 +94,83 @@ describe("template registry", () => {
     expect(latex).toContain("\\documentclass{report}");
     expect(latex).toContain("\\tableofcontents");
     expect(latex).toContain("\\chapter{");
+  });
+
+  it("report: report class, section-based (no chapters), renders sections + summary", () => {
+    expect(TEMPLATES.report.documentClass).toBe("report");
+    const latex = renderTemplateLatex("report", "x");
+    expect(latex).toContain("\\documentclass{report}");
+    expect(latex).toContain("\\section{");
+    expect(latex).toContain("\\begin{abstract}");
+    // Distinct from thesis: report is section-based, no \chapter and no long TOC.
+    expect(latex).not.toContain("\\chapter");
+    expect(latex).not.toContain("\\tableofcontents");
+  });
+
+  it("chemistry: article class, uses mhchem, renders \\ce{} reactions", () => {
+    expect(TEMPLATES.chemistry.documentClass).toBe("article");
+    expect(TEMPLATES.chemistry.packages).toContain("mhchem");
+    const latex = renderTemplateLatex("chemistry", "x");
+    expect(latex).toContain("\\documentclass{article}");
+    expect(latex).toContain("\\usepackage{mhchem}");
+    expect(latex).toContain("\\ce{");
+  });
+
+  it("physics: article class, uses siunitx + bm, renders vectors + SI units", () => {
+    expect(TEMPLATES.physics.documentClass).toBe("article");
+    expect(TEMPLATES.physics.packages).toContain("siunitx");
+    expect(TEMPLATES.physics.packages).toContain("bm");
+    const latex = renderTemplateLatex("physics", "x");
+    expect(latex).toContain("\\documentclass{article}");
+    expect(latex).toContain("\\usepackage{siunitx}");
+    expect(latex).toContain("\\vec{");
+    expect(latex).toContain("\\SI{");
+  });
+
+  it("exam: exam document class, renders questions + \\question + solution", () => {
+    expect(TEMPLATES.exam.documentClass).toBe("exam");
+    const latex = renderTemplateLatex("exam", "x");
+    expect(latex).toContain("\\documentclass{exam}");
+    expect(latex).toContain("\\begin{questions}");
+    expect(latex).toContain("\\question");
+    expect(latex).toContain("\\begin{solution}");
+    // exam declares its class environments via knownTheoremEnvironments (not amsthm).
+    expect(TEMPLATES.exam.knownTheoremEnvironments).toContain("questions");
+    expect(TEMPLATES.exam.knownTheoremEnvironments).toContain("solution");
+  });
+
+  it("engineering: article class, uses siunitx + circuitikz, renders circuit + units", () => {
+    expect(TEMPLATES.engineering.documentClass).toBe("article");
+    expect(TEMPLATES.engineering.packages).toContain("circuitikz");
+    expect(TEMPLATES.engineering.packages).toContain("siunitx");
+    const latex = renderTemplateLatex("engineering", "x");
+    expect(latex).toContain("\\documentclass{article}");
+    expect(latex).toContain("\\usepackage{circuitikz}");
+    expect(latex).toContain("\\begin{circuitikz}");
+    expect(latex).toContain("\\SI{");
+  });
+
+  it("letter: letter document class, renders opening/closing (no \\section/\\maketitle)", () => {
+    expect(TEMPLATES.letter.documentClass).toBe("letter");
+    const latex = renderTemplateLatex("letter", "x");
+    expect(latex).toContain("\\documentclass{letter}");
+    expect(latex).toContain("\\begin{letter}");
+    expect(latex).toContain("\\opening{");
+    expect(latex).toContain("\\closing{");
+    // A letter has no sectioning or title page.
+    expect(latex).not.toContain("\\section");
+    expect(latex).not.toContain("\\maketitle");
+  });
+
+  it("cv: plain article, self-laid-out (no moderncv / images / maketitle)", () => {
+    expect(TEMPLATES.cv.documentClass).toBe("article");
+    const latex = renderTemplateLatex("cv", "x");
+    expect(latex).toContain("\\documentclass{article}");
+    expect(latex).toContain("\\section*{");
+    // Self-laid-out: no title macro, no moderncv, no external image.
+    expect(latex).not.toContain("\\maketitle");
+    expect(latex).not.toContain("moderncv");
+    expect(latex).not.toContain("\\includegraphics");
   });
 
   it("slides: beamer class, renders titlepage frame + content frames", () => {

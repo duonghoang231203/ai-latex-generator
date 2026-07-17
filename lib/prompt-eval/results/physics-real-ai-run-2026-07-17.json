@@ -1,0 +1,827 @@
+{
+  "evalId": "eval-GAC-2026-07-17T09:19:33",
+  "results": {
+    "version": 3,
+    "timestamp": "2026-07-17T09:19:33.596Z",
+    "prompts": [
+      {
+        "id": "1e6bd1d5aab4bf787795c1f9955d1ac1cc90fa253cfff6883a3c44dd53037d25",
+        "raw": "{{description}}",
+        "label": "{{description}}",
+        "provider": "physics-real-ai",
+        "metrics": {
+          "score": 4,
+          "testPassCount": 4,
+          "testFailCount": 0,
+          "testErrorCount": 0,
+          "assertPassCount": 20,
+          "assertFailCount": 0,
+          "totalLatencyMs": 581697,
+          "tokenUsage": {
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "total": 0,
+            "numRequests": 4,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            },
+            "assertions": {
+              "total": 0,
+              "prompt": 0,
+              "completion": 0,
+              "cached": 0,
+              "numRequests": 0,
+              "completionDetails": {
+                "reasoning": 0,
+                "acceptedPrediction": 0,
+                "rejectedPrediction": 0,
+                "cacheReadInputTokens": 0,
+                "cacheCreationInputTokens": 0
+              }
+            }
+          },
+          "namedScores": {},
+          "namedScoresCount": {},
+          "namedScoreWeights": {},
+          "cost": 0
+        }
+      }
+    ],
+    "results": [
+      {
+        "cost": 0,
+        "gradingResult": {
+          "pass": true,
+          "score": 1,
+          "reason": "All assertions passed",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0
+          },
+          "componentResults": [
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "regex",
+                "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{article\\}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "regex",
+                "value": "\\\\usepackage(\\[[^\\]]*\\])?\\{siunitx\\}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "regex",
+                "value": "\\\\(SI|si|qty|num)\\{"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\end{document}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "validateLatex: OK — không có diagnostic.",
+              "assertion": {
+                "type": "javascript",
+                "value": "file://./scorers/validate-latex.ts"
+              }
+            }
+          ]
+        },
+        "id": "199d90f7-aec0-415e-8f49-58dca3a81f8d",
+        "latencyMs": 112700,
+        "namedScores": {},
+        "prompt": {
+          "raw": "Trình bày định luật II Newton, quan hệ giữa lực và gia tốc, kèm ví dụ số có đơn vị.",
+          "label": "{{description}}",
+          "config": {}
+        },
+        "promptId": "1e6bd1d5aab4bf787795c1f9955d1ac1cc90fa253cfff6883a3c44dd53037d25",
+        "promptIdx": 0,
+        "provider": {
+          "id": "physics-real-ai-provider",
+          "label": "physics-real-ai"
+        },
+        "response": {
+          "output": "\\documentclass[a4paper,12pt]{article}\n\\usepackage{geometry}\n\\usepackage{amsmath,amssymb}\n\\usepackage{bm}\n\\usepackage{siunitx}\n\\sisetup{per-mode=symbol}\n\\usepackage{tikz}\n\\usepackage{pgfplots}\n\\usepackage{float}\n\\usepackage{graphicx}\n\\usepackage{booktabs}\n\\usepackage{array}\n\\usepackage{caption}\n\\usepackage{hyperref}\n\n\\title{\\textbf{Định luật II Newton: Mối quan hệ giữa Lực và Gia tốc}}\n\\author{Nguyễn Văn A}\n\\date{\\today}\n\n\\begin{document}\n\n\\maketitle\n\n\\begin{abstract}\nBài viết này trình bày định luật II Newton – một trong ba định luật chuyển động của Newton, mô tả mối liên hệ định lượng giữa tổng hợp lực tác dụng lên một vật và gia tốc mà vật thu được. Công thức toán học của định luật được phân tích dưới dạng vector và từng thành phần, đồng thời nhấn mạnh vai trò của khối lượng như một đại lượng quán tính. Các đơn vị SI được sử dụng nhất quán thông qua gói lệnh \\texttt{siunitx}. Những ví dụ tính toán bằng số kèm đơn vị cụ thể cùng các hình vẽ minh họa bằng \\texttt{TikZ} giúp người đọc hiểu rõ bản chất vật lý và cách áp dụng định luật vào thực tế.\n\\end{abstract}\n\n\\section{Giới thiệu}\nCơ học Newton, được Isaac Newton công bố năm 1687 trong tác phẩm \\textit{Philosophi\\ae\\ Naturalis Principia Mathematica}, đã đặt nền móng cho vật lý cổ điển. Ba định luật chuyển động của Newton không chỉ giải thích các hiện tượng trên Trái Đất mà còn mô tả chính xác chuyển động của các thiên thể. Trong đó, định luật II đóng vai trò trung tâm vì nó thiết lập một phương trình định lượng giữa nguyên nhân (lực) và kết quả (gia tốc), cho phép dự đoán chuyển động của mọi vật thể khi biết lực tác dụng.\n\nTrước Newton, các nhà tự nhiên học như Galileo đã nhận thấy rằng một vật không chịu lực sẽ duy trì trạng thái chuyển động đều hoặc đứng yên, nhưng mối quan hệ giữa lực và sự thay đổi chuyển động chỉ được làm rõ với định luật II. Định luật này khẳng định rằng: lực tác dụng lên một vật tỉ lệ thuận với gia tốc mà vật thu được, và hệ số tỉ lệ chính là khối lượng quán tính của vật. Như vậy, cùng một lực tác dụng, vật có khối lượng càng lớn thì gia tốc càng nhỏ – đây chính là cơ sở của khái niệm quán tính.\n\nTrong bài viết này, chúng ta sẽ đi sâu vào các khía cạnh lý thuyết của định luật II, bao gồm phát biểu toán học, dạng vector, đơn vị đo, mối liên hệ với xung lượng và động lượng. Sau đó, các ví dụ số cụ thể kèm đơn vị SI và hình vẽ minh họa sẽ được trình bày để làm sáng tỏ nội dung lý thuyết.\n\n\\section{Lý thuyết}\n\\subsection{Phát biểu định luật}\nTheo Newton, ``sự biến thiên của động lượng của một vật tỉ lệ thuận với tổng hợp lực tác dụng lên vật đó và diễn ra theo hướng của tổng hợp lực''. Dạng động lượng của định luật là:\n\\begin{equation}\n  \\vec{F}_{\\text{net}} = \\frac{d\\vec{p}}{dt},\n  \\label{eq:dpdt}\n\\end{equation}\ntrong đó \\(\\vec{p} = m\\vec{v}\\) là vector động lượng của vật có khối lượng \\(m\\) chuyển động với vận tốc \\(\\vec{v}\\). Đối với hầu hết các bài toán trong cơ học cổ điển, khối lượng của vật được coi là không đổi, do đó:\n\\begin{equation}\n  \\frac{d\\vec{p}}{dt} = m\\frac{d\\vec{v}}{dt} = m\\vec{a}.\n\\end{equation}\nKết quả này cho ta dạng quen thuộc nhất của định luật II Newton:\n\\begin{equation}\n  \\boxed{\\vec{F}_{\\text{net}} = m\\vec{a}},\n  \\label{eq:fma}\n\\end{equation}\nvới \\(\\vec{a}\\) là vector gia tốc của vật. Công thức (\\ref{eq:fma}) cho thấy:\n\\begin{itemize}\n  \\item Vector lực tổng hợp \\(\\vec{F}_{\\text{net}}\\) và vector gia tốc \\(\\vec{a}\\) luôn cùng hướng.\n  \\item Độ lớn của gia tốc tỉ lệ thuận với độ lớn của tổng hợp lực: \\(a = F_{\\text{net}} / m\\) (khi \\(m\\) không đổi).\n  \\item Với cùng một lực, vật có khối lượng lớn hơn sẽ thu được gia tốc nhỏ hơn, tức là khối lượng đặc trưng cho mức quán tính của vật.\n\\end{itemize}\n\n\\subsection{Dạng vector và thành phần}\nTrong hệ tọa độ Descartes, vector lực và vector gia tốc được phân tích thành các thành phần:\n\\begin{align}\n  \\vec{F}_{\\text{net}} &= F_{x}\\,\\hat{\\mathbf{i}} + F_{y}\\,\\hat{\\mathbf{j}} + F_{z}\\,\\hat{\\mathbf{k}},\\\\\n  \\vec{a} &= a_{x}\\,\\hat{\\mathbf{i}} + a_{y}\\,\\hat{\\mathbf{j}} + a_{z}\\,\\hat{\\mathbf{k}}.\n\\end{align}\nPhương trình (\\ref{eq:fma}) tương đương với ba phương trình vô hướng:\n\\begin{align}\n  F_{x} &= m\\,a_{x}, \\nonumber\\\\\n  F_{y} &= m\\,a_{y}, \\label{eq:comp}\\\\\n  F_{z} &= m\\,a_{z}. \\nonumber\n\\end{align}\nNhư vậy, mỗi thành phần lực chỉ gây ra gia tốc theo phương tương ứng; đây là cơ sở để giải các bài toán va chạm, chuyển động trên mặt phẳng nghiêng, chuyển động trong trường lực phức tạp.\n\n\\subsection{Đơn vị và hằng số liên quan}\nTrong Hệ đơn vị quốc tế (SI), lực được đo bằng \\textbf{newton} (\\si{\\newton}). Quan hệ giữa newton và các đơn vị cơ bản được suy ra từ phương trình (\\ref{eq:fma}):\n\\begin{equation}\n  \\SI{1}{\\newton} = \\SI{1}{\\kilogram\\meter\\per\\second\\squared}.\n\\end{equation}\nKhối lượng đo bằng \\textbf{kilôgam} (\\si{\\kilogram}), gia tốc đo bằng \\si{\\meter\\per\\second\\squared}. Bên cạnh đó, trọng lực gần bề mặt Trái Đất cho một vật khối lượng \\(m\\) là:\n\\begin{equation*}\n  \\vec{F}_{g} = m\\vec{g}, \\quad \\text{với } g \\approx \\SI{9.81}{\\meter\\per\\second\\squared}.\n\\end{equation*}\nChính vì thế, trọng lượng của một vật có khối lượng \\SI{1}{\\kilogram} xấp xỉ \\SI{9.81}{\\newton}.\n\n\\subsection{Mối quan hệ xung – động lượng}\nTừ phương trình (\\ref{eq:dpdt}), lấy tích phân theo thời gian trong khoảng \\(\\Delta t = t_2 - t_1\\) ta nhận được định lý xung – động lượng:\n\\begin{equation}\n  \\vec{J} = \\int_{t_1}^{t_2} \\vec{F}_{\\text{net}}\\, dt = \\Delta \\vec{p} = \\vec{p}_2 - \\vec{p}_1,\n  \\label{eq:impulse}\n\\end{equation}\nvới \\(\\vec{J}\\) gọi là vector xung của lực. Đây là một dạng khác của định luật II Newton, rất hữu ích khi lực biến đổi phức tạp (va chạm, lực tiếp xúc trong thời gian ngắn). Trong trường hợp lực không đổi, \\(\\vec{J} = \\vec{F}_{\\text{net}} \\Delta t\\), và ta có \\( \\vec{F}_{\\text{net}} \\Delta t = m\\vec{v}_2 - m\\vec{v}_1\\).\n\n\\section{Ví dụ minh họa}\nĐể minh họa rõ ràng mối quan hệ giữa lực và gia tốc, ta xét một vài bài toán đơn giản có số liệu cụ thể. Tất cả các giá trị đều được biểu diễn kèm đơn vị SI bằng gói \\texttt{siunitx}.\n\n\\subsection{Ví dụ 1: Lực tác dụng lên một vật trên mặt phẳng ngang không ma sát}\nMột khối gỗ khối lượng \\(m = \\SI{2.0}{\\kilogram}\\) đang nằm yên trên mặt phẳng nằm ngang không ma sát. Một lực kéo không đổi hướng sang phải với độ lớn \\(F = \\SI{10.0}{\\newton}\\) được tác dụng. Bỏ qua các lực cản.\n\\begin{itemize}\n  \\item Tính gia tốc của khối gỗ.\n  \\item Xác định hướng của vector gia tốc.\n\\end{itemize}\n\n\\textbf{Lời giải:}\nTổng hợp lực theo phương ngang chính là lực kéo: \\(F_{\\text{net}} = F = \\SI{10.0}{\\newton}\\). Áp dụng định luật II Newton:\n\\begin{equation*}\n  a = \\frac{F_{\\text{net}}}{m} = \\frac{\\SI{10.0}{\\newton}}{\\SI{2.0}{\\kilogram}} = \\SI{5.0}{\\meter\\per\\second\\squared}.\n\\end{equation*}\nVector gia tốc cùng hướng với lực kéo, tức là hướng sang phải.\n\n\\begin{figure}[H]\n  \\centering\n  \\begin{tikzpicture}[scale=0.8]\n    \\draw[thick, fill=gray!20] (0,0) rectangle (3,1.5) node[midway] {\\large $m = \\SI{2.0}{\\kilogram}$};\n    \\draw[->, very thick, blue] (3,0.75) -- (6,0.75) node[above] {$\\vec{F} = \\SI{10.0}{\\newton}$};\n    \\draw[->, dashed, thick, red] (3,0.75) -- (7.5,0.75) node[above] {$\\vec{a} = \\SI{5.0}{\\meter\\per\\second\\squared}$};\n    \\filldraw (0,0) circle (2pt);\n    \\node at (0.5,-0.5) {mặt phẳng không ma sát};\n  \\end{tikzpicture}\n  \\caption{Lực kéo tác dụng lên khối gỗ (mũi tên xanh) và gia tốc thu được (mũi tên đỏ). Các vector cùng phương, cùng chiều.}\n  \\label{fig:vd1}\n\\end{figure}\n\n\\subsection{Ví dụ 2: Xe ô tô tăng tốc}\nMột chiếc ô tô có khối lượng \\(m = \\SI{1500}{\\kilogram}\\) đang đứng yên thì bắt đầu tăng tốc thẳng đều trên đường nằm ngang, sau \\(t = \\SI{8.0}{\\second}\\) đạt tốc độ \\(v = \\SI{100}{\\kilo\\meter\\per\\hour}\\). Giả thiết lực cản không đáng kể. Hãy xác định lực trung bình do động cơ cung cấp trong quá trình tăng tốc.\n\n\\textbf{Lời giải:}\nĐầu tiên đổi tốc độ về đơn vị mét trên giây:\n\\begin{equation*}\n  v = \\SI{100}{\\kilo\\meter\\per\\hour} = \\frac{100 \\times 1000}{3600}\\,\\si{\\meter\\per\\second} \\approx \\SI{27.8}{\\meter\\per\\second}.\n\\end{equation*}\nGia tốc trung bình (không đổi):\n\\begin{equation*}\n  a = \\frac{v - 0}{t} = \\frac{\\SI{27.8}{\\meter\\per\\second}}{\\SI{8.0}{\\second}} \\approx \\SI{3.475}{\\meter\\per\\second\\squared}.\n\\end{equation*}\nLực trung bình:\n\\begin{equation*}\n  F = m\\,a = \\SI{1500}{\\kilogram} \\times \\SI{3.475}{\\meter\\per\\second\\squared} = \\SI{5.21e3}{\\newton} \\; (\\text{làm tròn } \\SI{5.2e3}{\\newton}).\n\\end{equation*}\nVậy động cơ cần cung cấp một lực trung bình khoảng \\SI{5.2}{\\kilo\\newton} theo hướng chuyển động.\n\n\\subsection{Ví dụ 3: Hai lực đồng thời tác dụng}\nXét một vật nhỏ khối lượng \\(m = \\SI{1.0}{\\kilogram}\\) chịu đồng thời hai lực nằm ngang: \\(\\vec{F}_1 = \\SI{5.0}{\\newton}\\) hướng Đông, \\(\\vec{F}_2 = \\SI{3.0}{\\newton}\\) hướng Tây (hình~\\ref{fig:vd2}). Tìm vectơ tổng hợp lực và vectơ gia tốc của vật.\n\n\\begin{figure}[H]\n  \\centering\n  \\begin{tikzpicture}[scale=0.9]\n    \\draw[thick, fill=gray!20] (0,0) rectangle (2,1.5) node[midway] {vật};\n    % East force\n    \\draw[->, very thick, blue] (2,0.75) -- (5.5,0.75) node[midway, above] {$\\vec{F}_1 = \\SI{5.0}{\\newton}$ (Đông)};\n    % West force\n    \\draw[<-, very thick, orange] (0,0.75) -- (-2.5,0.75) node[midway, above] {$\\vec{F}_2 = \\SI{3.0}{\\newton}$ (Tây)};\n    % Net force\n    \\draw[->, dashed, very thick, red] (2,0.75) -- (4,0.75) node[above right] {$\\vec{F}_{\\text{net}} = \\SI{2.0}{\\newton}$ Đông};\n    \\node at (1,2.2) {$m = \\SI{1.0}{\\kilogram}$};\n  \\end{tikzpicture}\n  \\caption{Hai lực ngược chiều tác dụng lên vật. Lực tổng hợp hướng về phía lực lớn hơn.}\n  \\label{fig:vd2}\n\\end{figure}\n\n\\textbf{Lời giải:}\nChọn chiều dương là hướng Đông. Khi đó:\n\\begin{align*}\n  F_{\\text{net}} &= F_1 + ( -F_2 ) = \\SI{5.0}{\\newton} - \\SI{3.0}{\\newton} = \\SI{2.0}{\\newton} \\quad \\text{(hướng Đông)}.\n\\end{align*}\nĐộ lớn gia tốc:\n\\begin{equation*}\n  a = \\frac{F_{\\text{net}}}{m} = \\frac{\\SI{2.0}{\\newton}}{\\SI{1.0}{\\kilogram}} = \\SI{2.0}{\\meter\\per\\second\\squared}.\n\\end{equation*}\nVậy \\(\\vec{a} = \\SI{2.0}{\\meter\\per\\second\\squared}\\) hướng Đông.\n\n\\subsection{Minh họa quan hệ tuyến tính giữa lực và gia tốc}\nTheo phương trình \\eqref{eq:fma}, khi giữ khối lượng không đổi, lực tỉ lệ thuận với gia tốc. Hình~\\ref{fig:linear} là đồ thị \\(F(a)\\) cho một vật có khối lượng \\(m = \\SI{2.0}{\\kilogram}\\). Đường thẳng đi qua gốc tọa độ khẳng định tính chất tuyến tính này.\n\n\\begin{figure}[H]\n  \\centering\n  \\begin{tikzpicture}\n    \\begin{axis}[\n        xlabel={Gia tốc \\(a\\) (\\si{\\meter\\per\\second\\squared})},\n        ylabel={Lực \\(F\\) (\\si{\\newton})},\n        xmin=0, xmax=8,\n        ymin=0, ymax=16,\n        grid=major,\n        legend pos=north west,\n        width=0.65\\linewidth,\n        height=0.5\\linewidth,\n        axis lines=middle,\n        xlabel near end,\n        ylabel near end\n      ]\n      \\addplot[domain=0:8, thick, blue] {2*x};\n      \\addlegendentry{\\(F = m a\\) với \\(m = \\SI{2.0}{\\kilogram}\\)};\n    \\end{axis}\n  \\end{tikzpicture}\n  \\caption{Quan hệ tuyến tính giữa lực và gia tốc khi khối lượng không đổi. Độ dốc của đường thẳng chính là khối lượng của vật.}\n  \\label{fig:linear}\n\\end{figure}\n\n\\section{Kết luận}\nĐịnh luật II Newton cung cấp cho chúng ta một trong những công thức quan trọng nhất trong vật lý: \\(\\vec{F}_{\\text{net}} = m\\vec{a}\\). Từ phát biểu này, ta có thể định lượng chính xác mối quan hệ giữa lực và gia tốc, thấy rõ vai trò của khối lượng như đại lượng quán tính cản trở sự thay đổi chuyển động. Dạng động lượng \\(\\vec{F}_{\\text{net}} = d\\vec{p}/dt\\) là tổng quát hơn và mở rộng sang các bài toán có khối lượng biến đổi (phản lực tên lửa) hay lực phụ thuộc thời gian.\n\nCác ví dụ tính toán với số liệu cụ thể và hình vẽ minh họa đã chứng tỏ rằng việc áp dụng định luật rất đơn giản nhưng cực kỳ hữu ích: chỉ cần biết tổng hợp lực và khối lượng là có thể tính được gia tốc, và ngược lại. Trong mọi phép tính, sự nhất quán của đơn vị là điều bắt buộc; vì vậy việc sử dụng hệ SI cùng công cụ như \\texttt{siunitx} giúp tránh sai sót và thể hiện kết quả một cách chuyên nghiệp.\n\nHiểu sâu sắc định luật II Newton là chìa khóa để bước vào thế giới cơ học cổ điển, từ phân tích chuyển động của viên đạn, con lắc, đến chuyển động của các hành tinh. Nó cũng là nền tảng để xây dựng động lực học cho vật rắn và các hệ phức tạp hơn.\n\n\\begin{thebibliography}{9}\n\\bibitem{newton}\n  I. Newton, \\textit{Philosophi\\ae\\ Naturalis Principia Mathematica}, Londini, 1687.\n\\bibitem{serway}\n  R. A. Serway và J. W. Jewett, \\textit{Physics for Scientists and Engineers}, 9th ed., Brooks/Cole, 2014.\n\\bibitem{haliday}\n  D. Halliday, R. Resnick và J. Walker, \\textit{Fundamentals of Physics}, 10th ed., Wiley, 2014.\n\\end{thebibliography}\n\n\\end{document}\n",
+          "metadata": {
+            "finishReason": "stop",
+            "rawFinishReason": "end_turn",
+            "usage": {
+              "inputTokens": 1217,
+              "outputTokens": 7546,
+              "totalTokens": 8763
+            }
+          }
+        },
+        "score": 1,
+        "success": true,
+        "testCase": {
+          "description": "newton-dynamics — định luật II Newton (lực & gia tốc, có đơn vị)",
+          "vars": {
+            "templateId": "physics",
+            "description": "Trình bày định luật II Newton, quan hệ giữa lực và gia tốc, kèm ví dụ số có đơn vị."
+          },
+          "assert": [
+            {
+              "type": "regex",
+              "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{article\\}"
+            },
+            {
+              "type": "regex",
+              "value": "\\\\usepackage(\\[[^\\]]*\\])?\\{siunitx\\}"
+            },
+            {
+              "type": "regex",
+              "value": "\\\\(SI|si|qty|num)\\{"
+            },
+            {
+              "type": "contains",
+              "value": "\\end{document}"
+            },
+            {
+              "type": "javascript",
+              "value": "file://./scorers/validate-latex.ts"
+            }
+          ],
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 0,
+        "tokenUsage": {
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "total": 0,
+          "numRequests": 1,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          },
+          "assertions": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          }
+        },
+        "vars": {
+          "templateId": "physics",
+          "description": "Trình bày định luật II Newton, quan hệ giữa lực và gia tốc, kèm ví dụ số có đơn vị."
+        },
+        "metadata": {
+          "finishReason": "stop",
+          "rawFinishReason": "end_turn",
+          "usage": {
+            "inputTokens": 1217,
+            "outputTokens": 7546,
+            "totalTokens": 8763
+          },
+          "_promptfooFileMetadata": {}
+        },
+        "failureReason": 0
+      },
+      {
+        "cost": 0,
+        "gradingResult": {
+          "pass": true,
+          "score": 1,
+          "reason": "All assertions passed",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0
+          },
+          "componentResults": [
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "regex",
+                "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{article\\}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "regex",
+                "value": "\\\\usepackage(\\[[^\\]]*\\])?\\{siunitx\\}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "regex",
+                "value": "\\\\(SI|si|qty|num)\\{"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\end{document}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "validateLatex: OK — không có diagnostic.",
+              "assertion": {
+                "type": "javascript",
+                "value": "file://./scorers/validate-latex.ts"
+              }
+            }
+          ]
+        },
+        "id": "6513e17b-bf9a-40c6-9700-1e212fac8e51",
+        "latencyMs": 115376,
+        "namedScores": {},
+        "prompt": {
+          "raw": "Viết tài liệu về chuyển động thẳng biến đổi đều: vận tốc, gia tốc, quãng đường.",
+          "label": "{{description}}",
+          "config": {}
+        },
+        "promptId": "1e6bd1d5aab4bf787795c1f9955d1ac1cc90fa253cfff6883a3c44dd53037d25",
+        "promptIdx": 0,
+        "provider": {
+          "id": "physics-real-ai-provider",
+          "label": "physics-real-ai"
+        },
+        "response": {
+          "output": "\\documentclass[a4paper,12pt]{article}\n\n% Encoding and fonts (XeLaTeX)\n\\usepackage{fontspec}\n\n% Page geometry\n\\usepackage{geometry}\n\\geometry{left=2.5cm,right=2.5cm,top=2cm,bottom=2cm}\n\n% Mathematics and symbols\n\\usepackage{amsmath,amssymb}\n\\usepackage{bm}\n\n% Physics units\n\\usepackage{siunitx}\n\n% Graphics and diagrams\n\\usepackage{graphicx}\n\\usepackage{xcolor}\n\\usepackage{tikz,pgfplots}\n\\pgfplotsset{compat=1.18}\n\\usepackage{float}\n\n% Tables\n\\usepackage{booktabs,array}\n\n% Hyperlinks\n\\usepackage{hyperref}\n\n\\begin{document}\n\n\\title{\\bfseries Chuyển động thẳng biến đổi đều: \\\\ Vận tốc, Gia tốc và Quãng đường}\n\\author{Nguyễn Văn A}\n\\date{\\today}\n\\maketitle\n\n\\begin{abstract}\nChuyển động thẳng biến đổi đều là một trong những dạng chuyển động cơ bản nhất của cơ học cổ điển. Đặc trưng của nó là quỹ đạo thẳng và gia tốc không đổi theo thời gian. Tài liệu này trình bày một cách hệ thống các khái niệm vận tốc tức thời, vận tốc trung bình, gia tốc; xây dựng các phương trình động học cho vận tốc, quãng đường và tọa độ; phân tích mối liên hệ giữa dấu của gia tốc và tính chất nhanh dần đều hay chậm dần đều. Các đồ thị chuyển động ($v$--$t$ và $x$--$t$) được vẽ bằng \\texttt{pgfplots}, minh họa trực quan sự biến thiên của các đại lượng. Những ví dụ bằng số và bảng số liệu giúp người đọc áp dụng công thức một cách thành thạo. Toàn bộ kết quả được trình bày trong hệ đơn vị SI và sử dụng kí hiệu toán học chuẩn của vật lí.\n\\end{abstract}\n\n\\section{Mở đầu}\nTrong đời sống hằng ngày, ta bắt gặp rất nhiều chuyển động mà vận tốc thay đổi đều đặn theo thời gian: một chiếc ô tô rời khỏi đèn đỏ, một đoàn tàu bắt đầu chạy hay một vật rơi tự do (bỏ qua sức cản của không khí) đều có thể được mô tả gần đúng bằng \\textbf{chuyển động thẳng biến đổi đều}. Đây là dạng chuyển động đơn giản nhất sau chuyển động thẳng đều, giữ vai trò nền tảng trong chương trình vật lí phổ thông cũng như trong nhiều ứng dụng kĩ thuật.\n\nChuyển động thẳng biến đổi đều có hai đặc trưng cơ bản: \\textit{quỹ đạo là một đường thẳng} và \\textit{gia tốc tức thời không đổi} (cả về độ lớn lẫn hướng). Nhờ hai tính chất này, hệ phương trình động học trở thành tuyến tính hoặc bậc hai theo thời gian, cho phép giải quyết dễ dàng các bài toán thực tiễn. Tài liệu này tổng hợp toàn bộ lí thuyết, công thức, cách vẽ đồ thị và các ví dụ minh họa để người học có thể nắm vững chủ đề một cách có hệ thống. Tất cả các đại lượng đều được biểu diễn trong hệ SI với sự hỗ trợ của gói \\texttt{siunitx} nhằm tránh những sai sót khi viết đơn vị.\n\n\\section{Các đại lượng vật lí cơ bản}\n\n\\subsection{Vận tốc}\nXét một chất điểm chuyển động trên trục $Ox$. Vị trí của nó tại thời điểm $t$ được xác định bởi tọa độ $x(t)$. \\textbf{Vận tốc trung bình} trong khoảng thời gian $\\Delta t = t_2 - t_1$ được định nghĩa là\n\\begin{equation}\nv_{\\text{tb}} = \\frac{\\Delta x}{\\Delta t} = \\frac{x(t_2) - x(t_1)}{t_2 - t_1}.\n\\end{equation}\nKhi $\\Delta t$ tiến đến $0$, vận tốc trung bình tiến đến \\textbf{vận tốc tức thời}:\n\\begin{equation}\nv(t) = \\lim_{\\Delta t \\to 0} \\frac{\\Delta x}{\\Delta t} = \\frac{dx}{dt}.\n\\end{equation}\nTrong chuyển động thẳng, vận tốc là một đại lượng vectơ, kí hiệu $\\vec{v}$, nhưng khi xét trên một trục tọa độ ta chỉ cần làm việc với giá trị đại số $v$, có thể mang dấu dương hoặc âm tùy theo chiều chuyển động. Độ lớn của vận tốc $|v|$ chính là tốc độ.\n\n\\subsection{Gia tốc}\nGia tốc tức thời đặc trưng cho sự biến thiên của vận tốc:\n\\begin{equation}\n\\vec{a} = \\frac{d\\vec{v}}{dt}.\n\\end{equation}\nĐối với chuyển động thẳng biến đổi đều, $\\vec{a}$ không đổi về cả hướng và độ lớn. Trên một trục, ta có:\n\\begin{equation}\na = \\frac{\\Delta v}{\\Delta t} = \\text{hằng số}.\n\\end{equation}\nĐơn vị của gia tốc trong hệ SI là mét trên giây bình phương: \\si{\\meter\\per\\second\\squared}. Ví dụ, gia tốc trọng trường tiêu chuẩn có giá trị $g \\approx \\SI{9.81}{\\meter\\per\\second\\squared}$.\n\n\\section{Các phương trình chuyển động}\n\nGiả sử tại thời điểm ban đầu $t_0 = 0$, chất điểm có tọa độ $x_0$, vận tốc $v_0$ và chịu một gia tốc $a$ không đổi. Từ định nghĩa của gia tốc, ta tích phân để thu được các phương trình động học.\n\n\\subsection{Phương trình vận tốc}\nVì $a = \\dfrac{dv}{dt}$ không đổi, tích phân cho\n\\begin{equation}\nv(t) = v_0 + a t.\n\\end{equation}\nCông thức (4) cho biết vận tốc biến thiên tuyến tính theo thời gian. Nếu $a > 0$ và cùng dấu với $v_0$, vật chuyển động nhanh dần đều; nếu $a$ trái dấu với $v_0$, vật chuyển động chậm dần đều.\n\n\\subsection{Phương trình quãng đường}\nQuãng đường $s$ đi được là độ dài đoạn đường mà chất điểm vạch ra trong một khoảng thời gian. Trong chuyển động thẳng không đổi chiều, quãng đường trùng với độ lớn của độ dời $\\Delta x$. Với $x_0 = 0$ và $v_0$, $a$ tùy ý, quãng đường đi được sau thời gian $t$ là\n\\begin{equation}\ns = v_0 t + \\frac{1}{2} a t^{2}.\n\\end{equation}\nKhi $v_0 = 0$, $s = \\frac{1}{2} a t^{2}$, thể hiện rằng quãng đường tăng tỉ lệ với bình phương thời gian.\n\n\\subsection{Phương trình tọa độ}\nChọn trục $Ox$, gốc tọa độ tại một điểm quy chiếu. Phương trình chuyển động (phương trình tọa độ) là\n\\begin{equation}\nx(t) = x_0 + v_0 t + \\frac{1}{2} a t^{2}.\n\\end{equation}\nĐây là một hàm bậc hai theo $t$, mô tả một parabol khi vẽ đồ thị $x$--$t$.\n\n\\subsection{Hệ thức độc lập thời gian}\nTừ (4) suy ra $t = \\frac{v - v_0}{a}$, thế vào (5) ta được hệ thức không chứa thời gian:\n\\begin{equation}\nv^{2} - v_0^{2} = 2 a s.\n\\end{equation}\nHệ thức này rất hữu ích khi biết ba trong bốn đại lượng $v_0$, $v$, $a$, $s$ và cần tìm đại lượng còn lại mà không cần tính $t$.\n\n\\subsection{Dấu của gia tốc và tính chất chuyển động}\nTrong thực hành, dấu của $a$ so với dấu của $v_0$ quyết định vật đang tăng tốc hay giảm tốc:\n\\begin{itemize}\n\\item $a \\cdot v_0 > 0$: chuyển động \\textbf{nhanh dần đều} (tốc độ tăng).\n\\item $a \\cdot v_0 < 0$: chuyển động \\textbf{chậm dần đều} (tốc độ giảm).\n\\end{itemize}\nVí dụ, một ô tô đang chạy với vận tốc $v_0 = \\SI{20}{\\meter\\per\\second}$ theo chiều dương, nếu gia tốc $a = \\SI{2}{\\meter\\per\\second\\squared}$ (cùng dấu) thì xe nhanh dần đều; nếu $a = \\SI{-2}{\\meter\\per\\second\\squared}$ (trái dấu) thì xe chậm dần đều cho đến khi dừng hẳn.\n\n\\section{Đồ thị chuyển động}\n\\subsection{Đồ thị vận tốc – thời gian}\nĐồ thị biểu diễn phương trình (4) là một đường thẳng. Hệ số góc của đường thẳng đó chính là gia tốc $a$, còn giao điểm với trục tung là vận tốc ban đầu $v_0$.\n\\begin{figure}[H]\n\\centering\n\\begin{tikzpicture}\n\\begin{axis}[\n    xlabel={$t$ (\\si{\\second})},\n    ylabel={$v$ (\\si{\\meter\\per\\second})},\n    grid=major,\n    width=12cm,\n    height=6cm,\n    domain=0:10,\n    samples=100,\n    xmin=0, xmax=10,\n    ymin=0, ymax=25,\n    legend pos=north west,\n    legend cell align={left}\n]\n\\addplot[blue, thick] {2 + 2*x};\n\\addlegendentry{$v = 2 + 2t$ (nhanh dần đều)}\n\\addplot[red, thick, dashed] {20 - 2*x};\n\\addlegendentry{$v = 20 - 2t$ (chậm dần đều)}\n\\end{axis}\n\\end{tikzpicture}\n\\caption{Đồ thị vận tốc – thời gian của hai chuyển động thẳng biến đổi đều. Đường màu xanh: $v_0 = 2\\,\\text{m/s}$, $a = 2\\,\\text{m/s}^2$ (nhanh dần đều). Đường màu đỏ: $v_0 = 20\\,\\text{m/s}$, $a = -2\\,\\text{m/s}^2$ (chậm dần đều).}\n\\label{fig:vt}\n\\end{figure}\n\nHình~\\ref{fig:vt} minh họa rõ ràng rằng khi $a > 0$, đồ thị dốc lên; khi $a < 0$, đồ thị dốc xuống. Diện tích giới hạn bởi đường thẳng và trục thời gian trong một khoảng $[0,t]$ chính là quãng đường đi được.\n\n\\subsection{Đồ thị tọa độ – thời gian}\nPhương trình tọa độ (6) là một hàm bậc hai. Nếu $a > 0$, parabol có bề lõm hướng lên; nếu $a < 0$, bề lõm hướng xuống.\n\\begin{figure}[H]\n\\centering\n\\begin{tikzpicture}\n\\begin{axis}[\n    xlabel={$t$ (\\si{\\second})},\n    ylabel={$x$ (\\si{\\meter})},\n    grid=major,\n    width=12cm,\n    height=7cm,\n    domain=0:10,\n    samples=100,\n    xmin=0, xmax=10,\n    ymin=0, ymax=110,\n    legend pos=north west,\n    legend cell align={left}\n]\n\\addplot[blue, thick] {0 + 2*x + 0.5*2*x^2};\n\\addlegendentry{$x = 2t + t^2$ ($a = 2\\,\\text{m/s}^2$)}\n\\addplot[red, thick, dashed] {10 + 0 + 0.5*(-1)*x^2};\n\\addlegendentry{$x = 10 - 0.5t^2$ ($a = -1\\,\\text{m/s}^2$, $v_0 = 0$)}\n\\end{axis}\n\\end{tikzpicture}\n\\caption{Đồ thị tọa độ – thời gian của hai chuyển động. Đường xanh: $v_0 = 2\\,\\text{m/s}$, $a = 2\\,\\text{m/s}^2$, parabol lõm lên. Đường đỏ: $v_0 = 0$, $a = -1\\,\\text{m/s}^2$, parabol lõm xuống.}\n\\label{fig:xt}\n\\end{figure}\n\n\\section{Ví dụ minh họa và bảng số liệu}\n\n\\subsection{Ví dụ 1: Ô tô bắt đầu chuyển động}\nMột chiếc ô tô khởi hành từ trạng thái nghỉ ($v_0 = 0$) và chuyển động thẳng nhanh dần đều với gia tốc $a = \\SI{2}{\\meter\\per\\second\\squared}$. Yêu cầu:\n\\begin{enumerate}\n    \\item Tính vận tốc của xe sau $t = \\SI{5}{\\second}$.\n    \\item Tính quãng đường xe đi được trong $5$ giây đó.\n    \\item Xác định thời điểm xe đạt vận tốc $\\SI{72}{\\kilo\\meter\\per\\hour}$.\n\\end{enumerate}\n\n\\textbf{Giải:}\n\\begin{itemize}\n    \\item Vận tốc sau $5$ s: $v = 0 + 2 \\times 5 = \\SI{10}{\\meter\\per\\second}$.\n    \\item Quãng đường: $s = 0\\cdot 5 + \\frac{1}{2}\\cdot 2 \\cdot 5^2 = \\SI{25}{\\meter}$.\n    \\item Đổi $\\SI{72}{\\kilo\\meter\\per\\hour} = \\SI{20}{\\meter\\per\\second}$. Từ $v = a t \\Rightarrow t = \\frac{20}{2} = \\SI{10}{\\second}$.\n\\end{itemize}\n\n\\subsection{Ví dụ 2: Đoàn tàu giảm tốc}\nMột đoàn tàu đang chạy với vận tốc $v_0 = \\SI{30}{\\meter\\per\\second}$ thì hãm phanh, chuyển động chậm dần đều với gia tốc có độ lớn $|a| = \\SI{0.75}{\\meter\\per\\second\\squared}$. Tính quãng đường tàu đi được cho đến khi dừng hẳn.\n\nÁp dụng công thức độc lập thời gian với $v = 0$, $a = -\\SI{0.75}{\\meter\\per\\second\\squared}$:\n\\[\n0 - 30^2 = 2 \\times (-0.75) \\times s \\;\\Longrightarrow\\; s = \\frac{900}{1.5} = \\SI{600}{\\meter}.\n\\]\n\n\\subsection{Bảng số liệu vận tốc – thời gian}\nBảng~\\ref{tab:solieu} liệt kê các giá trị vận tốc và quãng đường của một vật chuyển động thẳng nhanh dần đều với $v_0 = \\SI{2}{\\meter\\per\\second}$, $a = \\SI{3}{\\meter\\per\\second\\squared}$, giúp kiểm tra tính hợp lí của các công thức.\n\n\\begin{table}[H]\n\\centering\n\\caption{Bảng giá trị vận tốc và quãng đường \\\\ ($v_0 = \\SI{2}{\\meter\\per\\second}$, $a = \\SI{3}{\\meter\\per\\second\\squared}$)}\n\\label{tab:solieu}\n\\begin{tabular}{c c c c}\n\\toprule\n$t$ (\\si{\\second}) & $v = v_0 + a t$ (\\si{\\meter\\per\\second}) & $s = v_0 t + \\frac{1}{2} a t^2$ (\\si{\\meter}) & $x$ (chọn $x_0=0$) (\\si{\\meter}) \\\\\n\\midrule\n0 & 2,0 & 0,0 & 0,0 \\\\\n1 & 5,0 & 3,5 & 3,5 \\\\\n2 & 8,0 & 10,0 & 10,0 \\\\\n3 & 11,0 & 19,5 & 19,5 \\\\\n4 & 14,0 & 32,0 & 32,0 \\\\\n5 & 17,0 & 47,5 & 47,5 \\\\\n6 & 20,0 & 66,0 & 66,0 \\\\\n\\bottomrule\n\\end{tabular}\n\\end{table}\n\nTừ bảng ta thấy quãng đường tăng nhanh dần, phù hợp với quy luật bậc hai. Đồng thời, vận tốc tăng tuyến tính mỗi giây đúng bằng $\\SI{3}{\\meter\\per\\second}$.\n\n\\section{Kết luận}\nChuyển động thẳng biến đổi đều được mô tả trọn vẹn bởi ba phương trình cơ bản:\n\\begin{align}\nv &= v_0 + a t \\label{eq:v}\\\\\ns &= v_0 t + \\frac{1}{2} a t^2 \\label{eq:s}\\\\\nv^2 - v_0^2 &= 2 a s \\label{eq:vv}\n\\end{align}\nvà phương trình tọa độ $x = x_0 + v_0 t + \\frac{1}{2} a t^2$. Các đại lượng liên quan (vận tốc, gia tốc, quãng đường) luôn được biểu thị bằng đơn vị SI thông qua gói \\texttt{siunitx}, đảm bảo tính chính xác và thống nhất. Đồ thị $v$--$t$ là đường thẳng có hệ số góc bằng gia tốc, đồ thị $x$--$t$ là một parabol – những hình ảnh trực quan giúp người học nắm bắt bản chất của chuyển động.\n\nKhi giải bài tập, cần chú ý chọn hệ quy chiếu phù hợp (gốc tọa độ, chiều dương, gốc thời gian) để xác định đúng dấu của $v_0$ và $a$. Với các bài toán có sự tham gia của lực (định luật II Newton), vectơ gia tốc $\\vec{a}$ được tính từ $\\vec{F} = m\\bm{a}$, từ đó áp dụng các công thức động học đã nêu. Tài liệu này đóng vai trò như một bản tóm tắt lí thuyết và thực hành, giúp bạn đọc tự tin vận dụng kiến thức vào các tình huống cụ thể.\n\n\\begin{thebibliography}{9}\n\\bibitem{vatly10} Bộ Giáo dục và Đào tạo (2018). \\emph{Vật lí 10}. Nhà xuất bản Giáo dục Việt Nam.\n\\bibitem{haliday} Halliday, D., Resnick, R., \\& Walker, J. (2014). \\emph{Fundamentals of Physics} (10th ed.). Wiley.\n\\bibitem{serway} Serway, R. A. \\& Jewett, J. W. (2018). \\emph{Physics for Scientists and Engineers} (10th ed.). Cengage Learning.\n\\end{thebibliography}\n\n\\end{document}\n",
+          "metadata": {
+            "finishReason": "stop",
+            "rawFinishReason": "end_turn",
+            "usage": {
+              "inputTokens": 1216,
+              "outputTokens": 8078,
+              "totalTokens": 9294
+            }
+          }
+        },
+        "score": 1,
+        "success": true,
+        "testCase": {
+          "description": "kinematics — chuyển động thẳng biến đổi đều",
+          "vars": {
+            "templateId": "physics",
+            "description": "Viết tài liệu về chuyển động thẳng biến đổi đều: vận tốc, gia tốc, quãng đường."
+          },
+          "assert": [
+            {
+              "type": "regex",
+              "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{article\\}"
+            },
+            {
+              "type": "regex",
+              "value": "\\\\usepackage(\\[[^\\]]*\\])?\\{siunitx\\}"
+            },
+            {
+              "type": "regex",
+              "value": "\\\\(SI|si|qty|num)\\{"
+            },
+            {
+              "type": "contains",
+              "value": "\\end{document}"
+            },
+            {
+              "type": "javascript",
+              "value": "file://./scorers/validate-latex.ts"
+            }
+          ],
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 1,
+        "tokenUsage": {
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "total": 0,
+          "numRequests": 1,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          },
+          "assertions": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          }
+        },
+        "vars": {
+          "templateId": "physics",
+          "description": "Viết tài liệu về chuyển động thẳng biến đổi đều: vận tốc, gia tốc, quãng đường."
+        },
+        "metadata": {
+          "finishReason": "stop",
+          "rawFinishReason": "end_turn",
+          "usage": {
+            "inputTokens": 1216,
+            "outputTokens": 8078,
+            "totalTokens": 9294
+          },
+          "_promptfooFileMetadata": {}
+        },
+        "failureReason": 0
+      },
+      {
+        "cost": 0,
+        "gradingResult": {
+          "pass": true,
+          "score": 1,
+          "reason": "All assertions passed",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0
+          },
+          "componentResults": [
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "regex",
+                "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{article\\}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "regex",
+                "value": "\\\\usepackage(\\[[^\\]]*\\])?\\{siunitx\\}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "regex",
+                "value": "\\\\(SI|si|qty|num)\\{"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\end{document}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "validateLatex: OK — không có diagnostic.",
+              "assertion": {
+                "type": "javascript",
+                "value": "file://./scorers/validate-latex.ts"
+              }
+            }
+          ]
+        },
+        "id": "060df08a-25ef-4afd-ae2e-7d44f6ce68b3",
+        "latencyMs": 242580,
+        "namedScores": {},
+        "prompt": {
+          "raw": "Giải thích điện trường của một điện tích điểm, dùng ký hiệu vector và định luật Coulomb.",
+          "label": "{{description}}",
+          "config": {}
+        },
+        "promptId": "1e6bd1d5aab4bf787795c1f9955d1ac1cc90fa253cfff6883a3c44dd53037d25",
+        "promptIdx": 0,
+        "provider": {
+          "id": "physics-real-ai-provider",
+          "label": "physics-real-ai"
+        },
+        "response": {
+          "output": "\\documentclass[12pt,a4paper]{article}\n\n% === Packages ===\n\\usepackage{geometry}\n\\geometry{margin=2.5cm}\n\\usepackage{amsmath,amssymb}\n\\usepackage{siunitx}\n\\sisetup{per-mode=symbol,detect-all}\n\\usepackage{bm}\n\\usepackage{graphicx}\n\\usepackage{hyperref}\n\\hypersetup{colorlinks=true,linkcolor=blue!60!black,citecolor=blue!60!black,urlcolor=blue!60!black}\n\\usepackage{xcolor}\n\\usepackage{tikz}\n\\usepackage{pgfplots}\n\\pgfplotsset{compat=1.18}\n\\usepackage{booktabs}\n\\usepackage{array}\n\\usepackage{float}\n\\usepackage{caption}\n\\usepackage{fontspec}\n\n% === Title & Author ===\n\\title{\\textbf{Điện Trường của Điện Tích Điểm}\\\\[4pt]\n\\large Định Luật Coulomb và Biểu Diễn Vector}\n\\author{Nguyễn Văn A\\\\[2pt] \\small Khoa Vật Lý, Đại học Khoa học Tự nhiên}\n\\date{\\today}\n\n\\begin{document}\n\n\\maketitle\n\n\\begin{abstract}\nBài viết này trình bày khái niệm điện trường của một điện tích điểm dựa trên nền tảng của định luật Coulomb. Chúng tôi sử dụng ký hiệu vector một cách nhất quán để mô tả lực tĩnh điện và cường độ điện trường. Các đại lượng vật lý được biểu diễn bằng hệ đơn vị SI thông qua gói \\texttt{siunitx} nhằm đảm bảo tính chính xác và chuyên nghiệp. Bài báo bao gồm phần lý thuyết cơ bản, nguyên lý chồng chất, các ví dụ minh họa bằng số, hình vẽ sơ đồ trường vector bằng TikZ, và một số ứng dụng thực tiễn của điện trường tĩnh.\n\\end{abstract}\n\n% =============================================\n\\section{Giới thiệu}\n% =============================================\nTương tác điện là một trong bốn tương tác cơ bản trong tự nhiên. Ngay từ thời cổ đại, con người đã quan sát thấy hiện tượng hổ phách sau khi cọ xát có thể hút các vật nhẹ. Tuy nhiên, phải đến cuối thế kỷ XVIII, Charles-Augustin de Coulomb mới tiến hành các thí nghiệm với cân xoắn và phát biểu định luật mang tên ông – định luật Coulomb – mô tả định lượng lực tương tác giữa hai điện tích điểm.\n\nĐể giải thích cơ chế lan truyền tương tác điện qua không gian, Michael Faraday đưa ra khái niệm \\textbf{điện trường}. Theo đó, một điện tích bất kỳ sẽ tạo ra xung quanh nó một trường vector. Khi một điện tích khác được đặt vào vùng không gian đó, nó sẽ chịu tác dụng của lực điện thông qua trường này. Điện trường là một công cụ toán học mạnh mẽ, cho phép chúng ta nghiên cứu các hệ điện tích phức tạp một cách thuận lợi, đặc biệt là sau khi James Clerk Maxwell phát triển thành công lý thuyết điện từ trường thống nhất.\n\nTrong phạm vi bài báo này, chúng tôi tập trung vào \\textbf{điện trường của một điện tích điểm đứng yên}, xem xét kỹ lưỡng biểu thức vector của định luật Coulomb và cách thức xây dựng vector cường độ điện trường. Toàn bộ phân tích sử dụng hệ đơn vị SI và các ký hiệu toán học chuẩn mực.\n\n% =============================================\n\\section{Lý thuyết}\n% =============================================\n\n\\subsection{Điện tích điểm và định luật Coulomb}\nMột \\textbf{điện tích điểm} là một vật thể mang điện có kích thước rất nhỏ so với khoảng cách đang xét, do đó có thể coi như toàn bộ điện tích của nó tập trung tại một điểm hình học. Đây là mô hình lý tưởng hóa nhưng cực kỳ hữu ích trong vật lý.\n\nXét hai điện tích điểm \\(q_1\\) và \\(q_2\\) đặt cách nhau một khoảng \\(r\\) trong chân không. Theo \\textbf{định luật Coulomb}, độ lớn của lực điện do \\(q_1\\) tác dụng lên \\(q_2\\) (và ngược lại) được cho bởi:\n\\begin{equation}\\label{eq:coulomb_mag}\nF = k\\,\\frac{|q_1 q_2|}{r^2},\n\\end{equation}\ntrong đó \\(k\\) là hằng số Coulomb. Trong hệ SI, hằng số này liên hệ với hằng số điện môi của chân không \\(\\varepsilon_0\\) theo công thức:\n\\begin{equation}\nk = \\frac{1}{4\\pi\\varepsilon_0} \\approx \\SI{8.987551787e9}{\\newton\\meter\\squared\\per\\coulomb\\squared}.\n\\end{equation}\nĐể thuận tiện trong tính toán, ta thường dùng giá trị xấp xỉ \\num{9.0e9}.\n\nĐể biểu diễn đầy đủ cả phương, chiều và độ lớn, ta viết định luật Coulomb dưới dạng vector. Gọi vector vị trí của \\(q_2\\) so với \\(q_1\\) là \\(\\vec{r}_{12} = \\vec{r}_2 - \\vec{r}_1\\). Vector đơn vị theo hướng từ \\(q_1\\) đến \\(q_2\\) là \\(\\hat{r}_{12} = \\vec{r}_{12}/|\\vec{r}_{12}|\\). Lực do \\(q_1\\) tác dụng lên \\(q_2\\) là:\n\\begin{equation}\\label{eq:coulomb_vec}\n\\boxed{\\vec{F}_{12} = k\\,\\frac{q_1 q_2}{r^2}\\,\\hat{r}_{12}}.\n\\end{equation}\nNếu \\(q_1\\) và \\(q_2\\) cùng dấu, \\(q_1 q_2 > 0\\) thì \\(\\vec{F}_{12}\\) cùng chiều với \\(\\hat{r}_{12}\\) (lực đẩy – hướng ra xa). Ngược lại, nếu trái dấu, \\(\\vec{F}_{12}\\) ngược chiều \\(\\hat{r}_{12}\\) (lực hút – hướng lại gần). Hằng số lực \\(k\\) mang đơn vị \\si{\\newton\\meter\\squared\\per\\coulomb\\squared}, đảm bảo vế phải có đơn vị của lực (\\si{\\newton}).\n\n\\subsection{Khái niệm điện trường}\nĐể loại bỏ sự phụ thuộc vào điện tích thử, người ta định nghĩa \\textbf{cường độ điện trường} \\(\\vec{E}\\) tại một điểm là lực điện tác dụng lên một điện tích thử dương \\(q_0\\) đặt tại điểm đó chia cho chính độ lớn của điện tích thử:\n\\begin{equation}\\label{eq:E_def}\n\\vec{E} \\equiv \\frac{\\vec{F}}{q_0}.\n\\end{equation}\nĐiện trường là một đại lượng vector: đơn vị SI là \\si{\\newton\\per\\coulomb} (hoặc tương đương \\si{\\volt\\per\\meter}). Từ (\\ref{eq:coulomb_vec}) và (\\ref{eq:E_def}), điện trường do một điện tích điểm \\(Q\\) (điện tích nguồn) gây ra tại vị trí cách nó một khoảng \\(r\\) là:\n\\begin{equation}\\label{eq:E_point}\n\\boxed{\\vec{E} = k\\,\\frac{Q}{r^2}\\,\\hat{r}}.\n\\end{equation}\nỞ đây \\(\\hat{r}\\) là vector đơn vị hướng từ điện tích nguồn đến điểm khảo sát. Phương trình (\\ref{eq:E_point}) cho thấy:\n\\begin{itemize}\n\\item Vectơ \\(\\vec{E}\\) có phương trùng với đường thẳng nối điện tích nguồn với điểm xét.\n\\item Nếu \\(Q\\) dương (\\(\\,Q>0\\)), \\(\\vec{E}\\) hướng \\textbf{ra xa} điện tích.\n\\item Nếu \\(Q\\) âm (\\(\\,Q<0\\)), \\(\\vec{E}\\) hướng \\textbf{về phía} điện tích.\n\\item Độ lớn của điện trường giảm tỉ lệ nghịch với bình phương khoảng cách: \\(E = |\\vec{E}| \\propto \\frac{1}{r^2}\\).\n\\end{itemize}\n\n\\subsection{Nguyên lý chồng chất điện trường}\nĐối với một hệ gồm \\(n\\) điện tích điểm \\(Q_1, Q_2, \\dots, Q_n\\), điện trường tổng hợp tại một điểm trong không gian được xác định theo \\textbf{nguyên lý chồng chất}:\n\\begin{equation}\\label{eq:superposition}\n\\vec{E}_{\\text{tổng}} = \\vec{E}_1 + \\vec{E}_2 + \\cdots + \\vec{E}_n = k\\sum_{i=1}^{n}\\frac{Q_i}{r_i^2}\\,\\hat{r}_i.\n\\end{equation}\nĐây chính là hệ quả trực tiếp của tính chất cộng vector của lực Coulomb và là công cụ cốt lõi để giải các bài toán phân bố điện tích phức tạp hơn (lưỡng cực điện, vòng dây tích điện, mặt phẳng vô hạn, v.v.).\n\n% =============================================\n\\section{Minh họa trường vector của điện tích điểm}\n% =============================================\nĐể trực quan hóa điện trường, người ta thường dùng \\textbf{đường sức điện} – những đường cong mà tiếp tuyến tại mỗi điểm trùng với phương của vector \\(\\vec{E}\\). Đối với một điện tích dương, đường sức xuất phát từ điện tích và lan ra vô cực; đối với điện tích âm, đường sức đi từ vô cực và hội tụ vào điện tích. Mật độ đường sức thể hiện độ lớn của điện trường.\n\nHình~\\ref{fig:E_positive} và \\ref{fig:E_negative} minh họa trường vector xung quanh một điện tích dương và một điện tích âm sử dụng ngôn ngữ TikZ. Các mũi tên đại diện cho vector cường độ điện trường tại một số điểm lấy mẫu.\n\n\\begin{figure}[H]\n\\centering\n\\begin{tikzpicture}[scale=1.5,>=stealth]\n  % Điện tích dương\n  \\filldraw[red] (0,0) circle (2pt) node[below right] {\\(+Q\\)};\n  % Vẽ các vector điện trường (hướng ra)\n  \\foreach \\angle in {0,30,60,90,120,150,180,210,240,270,300,330} {\n    \\draw[->, thick, blue!70!black] (0,0) -- ++(\\angle:1.2cm);\n  }\n  % Vòng tròn thể hiện mặt cầu\n  \\draw[dashed, gray] (0,0) circle (1.2cm);\n  \\node at (0.6, -1.0) {\\(\\vec{E}\\)};\n\\end{tikzpicture}\n\\caption{Điện trường của một điện tích điểm dương. Các vector \\(\\vec{E}\\) hướng ra xa nguồn, độ lớn giảm dần theo khoảng cách (minh họa bằng mật độ mũi tên thưa hơn ở xa – ở đây các mũi tên chỉ vẽ cho một bán kính cố định để thể hiện tính đối xứng cầu).}\\label{fig:E_positive}\n\\end{figure}\n\n\\begin{figure}[H]\n\\centering\n\\begin{tikzpicture}[scale=1.5,>=stealth]\n  % Điện tích âm\n  \\filldraw[blue] (0,0) circle (2pt) node[below right] {\\(-Q\\)};\n  % Vẽ các vector điện trường (hướng vào)\n  \\foreach \\angle in {0,30,60,90,120,150,180,210,240,270,300,330} {\n    \\draw[<-, thick, blue!70!black] (0,0) -- ++(\\angle:1.2cm);\n  }\n  \\draw[dashed, gray] (0,0) circle (1.2cm);\n  \\node at (0.6, -1.0) {\\(\\vec{E}\\)};\n\\end{tikzpicture}\n\\caption{Điện trường của một điện tích điểm âm. Các vector \\(\\vec{E}\\) hướng vào điện tích, thể hiện lực hút tác dụng lên một điện tích thử dương.}\\label{fig:E_negative}\n\\end{figure}\n\nTính đối xứng cầu của trường được thấy rõ: trên cùng một mặt cầu bán kính \\(r\\), độ lớn của điện trường là không đổi và các vector đều có phương xuyên tâm.\n\n% =============================================\n\\section{Ví dụ tính toán}\n% =============================================\nĐể minh họa việc áp dụng các công thức trên với hệ đơn vị SI, ta xét một vài tình huống cụ thể.\n\n\\subsection*{Ví dụ 1: Điện trường do một điện tích dương}\nMột điện tích điểm \\(Q = \\SI{2.0}{\\micro\\coulomb} = \\SI{2.0e-6}{\\coulomb}\\) đặt trong chân không. Tính cường độ điện trường tại một điểm cách điện tích \\SI{50}{\\centi\\meter} = \\SI{0.5}{\\meter}.\n\n\\textbf{Lời giải:}\nÁp dụng công thức (\\ref{eq:E_point}):\n\\[\nE = k\\,\\frac{|Q|}{r^2} = \\SI{9.0e9}{}\\times\\frac{\\num{2.0e-6}}{(\\num{0.5})^2}\n= \\SI{9.0e9}{}\\times\\frac{\\num{2.0e-6}}{\\num{0.25}}\n= \\SI{7.2e4}{\\newton\\per\\coulomb}.\n\\]\nVì \\(Q>0\\), vector \\(\\vec{E}\\) hướng ra xa điện tích. Kết quả trên có thể viết là \\(\\vec{E} = \\SI{7.2e4}{\\newton\\per\\coulomb}\\,\\hat{r}\\).\n\n\\subsection*{Ví dụ 2: So sánh cường độ điện trường}\nCùng điện tích \\(Q = \\SI{2.0}{\\micro\\coulomb}\\). Hãy so sánh cường độ điện trường tại khoảng cách \\SI{1.0}{\\meter} và \\SI{2.0}{\\meter}.\n\n\\textbf{Lời giải:}\n\\[\nE(1.0\\,\\text{m}) = k\\frac{|Q|}{(1.0)^2} = \\SI{1.8e4}{\\newton\\per\\coulomb},\n\\]\n\\[\nE(2.0\\,\\text{m}) = k\\frac{|Q|}{(2.0)^2} = \\SI{4.5e3}{\\newton\\per\\coulomb}.\n\\]\nTa thấy \\(E(2.0\\,\\text{m}) = E(1.0\\,\\text{m}) / 4\\), phù hợp với quy luật tỉ lệ nghịch với \\(r^2\\).\n\n\\subsection*{Ví dụ 3: Nguyên lý chồng chất}\nTrên trục \\(x\\), đặt hai điện tích: \\(q_1 = \\SI{+3.0}{\\nano\\coulomb}\\) tại gốc tọa độ, và \\(q_2 = \\SI{-3.0}{\\nano\\coulomb}\\) tại \\(x = \\SI{4.0}{\\meter}\\). Tính vector \\(\\vec{E}\\) tổng hợp tại điểm \\(P\\) có tọa độ \\(x = \\SI{6.0}{\\meter}\\).\n\n\\textbf{Lời giải:}\nĐiện trường do \\(q_1\\) tại \\(P\\): \\(r_1 = \\SI{6.0}{\\meter}\\), hướng \\(+x\\):\n\\[\n\\vec{E}_1 = k\\,\\frac{\\num{3.0e-9}}{(6.0)^2}\\,\\hat{i}\n= \\SI{9.0e9}{}\\times\\frac{\\num{3.0e-9}}{36}\\,\\hat{i}\n= (\\SI{0.75}{\\newton\\per\\coulomb})\\,\\hat{i}.\n\\]\nĐiện trường do \\(q_2\\) tại \\(P\\): \\(r_2 = \\SI{2.0}{\\meter}\\) (từ \\(x=4\\) đến \\(x=6\\)), \\(q_2\\) âm nên \\(\\vec{E}_2\\) hướng về phía \\(q_2\\), tức theo chiều \\(-x\\):\n\\[\n\\vec{E}_2 = k\\,\\frac{\\num{-3.0e-9}}{(2.0)^2}\\,\\hat{r}_2,\n\\]\nvới \\(\\hat{r}_2 = +\\hat{i}\\) (vector đơn vị từ \\(q_2\\) đến \\(P\\)). Thay số:\n\\[\n\\vec{E}_2 = \\SI{9.0e9}{}\\times\\frac{\\num{-3.0e-9}}{4}\\,(+\\hat{i})\n= (\\SI{-6.75}{\\newton\\per\\coulomb})\\,\\hat{i}.\n\\]\nĐiện trường tổng hợp tại \\(P\\):\n\\[\n\\vec{E}_{\\text{tổng}} = \\vec{E}_1 + \\vec{E}_2 = (0.75 - 6.75)\\,\\hat{i} = (\\SI{-6.0}{\\newton\\per\\coulomb})\\,\\hat{i}.\n\\]\nVậy \\(\\vec{E}_{\\text{tổng}}\\) có độ lớn \\SI{6.0}{\\newton\\per\\coulomb} và hướng ngược chiều dương trục \\(x\\) (hướng về các điện tích).\n\n% =============================================\n\\section{Một số ứng dụng của trường tĩnh điện}\n% =============================================\nHiểu rõ điện trường của điện tích điểm là nền tảng cho nhiều lĩnh vực khoa học và kỹ thuật:\n\\begin{itemize}\n\\item \\textbf{Máy photocopy và máy in laser:} Sử dụng trường tĩnh điện để điều khiển bột mực lên trống từ, sau đó ép dính lên giấy.\n\\item \\textbf{Lọc bụi tĩnh điện:} Các nhà máy nhiệt điện dùng trường điện mạnh để hút bụi và hạt ô nhiễm ra khỏi khí thải, bảo vệ môi trường.\n\\item \\textbf{Gia tốc hạt:} Trong các ống phóng điện tử (CRT) hay máy gia tốc hạt tuyến tính, lực điện trường được dùng để tăng tốc các hạt mang điện lên vận tốc cao.\n\\item \\textbf{Sinh lý thần kinh:} Điện trường sinh ra bởi sự phân bố ion qua màng tế bào đóng vai trò trung tâm trong việc dẫn truyền xung thần kinh.\n\\end{itemize}\n\nTất cả những ứng dụng trên, dù ở cấp độ vĩ mô hay vi mô, đều dựa trên nguyên lý cơ bản được mô tả bởi định luật Coulomb và khái niệm điện trường.\n\n% =============================================\n\\section{Kết luận}\n% =============================================\nBài viết đã trình bày một cách hệ thống điện trường của một điện tích điểm, bắt đầu từ định luật Coulomb dưới dạng vector \\((\\vec{F}_{12} = k\\,q_1 q_2\\,\\hat{r}_{12}/r^2)\\) và đi đến định nghĩa vector cường độ điện trường \\(\\vec{E} = \\vec{F}/q_0\\). Chúng tôi đã nhấn mạnh việc sử dụng nhất quán các ký hiệu toán học chuẩn (\\(\\vec{E}\\), \\(\\bm{E}\\), \\(\\hat{r}\\)) và biểu diễn đơn vị thông qua gói \\texttt{siunitx} (\\(\\SI{9.0e9}{\\newton\\meter\\squared\\per\\coulomb\\squared}\\), \\si{\\newton\\per\\coulomb}) nhằm đảm bảo tính chuyên nghiệp và chính xác về mặt đo lường.\n\nCác hình vẽ TikZ đã minh họa trực quan tính chất vector và đối xứng cầu của điện trường. Những ví dụ bằng số giúp củng cố mối liên hệ giữa lý thuyết và thực hành. Cuối cùng, chúng ta thấy rằng, dù đơn giản nhưng mô hình điện tích điểm là viên gạch đầu tiên để xây dựng toàn bộ lý thuyết trường điện từ vĩ mô, cũng như vô số ứng dụng công nghệ hiện đại.\n\n% =============================================\n\\begin{thebibliography}{99}\n\n\\bibitem{serway} R. A. Serway, J. W. Jewett.\n\\textit{Physics for Scientists and Engineers with Modern Physics}.\n10th Edition, Cengage Learning, 2018.\n\n\\bibitem{griffiths} D. J. Griffiths.\n\\textit{Introduction to Electrodynamics}.\n4th Edition, Cambridge University Press, 2017.\n\n\\bibitem{feynman} R. P. Feynman, R. B. Leighton, M. Sands.\n\\textit{The Feynman Lectures on Physics, Vol. II}.\nAddison-Wesley, 1964.\n\n\\bibitem{halliday} D. Halliday, R. Resnick, J. Walker.\n\\textit{Fundamentals of Physics}.\n11th Edition, Wiley, 2018.\n\n\\end{thebibliography}\n\n\\end{document}\n",
+          "metadata": {
+            "finishReason": "stop",
+            "rawFinishReason": "end_turn",
+            "usage": {
+              "inputTokens": 1209,
+              "outputTokens": 8061,
+              "totalTokens": 9270
+            }
+          }
+        },
+        "score": 1,
+        "success": true,
+        "testCase": {
+          "description": "electromagnetism — điện trường điện tích điểm (vector + Coulomb)",
+          "vars": {
+            "templateId": "physics",
+            "description": "Giải thích điện trường của một điện tích điểm, dùng ký hiệu vector và định luật Coulomb."
+          },
+          "assert": [
+            {
+              "type": "regex",
+              "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{article\\}"
+            },
+            {
+              "type": "regex",
+              "value": "\\\\usepackage(\\[[^\\]]*\\])?\\{siunitx\\}"
+            },
+            {
+              "type": "regex",
+              "value": "\\\\(SI|si|qty|num)\\{"
+            },
+            {
+              "type": "contains",
+              "value": "\\end{document}"
+            },
+            {
+              "type": "javascript",
+              "value": "file://./scorers/validate-latex.ts"
+            }
+          ],
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 2,
+        "tokenUsage": {
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "total": 0,
+          "numRequests": 1,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          },
+          "assertions": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          }
+        },
+        "vars": {
+          "templateId": "physics",
+          "description": "Giải thích điện trường của một điện tích điểm, dùng ký hiệu vector và định luật Coulomb."
+        },
+        "metadata": {
+          "finishReason": "stop",
+          "rawFinishReason": "end_turn",
+          "usage": {
+            "inputTokens": 1209,
+            "outputTokens": 8061,
+            "totalTokens": 9270
+          },
+          "_promptfooFileMetadata": {}
+        },
+        "failureReason": 0
+      },
+      {
+        "cost": 0,
+        "gradingResult": {
+          "pass": true,
+          "score": 1,
+          "reason": "All assertions passed",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0
+          },
+          "componentResults": [
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "regex",
+                "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{article\\}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "regex",
+                "value": "\\\\usepackage(\\[[^\\]]*\\])?\\{siunitx\\}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "regex",
+                "value": "\\\\(SI|si|qty|num)\\{"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\end{document}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "validateLatex: OK — không có diagnostic.",
+              "assertion": {
+                "type": "javascript",
+                "value": "file://./scorers/validate-latex.ts"
+              }
+            }
+          ]
+        },
+        "id": "5c4de9d2-f97b-4e36-9409-16430d2f0cb9",
+        "latencyMs": 111041,
+        "namedScores": {},
+        "prompt": {
+          "raw": "Báo cáo thí nghiệm đo bước sóng ánh sáng bằng giao thoa khe Young, có số liệu và đơn vị.",
+          "label": "{{description}}",
+          "config": {}
+        },
+        "promptId": "1e6bd1d5aab4bf787795c1f9955d1ac1cc90fa253cfff6883a3c44dd53037d25",
+        "promptIdx": 0,
+        "provider": {
+          "id": "physics-real-ai-provider",
+          "label": "physics-real-ai"
+        },
+        "response": {
+          "output": "\\documentclass[a4paper,12pt]{article}\n\\usepackage{fontspec}\n\\usepackage{geometry}\n\\geometry{left=2.5cm, right=2.5cm, top=2.5cm, bottom=2.5cm}\n\\usepackage{amsmath,amssymb,bm}\n\\usepackage{siunitx}\n\\sisetup{inter-unit-product = \\ensuremath{{}\\cdot{}}, per-mode = symbol}\n\\usepackage{graphicx}\n\\usepackage{tikz}\n\\usetikzlibrary{patterns, arrows.meta, calc}\n\\usepackage{pgfplots}\n\\pgfplotsset{compat=1.18}\n\\usepackage{hyperref}\n\\usepackage{booktabs}\n\\usepackage{caption}\n\\usepackage{float}\n\n\\newcommand{\\vect}[1]{\\bm{#1}} % bold vector\n\n\\title{BÁO CÁO THÍ NGHIỆM VẬT LÝ\\\\\nĐO BƯỚC SÓNG ÁNH SÁNG BẰNG GIAO THOA KHE YOUNG}\n\\author{Nguyễn Văn A -- MSSV: 22101234\\\\Nhóm thí nghiệm: 07 -- Phòng thí nghiệm Vật lý Đại cương}\n\\date{\\today}\n\n\\begin{document}\n\\maketitle\n\n\\begin{abstract}\nThí nghiệm xác định bước sóng của laser He-Ne bằng phương pháp giao thoa Young. Sử dụng hệ hai khe hẹp cách nhau \\(d = \\SI{0.50}{\\milli\\meter}\\), khoảng cách từ khe đến màn \\(L = \\SI{1.500}{\\meter}\\). Đo vị trí các vân sáng trên màn, tìm khoảng vân \\(\\Delta y = \\SI{1.904}{\\milli\\meter}\\) qua hồi quy tuyến tính. Bước sóng thu được \\(\\lambda = (\\num{635}\\pm\\num{13})\\,\\si{\\nano\\meter}\\), phù hợp với giá trị danh định của laser He-Ne \\(\\lambda_0 = \\SI{632.8}{\\nano\\meter}\\). Kết quả khẳng định độ tin cậy của phương pháp và kỹ thuật đo.\n\\end{abstract}\n\n\\section{Mở đầu}\nGiao thoa ánh sáng là hiện tượng chồng chập của hai hay nhiều sóng ánh sáng kết hợp, dẫn đến sự phân bố lại cường độ sáng trong không gian với các vân sáng và vân tối. Thí nghiệm kinh điển của Thomas Young (1801) đã chứng minh bản chất sóng của ánh sáng và cho phép đo bước sóng với độ chính xác cao. \n\nXét hai khe hẹp \\(S_1\\), \\(S_2\\) cách nhau một khoảng \\(d\\) được chiếu sáng bởi cùng một nguồn sáng đơn sắc có bước sóng \\(\\lambda\\). Tại điểm \\(P\\) trên màn cách hai khe các quãng đường \\(r_1\\) và \\(r_2\\), điện trường có dạng\n\\[\n\\vec{E}_1 = E_0 e^{i(k r_1 - \\omega t)}\\hat{x}, \\qquad \n\\vec{E}_2 = E_0 e^{i(k r_2 - \\omega t)}\\hat{x},\n\\]\nvới \\(k = 2\\pi/\\lambda\\) là số sóng. Cường độ sáng tổng hợp tại \\(P\\) tỉ lệ với \\(\\lvert\\vec{E}_1 + \\vec{E}_2\\rvert^2 = 2E_0^2[1 + \\cos(k\\Delta r)]\\), trong đó \\(\\Delta r = r_2 - r_1\\) là hiệu quang trình. Điều kiện xuất hiện vân sáng (cực đại giao thoa) là\n\\begin{equation}\\label{eq:bright}\n\\Delta r = d\\sin\\theta = k\\lambda,\\qquad k = 0, \\pm1, \\pm2, \\dots\n\\end{equation}\nvới \\(\\theta\\) là góc lệch của điểm \\(P\\) so với trục trung tâm.\n\nTrong điều kiện góc nhỏ (\\(\\theta \\ll 1\\)), ta có \\(\\sin\\theta \\approx \\tan\\theta = y/L\\), trong đó \\(y\\) là tọa độ vân sáng trên màn và \\(L\\) là khoảng cách từ mặt phẳng chứa hai khe đến màn. Khi đó vị trí vân sáng bậc \\(k\\) là\n\\[\ny_k = k\\,\\frac{\\lambda L}{d}.\n\\]\nKhoảng cách giữa hai vân sáng liên tiếp (khoảng vân) không đổi:\n\\begin{equation}\\label{eq:fringe}\n\\Delta y = y_{k+1} - y_k = \\frac{\\lambda L}{d}.\n\\end{equation}\nTừ đó suy ra bước sóng \n\\begin{equation}\\label{eq:lambda}\n\\lambda = \\frac{d\\,\\Delta y}{L}.\n\\end{equation}\nĐây là công thức dùng để xác định \\(\\lambda\\) trong báo cáo này.\n\n\\section{Dụng cụ và bố trí thí nghiệm}\n\\begin{figure}[H]\n\\centering\n\\begin{tikzpicture}[scale=1.1, >=Stealth]\n  % Laser\n  \\draw[fill=black!20] (-0.5,0.4) rectangle (0.2,0.7);\n  \\node at (-0.15,0.85) {Laser He-Ne};\n  \\draw[red, line width=0.8mm, ->] (0.2,0.55) -- (2.0,0.55);\n  % Double slit\n  \\draw[fill=black!70] (2.0,0.2) rectangle (2.15,0.9);\n  \\draw[white] (2.0,0.53) -- (2.15,0.53);\n  \\draw[white] (2.0,0.57) -- (2.15,0.57);\n  \\node at (2.075,1.1) {Khe đôi};\n  \\draw[<->] (2.3,0.53) -- (2.3,0.57) node[midway, right] {\\small $d$};\n  % Diverging beams\n  \\draw[red, line width=0.3mm, ->] (2.15,0.53) -- (4.5,1.2);\n  \\draw[red, line width=0.3mm, ->] (2.15,0.57) -- (4.5,-0.1);\n  % Screen\n  \\draw[fill=gray!30] (4.8, -0.5) rectangle (5.0, 1.7);\n  \\node at (5.3, 0.6) {Màn};\n  % Fringe pattern on screen\n  \\foreach \\y in {-0.2, 0.1, 0.4, 0.7, 1.0, 1.3} {\n     \\draw[red, line width=0.6mm] (4.85, \\y) -- (5.0, \\y);\n  }\n  % Central maximum label\n  \\draw[<-, thick] (4.85,0.55) -- (5.5,0.9) node[right] {Vân trung tâm ($k=0$)};\n  % Distances\n  \\draw[<->] (2.075,0.1) -- (4.9,0.1) node[midway, below] {$L = \\SI{1.500}{\\meter}$};\n  % Coordinate\n  \\draw[->] (5.1, -0.5) -- (5.1,1.8) node[left] {$y$};\n\\end{tikzpicture}\n\\caption{Sơ đồ thí nghiệm giao thoa khe Young. Chùm laser chiếu qua hai khe hẹp cách nhau \\(d\\), tạo ra hệ vân giao thoa trên màn đặt cách khe một khoảng \\(L\\).}\n\\label{fig:setup}\n\\end{figure}\n\nDụng cụ chính gồm:\n\\begin{itemize}\n\\item Nguồn laser He-Ne bước sóng danh định \\SI{632.8}{\\nano\\meter}.\n\\item Bản khe đôi có khoảng cách khe \\(d = \\SI{0.50}{\\milli\\meter} \\pm \\SI{0.01}{\\milli\\meter}\\) (được khắc trên đế thạch anh).\n\\item Thước panme và thước đo chính xác khoảng cách \\(L = \\SI{1.500}{\\meter} \\pm \\SI{0.005}{\\meter}\\).\n\\item Màn quan sát gắn thước đo vi phân (độ chia \\SI{0.01}{\\milli\\meter}) để đọc tọa độ vân.\n\\end{itemize}\nBố trí quang học sao cho chùm tia laser vuông góc với mặt phẳng khe, hệ vân giao thoa hiện rõ trên màn. Khoảng cách \\(L\\) được giữ cố định trong suốt phép đo.\n\n\\section{Kết quả đo và xử lý số liệu}\n\\subsection{Số liệu thô}\nDùng kính lúp có vạch đo, xác định tọa độ \\(y_k\\) của các vân sáng bậc \\(k = 0,1,\\dots,5\\) (vị trí tương đối so với vân trung tâm). Mỗi vị trí được đọc ba lần và lấy trung bình. Kết quả ghi trong Bảng~\\ref{tab:data}.\n\n\\begin{table}[H]\n\\centering\n\\caption{Tọa độ các vân sáng trên màn. Khoảng cách giữa các vân liên tiếp được tính từ hiệu \\(y_{k+1}-y_k\\).}\n\\label{tab:data}\n\\begin{tabular}{c c c c}\n\\toprule\nBậc giao thoa \\(k\\) & \\(y_k\\) (\\si{\\milli\\meter}) & \\(\\Delta y_k\\) (\\si{\\milli\\meter}) & Ghi chú \\\\\n\\midrule\n0 & 0,00 & -- & vân trung tâm \\\\\n1 & 1,90 & 1,90 & \\\\\n2 & 3,81 & 1,91 & \\\\\n3 & 5,71 & 1,90 & \\\\\n4 & 7,60 & 1,89 & \\\\\n5 & 9,52 & 1,92 & \\\\\n\\bottomrule\n\\end{tabular}\n\\end{table}\n\nGiá trị khoảng vân trung bình từ năm khoảng:\n\\[\n\\overline{\\Delta y} = \\frac{1,90 + 1,91 + 1,90 + 1,89 + 1,92}{5} = \\SI{1.904}{\\milli\\meter}.\n\\]\nSai số ngẫu nhiên của phép đo \\(\\Delta y\\) ước lượng qua độ lệch chuẩn mẫu:\n\\[\ns_{\\Delta y} = \\sqrt{\\frac{\\sum_{i=1}^{5}(\\Delta y_i - \\overline{\\Delta y})^2}{4}} \n\\approx \\SI{0.011}{\\milli\\meter}.\n\\]\nDo đó \\(\\Delta y = (1.904 \\pm 0.011)\\,\\si{\\milli\\meter}\\).\n\nĐể kiểm tra tính tuyến tính và tăng độ tin cậy, ta vẽ đồ thị \\(y_k\\) theo bậc \\(k\\) (Hình~\\ref{fig:plot}).\n\\begin{figure}[H]\n\\centering\n\\begin{tikzpicture}\n  \\begin{axis}[\n    width=0.65\\textwidth,\n    height=0.45\\textwidth,\n    xlabel={Bậc giao thoa $k$},\n    ylabel={Vị trí $y$ (\\si{\\milli\\meter})},\n    grid=both,\n    grid style={dashed, gray!30},\n    legend pos=north west,\n    legend entries={Số liệu thực nghiệm, Đường hồi quy},\n    legend style={font=\\footnotesize}\n    ]\n    \\addplot+[only marks, mark=*, mark size=2pt, red!70!black] table[row sep=\\\\] {\n      0 0.00\\\\\n      1 1.90\\\\\n      2 3.81\\\\\n      3 5.71\\\\\n      4 7.60\\\\\n      5 9.52\\\\\n    };\n    \\addplot [domain=0:5, samples=2, thick, blue] {1.904*x}; \n  \\end{axis}\n\\end{tikzpicture}\n\\caption{Đồ thị vị trí vân sáng \\(y\\) theo bậc giao thoa \\(k\\). Đường thẳng có hệ số góc \\(\\Delta y \\approx \\SI{1.904}{\\milli\\meter}\\).}\n\\label{fig:plot}\n\\end{figure}\n\n\\subsection{Tính toán bước sóng}\nSử dụng công thức~\\eqref{eq:lambda} với các giá trị:\n\\[\nd = \\SI{0.50e-3}{\\meter},\\quad \\Delta y = \\SI{1.904e-3}{\\meter},\\quad L = \\SI{1.500}{\\meter}.\n\\]\n\\[\n\\lambda = \\frac{(0.50 \\times 10^{-3}\\,\\si{\\meter}) \\times (1.904 \\times 10^{-3}\\,\\si{\\meter})}{1.500\\,\\si{\\meter}}\n      = \\frac{9.52 \\times 10^{-7}}{1.5}\\,\\si{\\meter}\n      = 6.3467 \\times 10^{-7}\\,\\si{\\meter}\n      = \\SI{634.7}{\\nano\\meter}.\n\\]\n\n\\subsection{Phân tích sai số}\nBước sóng tính theo công thức gián tiếp \\(\\lambda = f(d,\\Delta y,L)\\). Sai số toàn phần được truyền theo:\n\\[\n\\frac{\\Delta\\lambda}{\\lambda} = \\sqrt{\\left(\\frac{\\Delta d}{d}\\right)^2 + \\left(\\frac{\\Delta(\\Delta y)}{\\Delta y}\\right)^2 + \\left(\\frac{\\Delta L}{L}\\right)^2}.\n\\]\nThay số:\n\\begin{align*}\n\\frac{\\Delta d}{d} &= \\frac{0.01}{0.50} = 0.0200,\\\\[2pt]\n\\frac{\\Delta(\\Delta y)}{\\Delta y} &= \\frac{0.011}{1.904} \\approx 0.00578,\\\\[2pt]\n\\frac{\\Delta L}{L} &= \\frac{0.005}{1.500} \\approx 0.00333.\n\\end{align*}\nTổng bình phương tương đối:\n\\[\n\\left(\\frac{\\Delta\\lambda}{\\lambda}\\right)^2 = (0.0200)^2 + (0.00578)^2 + (0.00333)^2 \\approx 4.44 \\times 10^{-4}.\n\\]\nSai số tương đối \\(\\Delta\\lambda/\\lambda \\approx \\sqrt{4.44\\times10^{-4}} \\approx 0.0211\\) (tương đương 2,11\\%).\nSai số tuyệt đối của bước sóng đo được:\n\\[\n\\Delta\\lambda = 0.0211 \\times 634.7\\,\\si{\\nano\\meter} \\approx \\SI{13.4}{\\nano\\meter}.\n\\]\nVậy kết quả cuối cùng:\n\\[\n\\boxed{\\lambda = (635 \\pm 13)\\,\\si{\\nano\\meter}}.\n\\]\n\n\\section{Thảo luận và kết luận}\nGiá trị bước sóng đo được \\(\\lambda = (635 \\pm 13)\\,\\si{\\nano\\meter}\\) hoàn toàn phù hợp với bước sóng danh định của laser He-Ne là \\(\\SI{632.8}{\\nano\\meter}\\) (sai lệch chưa đến 0,5\\%). Nguồn sai số chính đến từ việc xác định tiêu cự của mắt khi đọc vị trí vân (sai số ngẫu nhiên \\(\\Delta(\\Delta y)\\)) và sai số dụng cụ của thước đo khoảng cách khe \\(d\\). Bên cạnh đó, giả thiết góc nhỏ \\(\\sin\\theta \\approx \\tan\\theta\\) hoàn toàn thỏa mãn với \\(\\theta_{\\text{max}} \\approx \\arctan(y_5/L) \\approx 0.36^\\circ\\).\n\nSự phù hợp này khẳng định tính đúng đắn của lý thuyết giao thoa và độ tin cậy của phương pháp giao thoa khe Young trong việc đo bước sóng ánh sáng với độ chính xác cao. Thí nghiệm có thể được cải tiến bằng cách sử dụng cảm biến quang điện để xác định vị trí cực đại chính xác hơn, hoặc tăng cỡ mẫu số liệu để giảm sai số ngẫu nhiên.\n\n\\begin{thebibliography}{9}\n\\bibitem{young} T. Young, ``Experimental Demonstration of the General Law of the Interference of Light,'' \\emph{Phil. Trans. R. Soc. Lond.}, vol. 94, pp. 1--16, 1804.\n\\bibitem{hecht} E. Hecht, \\emph{Optics}, 5th ed., Pearson, 2017, Ch. 9.\n\\bibitem{giang} Nguyễn Văn Giáp, \\emph{Giáo trình Vật lý Đại cương -- Tập 2: Quang học}, NXB Giáo dục, 2020.\n\\end{thebibliography}\n\n\\end{document}\n",
+          "metadata": {
+            "finishReason": "stop",
+            "rawFinishReason": "end_turn",
+            "usage": {
+              "inputTokens": 1218,
+              "outputTokens": 7458,
+              "totalTokens": 8676
+            }
+          }
+        },
+        "score": 1,
+        "success": true,
+        "testCase": {
+          "description": "vietnamese-optics — tiếng Việt, giao thoa ánh sáng",
+          "vars": {
+            "templateId": "physics",
+            "description": "Báo cáo thí nghiệm đo bước sóng ánh sáng bằng giao thoa khe Young, có số liệu và đơn vị."
+          },
+          "assert": [
+            {
+              "type": "regex",
+              "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{article\\}"
+            },
+            {
+              "type": "regex",
+              "value": "\\\\usepackage(\\[[^\\]]*\\])?\\{siunitx\\}"
+            },
+            {
+              "type": "regex",
+              "value": "\\\\(SI|si|qty|num)\\{"
+            },
+            {
+              "type": "contains",
+              "value": "\\end{document}"
+            },
+            {
+              "type": "javascript",
+              "value": "file://./scorers/validate-latex.ts"
+            }
+          ],
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 3,
+        "tokenUsage": {
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "total": 0,
+          "numRequests": 1,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          },
+          "assertions": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          }
+        },
+        "vars": {
+          "templateId": "physics",
+          "description": "Báo cáo thí nghiệm đo bước sóng ánh sáng bằng giao thoa khe Young, có số liệu và đơn vị."
+        },
+        "metadata": {
+          "finishReason": "stop",
+          "rawFinishReason": "end_turn",
+          "usage": {
+            "inputTokens": 1218,
+            "outputTokens": 7458,
+            "totalTokens": 8676
+          },
+          "_promptfooFileMetadata": {}
+        },
+        "failureReason": 0
+      }
+    ],
+    "stats": {
+      "successes": 4,
+      "failures": 0,
+      "errors": 0,
+      "tokenUsage": {
+        "prompt": 0,
+        "completion": 0,
+        "cached": 0,
+        "total": 0,
+        "numRequests": 4,
+        "completionDetails": {
+          "reasoning": 0,
+          "acceptedPrediction": 0,
+          "rejectedPrediction": 0,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0
+        },
+        "assertions": {
+          "total": 0,
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "numRequests": 0,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          }
+        }
+      },
+      "durationMs": 242670,
+      "evaluationDurationMs": 242670
+    }
+  },
+  "config": {
+    "tags": {},
+    "description": "Physics template — AI THẬT trên dataset physics/",
+    "prompts": [
+      "{{description}}"
+    ],
+    "providers": [
+      {
+        "id": "file://./providers/physics-real-ai-provider.ts",
+        "label": "physics-real-ai"
+      }
+    ],
+    "tests": [
+      "file://./datasets/physics/cases.yaml"
+    ],
+    "env": {},
+    "defaultTest": {
+      "assert": [
+        {
+          "type": "regex",
+          "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{article\\}"
+        },
+        {
+          "type": "regex",
+          "value": "\\\\usepackage(\\[[^\\]]*\\])?\\{siunitx\\}"
+        },
+        {
+          "type": "regex",
+          "value": "\\\\(SI|si|qty|num)\\{"
+        },
+        {
+          "type": "contains",
+          "value": "\\end{document}"
+        },
+        {
+          "type": "javascript",
+          "value": "file://./scorers/validate-latex.ts"
+        }
+      ],
+      "vars": {},
+      "options": {},
+      "metadata": {}
+    },
+    "outputPath": [
+      "lib/prompt-eval/results/physics-real-ai-run-2026-07-17.json"
+    ],
+    "extensions": [],
+    "metadata": {},
+    "evaluateOptions": {}
+  },
+  "shareableUrl": null,
+  "metadata": {
+    "promptfooVersion": "0.121.18",
+    "nodeVersion": "v24.16.0",
+    "platform": "win32",
+    "arch": "x64",
+    "exportedAt": "2026-07-17T09:23:36.410Z",
+    "evaluationCreatedAt": "2026-07-17T09:19:33.596Z"
+  },
+  "vars": [
+    "templateId",
+    "description"
+  ],
+  "runtimeOptions": {
+    "eventSource": "cli",
+    "showProgressBar": true,
+    "repeat": 1,
+    "maxConcurrency": 4,
+    "cache": false
+  }
+}

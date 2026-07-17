@@ -72,6 +72,18 @@ describe("documentStore", () => {
     expect(list.find((d) => d.id === a.id)?.hasPdf).toBe(true);
   });
 
+  it("list: isProject=false cho tài liệu single-file, true khi có files[] không rỗng", async () => {
+    const single = await createDocument(baseInput());
+    const project = await createDocument({
+      ...baseInput(),
+      files: [{ path: "main.tex", content: baseInput().latex }],
+      rootFile: "main.tex",
+    });
+    const list = await listDocuments();
+    expect(list.find((d) => d.id === single.id)?.isProject).toBe(false);
+    expect(list.find((d) => d.id === project.id)?.isProject).toBe(true);
+  });
+
   it("update merge trường & đổi updatedAt, giữ createdAt", async () => {
     const doc = await createDocument(baseInput());
     await new Promise((r) => setTimeout(r, 5));

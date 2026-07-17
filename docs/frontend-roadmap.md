@@ -18,23 +18,31 @@ template `#later`) và các quyết định kỹ thuật đã thống nhất:
 
 ## 2. Lộ trình Triển khai Frontend (Frontend Roadmap)
 
-### 🟢 Phase 1: Nâng cấp Kiến trúc Nền tảng (Architecture Foundations)
+### 🟢 Phase 1: Nâng cấp Kiến trúc Nền tảng (Architecture Foundations) — ✅ Hoàn thành (2026-07-16)
 
 *Mục tiêu: Đặt nền móng State Management và Data Fetching trước khi nhồi nhét giao diện phức tạp.*
 
-- **FE-1.1 `[Platform]`:** Tích hợp `TanStack Query` vào dự án (Cài đặt & setup `QueryClientProvider` ở Root Layout).
-- **FE-1.2 `[Platform]`:** Chuyển đổi các API fetch hiện tại (như luồng lấy danh sách tài liệu) sang hooks của React Query (`useQuery`).
-- **FE-1.3 `[Platform]`:** Khởi tạo `Zustand` Store. Tạo `useWorkspaceStore` để quản lý trạng thái hiển thị của Workspace (ví dụ: tab nào đang mở, đóng/mở panel chat, layout split-pane).
-- **FE-1.4 `[Platform]`:** Tối ưu hóa UI hiện hành, dọn dẹp các `useState` dư thừa và xử lý prop drilling trong `DocumentWorkspace.tsx` và `ChatAssistant.tsx`.
+- **FE-1.1 `[Platform]`:** ✅ Tích hợp `TanStack Query` (`@tanstack/react-query@5.101.2`). `components/providers.tsx` (`"use client"`, `useState(() => new QueryClient())`, defaults `staleTime 30s`/`refetchOnWindowFocus`/`retry 1`), bọc ngoài `ThemeProvider` trong `app/layout.tsx`.
+- **FE-1.2 `[Platform]`:** ✅ `DocumentList` → `useQuery({ initialData })` (seed SSR) + `useMutation` xoá → `invalidateQueries`. Create-success trong `useDocumentGenerationChat` cũng invalidate (tránh regression list cũ). Key dùng chung: `lib/query-keys.ts`. Test: `tests/unit/document-list.test.tsx` (6 case) + helper `tests/utils/react-query.tsx`.
+- **FE-1.3 `[Platform]`:** ✅ `Zustand` (`zustand@5.0.14`). `components/stores/workspace-store.ts` — `useWorkspaceStore { tab: "pdf"|"source"; setTab }` với `persist` (localStorage, global) + `skipHydration` (rehydrate trong `useEffect` để tránh lệch hydration SSR). `DocumentWorkspace` đã chuyển `tab` sang store (bỏ `useState` + giá trị `"chat"` chết). *Phạm vi tối giản có chủ đích: chỉ `tab` — panel toggle/split-pane chưa tồn tại, sẽ thêm khi Phase 2 có state workspace thật.*
+- **FE-1.4 `[Platform]`:** ✅ (mỏng) Dọn `useState` dư thừa: gộp `chatBusy`+`isStreaming` (luôn đồng bộ) → một `isStreaming` trong `DocumentWorkspace`; hoist `TEMPLATE_GROUPS` ra module scope trong `ChatAssistant` (không tính lại mỗi render). *Không có prop-drilling đáng kể để sửa. Nhóm state `draft/saving/isStreaming/actionError` (save + chat SSE) CHỦ ĐÍCH giữ local — sẽ chuyển sang React Query `useMutation` ở lát Phase 2 (migrate DocumentWorkspace), không phải Zustand.*
 
 ### 🟡 Phase 2: Hỗ trợ Dự án Nhiều File (E1 - Multi-file Project Support)
 
 *Mục tiêu: Xây dựng giao diện quản lý cây thư mục và code editor nhiều tab.*
 
-- **FE-2.1 `[AI-Core]`:** Xây dựng component `FileExplorer` (cây thư mục bên trái Workspace) hỗ trợ hiển thị danh sách các file `.tex` và ảnh/assets trong dự án.
-- **FE-2.2 `[Platform]`:** Quản lý state Multi-tab với Zustand (cho phép click mở nhiều tab file cùng lúc trên giao diện như một IDE thực thụ).
-- **FE-2.3 `[AI-Core]`:** Thêm giao diện chỉ định "Root File" (file gốc để gọi lệnh biên dịch PDF).
-- **FE-2.4 `[Platform]`:** Xử lý luồng Auto-save (lưu nháp tự động) mượt mà bằng cơ chế `useMutation` và `debounce` của TanStack Query.
+> 🔄 **E1a đã ship (2026-07-16) — bản tối giản bằng `useState`, CHƯA theo kiến trúc Phase 1.**
+> `components/ProjectFileEditor.tsx` đã cung cấp: **tab file phẳng** (root đầu, ★), thêm/đổi tên/xoá
+> file, "đặt làm file gốc", draft từng file (`Record<path,string>`), một nút "Lưu & biên dịch"
+> (PATCH cả mảng `files`). Convert-in-place + ẩn chat-edit cho dự án ở `DocumentWorkspace.tsx`.
+> **Còn lại của Phase 2:** cây thư mục lồng thật (FE-2.1), multi-tab bằng Zustand (FE-2.2), auto-save
+> debounce bằng React Query (FE-2.4) — tất cả **phụ thuộc Phase 1** (hiện chưa có TanStack Query /
+> Zustand). Đây là lý do **khuyến nghị làm Phase 1 trước** khi mở rộng thêm Phase 2.
+
+- **FE-2.1 `[AI-Core]`:** 🔄 *Một phần (E1a).* Xây dựng component `FileExplorer` (cây thư mục bên trái Workspace) hỗ trợ hiển thị danh sách các file `.tex` và ảnh/assets trong dự án. → *E1a mới có **tab phẳng** trong `ProjectFileEditor`; cây lồng + assets vẫn cần làm.*
+- **FE-2.2 `[Platform]`:** Quản lý state Multi-tab với Zustand (cho phép click mở nhiều tab file cùng lúc trên giao diện như một IDE thực thụ). → *Chưa: E1a dùng `useState`, một pane editor cho tab đang chọn (không mở song song nhiều tab).*
+- **FE-2.3 `[AI-Core]`:** ✅ *(E1a)* Thêm giao diện chỉ định "Root File" (file gốc để gọi lệnh biên dịch PDF). → *nút "đặt làm file gốc" per-tab + ★ đánh dấu root; PATCH gửi `rootFile`.*
+- **FE-2.4 `[Platform]`:** 🔄 **Single-file ✅ (2026-07-16), multi-file còn.** Auto-save nháp qua React Query `useMutation` + debounce 1500ms cho editor single-file (`DocumentWorkspace`): PATCH thêm cờ `compile:false` (persist latex, **không** biên dịch, giữ pdf/log/error, không đổi `attempts`); tách biên dịch thành nút **"Biên dịch"** tường minh (shadcn `Button`); chỉ báo trạng thái auto-save (shadcn `Spinner`: Đang lưu/Đã lưu/Lưu nháp lỗi); bỏ "Hoàn tác". Test: 2 integration case cho nhánh `compile:false`. **Còn: auto-save cho `ProjectFileEditor` (multi-file)** — cờ backend đã dùng chung, chỉ cần nối FE (lát sau).
 
 ### 🟡 Phase 3: Lắp ráp Tài liệu Agentic (E2 - Agentic Multi-step Assembly)
 

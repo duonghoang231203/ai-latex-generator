@@ -1,0 +1,30 @@
+# lib/prompt-eval/promptfooconfig.chemistry.yaml
+# Eval template `chemistry` bằng MockProvider (tất định, $0) — CI/regression. Theo pattern
+# promptfooconfig.report.yaml. Chạy từ ROOT:
+#   npx promptfoo eval -c lib/prompt-eval/promptfooconfig.chemistry.yaml
+description: "Chemistry template — MockProvider (deterministic) trên dataset chemistry/"
+
+prompts:
+  - "{{description}}"
+
+providers:
+  - id: file://./providers/chemistry-provider.ts
+    label: chemistry-mock
+
+tests:
+  - file://./datasets/chemistry/cases.yaml
+
+defaultTest:
+  assert:
+    - type: contains
+      value: "\\documentclass{article}"
+    - type: contains
+      value: "\\usepackage{mhchem}"
+    - type: contains
+      value: "\\ce{"
+    - type: contains
+      value: "\\begin{document}"
+    - type: contains
+      value: "\\end{document}"
+    - type: javascript
+      value: file://./scorers/validate-latex.ts

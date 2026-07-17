@@ -1,0 +1,29 @@
+# lib/prompt-eval/datasets/chemistry/cases.yaml
+# Test case cho template `chemistry` (mhchem \ce{}). Theo pattern report/math cases.yaml.
+# vars.templateId = "chemistry" (validate-latex scorer đọc để lấy đúng packageAllowlist).
+# Assertion chung (article class, mhchem, \ce{}, validate-latex) đặt ở defaultTest của config —
+# mỗi case chỉ khai báo vars, để defaultTest lo output-contract + compliance.
+
+- description: "combustion — phản ứng đốt cháy metan"
+  vars:
+    templateId: chemistry
+    description: "Viết tài liệu về phản ứng đốt cháy khí metan, kèm phương trình phản ứng cân bằng."
+  assert: []
+
+- description: "equilibrium — tổng hợp amoniac (Haber), có cân bằng"
+  vars:
+    templateId: chemistry
+    description: "Trình bày phản ứng tổng hợp amoniac theo quy trình Haber và trạng thái cân bằng."
+  assert: []
+
+- description: "acid-base — trung hòa axit-bazơ"
+  vars:
+    templateId: chemistry
+    description: "Giải thích phản ứng trung hòa giữa axit clohydric (HCl) và natri hydroxit (NaOH)."
+  assert: []
+
+- description: "vietnamese-lab — tiếng Việt có dấu đầy đủ (Unicode + font)"
+  vars:
+    templateId: chemistry
+    description: "Báo cáo thí nghiệm điều chế khí oxi bằng cách nhiệt phân kali pemanganat trong phòng thí nghiệm."
+  assert: []

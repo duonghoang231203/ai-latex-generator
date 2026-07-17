@@ -1,0 +1,30 @@
+# lib/prompt-eval/promptfooconfig.engineering.yaml
+# Eval template `engineering` bằng MockProvider (tất định, $0) — CI/regression. Theo pattern
+# promptfooconfig.physics.yaml. Chạy từ ROOT:
+#   npx promptfoo eval -c lib/prompt-eval/promptfooconfig.engineering.yaml
+description: "Engineering template — MockProvider (deterministic) trên dataset engineering/"
+
+prompts:
+  - "{{description}}"
+
+providers:
+  - id: file://./providers/engineering-provider.ts
+    label: engineering-mock
+
+tests:
+  - file://./datasets/engineering/cases.yaml
+
+defaultTest:
+  assert:
+    - type: contains
+      value: "\\documentclass{article}"
+    - type: contains
+      value: "\\usepackage{circuitikz}"
+    - type: contains
+      value: "\\begin{circuitikz}"
+    - type: contains
+      value: "\\SI{"
+    - type: contains
+      value: "\\end{document}"
+    - type: javascript
+      value: file://./scorers/validate-latex.ts

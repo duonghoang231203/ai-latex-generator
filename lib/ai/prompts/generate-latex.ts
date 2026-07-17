@@ -22,6 +22,19 @@ function buildStructureHint(input: GenerateInput): string {
     if (t.packages.length > 0) {
       lines.push(`Recommended packages (use when appropriate): ${t.packages.join(", ")}.`);
     }
+    // Tell the AI the FULL package allowlist up-front + "use ONLY these". validateLatex() enforces
+    // this same list post-hoc, so surfacing it here cuts repair cycles (root-cause fix — the generate
+    // prompt previously only exposed `packages`, the 4 base ones, so the model freely added others.
+    // See report template eval in docs/backend-roadmap.md § Phase 6). fontspec is always injected by
+    // the template system; inputenc/fontenc are pdfLaTeX-only and rejected under XeLaTeX + fontspec.
+    if (t.packageAllowlist && t.packageAllowlist.length > 0) {
+      lines.push(
+        "ALLOWED PACKAGES (exhaustive) — \\usepackage ONLY these, and NOTHING else: " +
+          `${t.packageAllowlist.join(", ")} (fontspec is added automatically). ` +
+          "If a feature seems to need another package, use an allowed one or plain LaTeX instead. " +
+          "Never use inputenc or fontenc — this compiles with XeLaTeX + fontspec (UTF-8 is native).",
+      );
+    }
     return lines.filter(Boolean).join(" ");
   }
 

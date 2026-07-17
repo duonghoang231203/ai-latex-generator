@@ -1,0 +1,32 @@
+# lib/prompt-eval/promptfooconfig.chemistry.real-ai.yaml
+# Eval template `chemistry` bằng AI THẬT (đọc .env qua getProvider(); AI_PROVIDER=sotatek-anthropic,
+# AI_MODEL=deepseek/deepseek-v4-pro). TỐN API QUOTA THẬT mỗi lần chạy. Theo pattern
+# promptfooconfig.report.real-ai.yaml.
+#   npx promptfoo eval -c lib/prompt-eval/promptfooconfig.chemistry.real-ai.yaml -o <out>.json
+description: "Chemistry template — AI THẬT trên dataset chemistry/"
+
+prompts:
+  - "{{description}}"
+
+providers:
+  - id: file://./providers/chemistry-real-ai-provider.ts
+    label: chemistry-real-ai
+
+tests:
+  - file://./datasets/chemistry/cases.yaml
+
+defaultTest:
+  assert:
+    # regex: chấp nhận \documentclass[opt]{article}. Backslash PHẢI escape (\\) — nếu không, \d bị
+    # hiểu là "chữ số" (bug đã gặp ở report real-ai config lần đầu).
+    - type: regex
+      value: '\\documentclass(\[[^\]]*\])?\{article\}'
+    # regex (not contains): mhchem is idiomatically loaded as \usepackage[version=4]{mhchem}.
+    - type: regex
+      value: '\\usepackage(\[[^\]]*\])?\{mhchem\}'
+    - type: contains
+      value: "\\ce{"
+    - type: contains
+      value: "\\end{document}"
+    - type: javascript
+      value: file://./scorers/validate-latex.ts

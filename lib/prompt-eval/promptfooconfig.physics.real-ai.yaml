@@ -1,0 +1,32 @@
+# lib/prompt-eval/promptfooconfig.physics.real-ai.yaml
+# Eval template `physics` bằng AI THẬT (đọc .env qua getProvider(); AI_PROVIDER=sotatek-anthropic,
+# AI_MODEL=deepseek/deepseek-v4-pro). TỐN API QUOTA THẬT mỗi lần chạy. Theo pattern
+# promptfooconfig.chemistry.real-ai.yaml.
+#   npx promptfoo eval -c lib/prompt-eval/promptfooconfig.physics.real-ai.yaml -o <out>.json
+description: "Physics template — AI THẬT trên dataset physics/"
+
+prompts:
+  - "{{description}}"
+
+providers:
+  - id: file://./providers/physics-real-ai-provider.ts
+    label: physics-real-ai
+
+tests:
+  - file://./datasets/physics/cases.yaml
+
+defaultTest:
+  assert:
+    # regex: chấp nhận \documentclass[opt]{article}. Backslash PHẢI escape (\\).
+    - type: regex
+      value: '\\documentclass(\[[^\]]*\])?\{article\}'
+    # siunitx phải được nạp (regex để chấp nhận cả option nếu có)
+    - type: regex
+      value: '\\usepackage(\[[^\]]*\])?\{siunitx\}'
+    # và phải THỰC SỰ dùng siunitx cho đại lượng/đơn vị (\SI/\si/\qty/\num)
+    - type: regex
+      value: '\\(SI|si|qty|num)\{'
+    - type: contains
+      value: "\\end{document}"
+    - type: javascript
+      value: file://./scorers/validate-latex.ts

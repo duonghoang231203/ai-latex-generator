@@ -113,6 +113,60 @@ describe("/api/documents CRUD + chat", () => {
     expect(updated.title).toBe("Tên mới");
   });
 
+  it("PATCH single-file: package không trong allowlist template → lỗi validate, không compile", async () => {
+    const doc = await createDoc(); // template mặc định "academic"
+    const fetchSpy = vi.fn();
+    vi.stubGlobal("fetch", fetchSpy);
+    const res = await patchPATCH(
+      jsonReq(
+        `http://localhost/api/documents/${doc.id}`,
+        {
+          latex:
+            "\\documentclass{article}\\usepackage{totallynotallowedpkg}\\begin{document}x\\end{document}",
+        },
+        "PATCH",
+      ),
+      ctx(doc.id),
+    );
+    expect(res.status).toBe(200);
+    const updated = (await res.json()) as StoredDocument;
+    expect(updated.error).toBeTruthy();
+    expect(updated.log ?? "").toContain("totallynotallowedpkg");
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it("PATCH compile:false (auto-save) → persist latex, KHÔNG gọi compile-service, giữ pdf + attempts", async () => {
+    const doc = await createDoc();
+    const originalPdf = doc.pdfBase64;
+    expect(originalPdf && originalPdf.length).toBeGreaterThan(0);
+    expect(doc.attempts).toBe(1);
+
+    // Sau khi tạo xong: thay fetch bằng spy để chứng minh auto-save KHÔNG chạm compile-service.
+    const fetchSpy = vi.fn();
+    vi.stubGlobal("fetch", fetchSpy);
+
+    const draft = "\\documentclass{article}\\begin{document}Nháp tự động\\end{document}";
+    const res = await patchPATCH(
+      jsonReq(`http://localhost/api/documents/${doc.id}`, { latex: draft, compile: false }, "PATCH"),
+      ctx(doc.id),
+    );
+    expect(res.status).toBe(200);
+    const updated = (await res.json()) as StoredDocument;
+    expect(updated.latex).toBe(draft); // đã persist
+    expect(updated.pdfBase64).toBe(originalPdf); // pdf giữ nguyên (không biên dịch)
+    expect(updated.attempts).toBe(doc.attempts); // attempts không đổi (draft-save ≠ 1 lần compile)
+    expect(fetchSpy).not.toHaveBeenCalled(); // KHÔNG gọi compile-service
+  });
+
+  it("PATCH compile:false với latex rỗng → vẫn 400 (chặn rỗng)", async () => {
+    const doc = await createDoc();
+    const res = await patchPATCH(
+      jsonReq(`http://localhost/api/documents/${doc.id}`, { latex: "   ", compile: false }, "PATCH"),
+      ctx(doc.id),
+    );
+    expect(res.status).toBe(400);
+  });
+
   it("POST chat áp dụng chỉ thị → latex mới + lịch sử chat", async () => {
     const doc = await createDoc();
     const res = await chatPOST(

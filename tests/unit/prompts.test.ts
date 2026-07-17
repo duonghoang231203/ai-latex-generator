@@ -291,6 +291,17 @@ describe("buildGeneratePrompt", () => {
     expect(p).toContain("TYPE: Mathematics document");
   });
 
+  it("injects the template's packageAllowlist up-front with a 'use ONLY these' contract", () => {
+    const p = buildGeneratePrompt({ description: "x", docType: "article", template: "math" });
+    // "ALLOWED PACKAGES" + the inputenc guard are unique to the generic injection (not in math's
+    // own promptGuidance) — so this asserts the buildStructureHint allowlist injection specifically.
+    expect(p).toContain("ALLOWED PACKAGES");
+    expect(p).toContain("inputenc");
+    // math's allowlist packages must be present in the injected list.
+    expect(p).toContain("amsthm");
+    expect(p).toContain("mathtools");
+  });
+
   it("uses docType fallback guidance when no template", () => {
     const p = buildGeneratePrompt({ description: "x", docType: "report" });
     expect(p).toContain("Report structure");

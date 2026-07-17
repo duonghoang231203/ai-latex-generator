@@ -1,0 +1,939 @@
+{
+  "evalId": "eval-58B-2026-07-17T10:09:29",
+  "results": {
+    "version": 3,
+    "timestamp": "2026-07-17T10:09:29.693Z",
+    "prompts": [
+      {
+        "id": "1e6bd1d5aab4bf787795c1f9955d1ac1cc90fa253cfff6883a3c44dd53037d25",
+        "raw": "{{description}}",
+        "label": "{{description}}",
+        "provider": "letter-real-ai",
+        "metrics": {
+          "score": 4,
+          "testPassCount": 4,
+          "testFailCount": 0,
+          "testErrorCount": 0,
+          "assertPassCount": 28,
+          "assertFailCount": 0,
+          "totalLatencyMs": 176423,
+          "tokenUsage": {
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "total": 0,
+            "numRequests": 4,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            },
+            "assertions": {
+              "total": 0,
+              "prompt": 0,
+              "completion": 0,
+              "cached": 0,
+              "numRequests": 0,
+              "completionDetails": {
+                "reasoning": 0,
+                "acceptedPrediction": 0,
+                "rejectedPrediction": 0,
+                "cacheReadInputTokens": 0,
+                "cacheCreationInputTokens": 0
+              }
+            }
+          },
+          "namedScores": {},
+          "namedScoresCount": {},
+          "namedScoreWeights": {},
+          "cost": 0
+        }
+      }
+    ],
+    "results": [
+      {
+        "cost": 0,
+        "gradingResult": {
+          "pass": true,
+          "score": 1,
+          "reason": "All assertions passed",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0
+          },
+          "componentResults": [
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "regex",
+                "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{letter\\}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\begin{letter}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\opening{"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\closing{"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "not-contains",
+                "value": "\\section"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\end{document}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "validateLatex: OK — không có diagnostic.",
+              "assertion": {
+                "type": "javascript",
+                "value": "file://./scorers/validate-latex.ts"
+              }
+            }
+          ]
+        },
+        "id": "982c5747-c323-44ed-aa27-89103f504258",
+        "latencyMs": 49677,
+        "namedScores": {},
+        "prompt": {
+          "raw": "Viết thư xin việc ứng tuyển vị trí kỹ sư phần mềm tại một công ty công nghệ.",
+          "label": "{{description}}",
+          "config": {}
+        },
+        "promptId": "1e6bd1d5aab4bf787795c1f9955d1ac1cc90fa253cfff6883a3c44dd53037d25",
+        "promptIdx": 0,
+        "provider": {
+          "id": "letter-real-ai-provider",
+          "label": "letter-real-ai"
+        },
+        "response": {
+          "output": "\\documentclass[12pt,a4paper]{letter}\n\\usepackage[top=2cm,bottom=2cm,left=2.5cm,right=2.5cm]{geometry}\n\\usepackage{hyperref}\n\\usepackage{xcolor}\n\n\\signature{Nguyễn Minh Tuấn}\n\\address{\n    Số 15, ngõ 28, đường Hoàng Quốc Việt \\\\\n    Phường Nghĩa Đô, Quận Cầu Giấy \\\\\n    Hà Nội, Việt Nam \\\\\n    \\href{mailto:minhtuan.nguyen@email.com}{minhtuan.nguyen@email.com} \\\\\n    Điện thoại: 0987 654 321\n}\n\n\\begin{document}\n\\begin{letter}{\n    Kính gửi: Phòng Nhân sự \\\\\n    Công ty Cổ phần Công nghệ Alpha \\\\\n    Tầng 8, tòa nhà Tech Tower \\\\\n    63 Lê Văn Lương, Quận Thanh Xuân \\\\\n    Hà Nội\n}\n\n\\opening{Kính gửi Ông/Bà Trưởng phòng Tuyển dụng,}\n\nTôi viết thư này để bày tỏ sự quan tâm sâu sắc đến vị trí \\textbf{Kỹ sư Phần mềm} tại Công ty Cổ phần Công nghệ Alpha mà Quý công ty đang đăng tuyển. Qua kênh thông tin tuyển dụng trên LinkedIn và website chính thức của công ty, tôi đặc biệt ấn tượng với định hướng phát triển các sản phẩm trí tuệ nhân tạo ứng dụng trong doanh nghiệp mà Quý công ty tiên phong. Với nền tảng chuyên môn vững chắc và niềm đam mê công nghệ, tôi tin rằng mình có thể đóng góp tích cực vào sự thành công của đội ngũ kỹ thuật.\n\nTôi tốt nghiệp loại Giỏi ngành Khoa học Máy tính tại Đại học Bách khoa Hà Nội vào tháng 6 năm 2022, với điểm trung bình tích lũy 3.53/4.0. Đề tài tốt nghiệp của tôi, \\textit{“Xây dựng hệ thống gợi ý sản phẩm dựa trên học sâu cho nền tảng thương mại điện tử”}, đã đạt điểm A và được hội đồng đánh giá cao về tính thực tiễn. Trong suốt quá trình học, tôi đã tích lũy kiến thức sâu về cấu trúc dữ liệu và giải thuật, hệ điều hành, mạng máy tính cũng như các mô hình phát triển phần mềm hiện đại.\n\nSau khi ra trường, tôi có hai năm kinh nghiệm làm việc với vai trò Kỹ sư Phần mềm tại Công ty TNHH Phần mềm FPT. Tại đây, tôi trực tiếp tham gia phát triển và bảo trì hệ thống quản lý quan hệ khách hàng (CRM) phục vụ hơn 50,000 người dùng, sử dụng công nghệ chính là React (TypeScript), Node.js và cơ sở dữ liệu PostgreSQL. Một trong những đóng góp nổi bật của tôi là tối ưu hóa hiệu năng API, giúp giảm 35\\% thời gian phản hồi và tiết kiệm khoảng 20\\% chi phí vận hành đám mây trên AWS. Tôi cũng chủ động xây dựng các pipeline CI/CD với GitHub Actions, áp dụng kiểm thử tự động và tham gia các phiên code review, góp phần nâng cao chất lượng sản phẩm chung. Bên cạnh đó, tôi thường xuyên sử dụng Python và TensorFlow để phát triển các tiện ích phân tích nội bộ, giúp đội ngũ kinh doanh hiểu rõ hơn về hành vi khách hàng.\n\nViệc ứng tuyển vào Công ty Alpha xuất phát từ sự đồng điệu về định hướng công nghệ. Tôi theo dõi chặt chẽ hành trình phát triển của Alpha từ những ngày đầu ra mắt nền tảng AlphaMind và rất ngưỡng mộ cách công ty kết hợp xử lý ngôn ngữ tự nhiên với tự động hóa quy trình để tạo ra giá trị thực sự cho doanh nghiệp. Tôi khao khát được làm việc trong môi trường khuyến khích đổi mới sáng tạo, nơi tôi có thể áp dụng kinh nghiệm về phát triển full-stack và học hỏi sâu hơn về MLOps, triển khai mô hình học máy ở quy mô lớn. Tôi sẵn sàng tham gia vào các dự án xây dựng backend vững chắc cũng như tối ưu hệ thống dữ liệu để hỗ trợ cho các sản phẩm AI của công ty.\n\nVề kỹ năng mềm, tôi có khả năng giao tiếp hiệu quả và làm việc nhóm tốt, thể hiện qua việc phối hợp thường xuyên với bộ phận sản phẩm và thiết kế trong các dự án Agile/Scrum. Tôi không ngừng học hỏi, hiện đang hoàn thành chứng chỉ AWS Solutions Architect Associate và dành thời gian rảnh để nghiên cứu các bài báo mới về hệ thống phân tán và học tăng cường. Tôi tin rằng thái độ cầu tiến cùng nền tảng kỹ thuật đa dạng sẽ giúp tôi nhanh chóng hòa nhập và đóng góp tại Alpha.\n\nTôi xin gửi kèm theo thư này sơ yếu lý lịch và bảng điểm để Quý công ty tiện tham khảo. Rất mong có cơ hội được trao đổi trực tiếp trong một buổi phỏng vấn để trình bày chi tiết hơn về những gì tôi có thể mang lại cho đội ngũ. Tôi chân thành cảm ơn Quý công ty đã dành thời gian xem xét hồ sơ của tôi.\n\n\\closing{Trân trọng,}\n\n\\cc{Phòng Nhân sự (lưu hồ sơ)}\n\\encl{Sơ yếu lý lịch và bảng điểm}\n\\ps{Tôi sẵn sàng tham gia phỏng vấn trực tiếp hoặc trực tuyến theo lịch của Quý công ty và có thể bắt đầu công việc ngay khi được yêu cầu.}\n\n\\end{letter}\n\\end{document}\n",
+          "metadata": {
+            "finishReason": "stop",
+            "rawFinishReason": "end_turn",
+            "usage": {
+              "inputTokens": 1123,
+              "outputTokens": 2879,
+              "totalTokens": 4002
+            }
+          }
+        },
+        "score": 1,
+        "success": true,
+        "testCase": {
+          "description": "job-application — thư xin việc",
+          "vars": {
+            "templateId": "letter",
+            "description": "Viết thư xin việc ứng tuyển vị trí kỹ sư phần mềm tại một công ty công nghệ."
+          },
+          "assert": [
+            {
+              "type": "regex",
+              "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{letter\\}"
+            },
+            {
+              "type": "contains",
+              "value": "\\begin{letter}"
+            },
+            {
+              "type": "contains",
+              "value": "\\opening{"
+            },
+            {
+              "type": "contains",
+              "value": "\\closing{"
+            },
+            {
+              "type": "not-contains",
+              "value": "\\section"
+            },
+            {
+              "type": "contains",
+              "value": "\\end{document}"
+            },
+            {
+              "type": "javascript",
+              "value": "file://./scorers/validate-latex.ts"
+            }
+          ],
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 0,
+        "tokenUsage": {
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "total": 0,
+          "numRequests": 1,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          },
+          "assertions": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          }
+        },
+        "vars": {
+          "templateId": "letter",
+          "description": "Viết thư xin việc ứng tuyển vị trí kỹ sư phần mềm tại một công ty công nghệ."
+        },
+        "metadata": {
+          "finishReason": "stop",
+          "rawFinishReason": "end_turn",
+          "usage": {
+            "inputTokens": 1123,
+            "outputTokens": 2879,
+            "totalTokens": 4002
+          },
+          "_promptfooFileMetadata": {}
+        },
+        "failureReason": 0
+      },
+      {
+        "cost": 0,
+        "gradingResult": {
+          "pass": true,
+          "score": 1,
+          "reason": "All assertions passed",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0
+          },
+          "componentResults": [
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "regex",
+                "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{letter\\}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\begin{letter}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\opening{"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\closing{"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "not-contains",
+                "value": "\\section"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\end{document}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "validateLatex: OK — không có diagnostic.",
+              "assertion": {
+                "type": "javascript",
+                "value": "file://./scorers/validate-latex.ts"
+              }
+            }
+          ]
+        },
+        "id": "43b674eb-fe86-4153-9d1e-50089987ac79",
+        "latencyMs": 34881,
+        "namedScores": {},
+        "prompt": {
+          "raw": "Viết thư xin nghỉ việc gửi quản lý trực tiếp, thông báo trước 30 ngày.",
+          "label": "{{description}}",
+          "config": {}
+        },
+        "promptId": "1e6bd1d5aab4bf787795c1f9955d1ac1cc90fa253cfff6883a3c44dd53037d25",
+        "promptIdx": 0,
+        "provider": {
+          "id": "letter-real-ai-provider",
+          "label": "letter-real-ai"
+        },
+        "response": {
+          "output": "\\documentclass[12pt]{letter}\n\\usepackage[left=3cm, right=2.5cm, top=2.5cm, bottom=2.5cm]{geometry}\n\\usepackage{hyperref}\n\\usepackage{xcolor}\n\\hypersetup{\n  colorlinks=true,\n  linkcolor=blue!60!black,\n  urlcolor=blue!60!black\n}\n\n\\address{\n  Nguyễn Văn A \\\\\n  Số 42, đường Nguyễn Huệ \\\\\n  Quận 1, TP. Hồ Chí Minh \\\\\n  \\href{mailto:nguyenvana@email.com}{nguyenvana@email.com} \\\\\n  Điện thoại: 0901 234 567\n}\n\n\\signature{\n  \\textbf{Nguyễn Văn A} \\\\\n  Nhân viên Phòng Phát triển Kinh doanh \\\\\n  \\href{mailto:nguyenvana@email.com}{nguyenvana@email.com}\n}\n\n\\date{ngày 16 tháng 5 năm 2025}\n\n\\begin{document}\n\n\\begin{letter}{\n  Chị Trần Thị B \\\\\n  Trưởng phòng Phát triển Kinh doanh \\\\\n  Công ty TNHH ABC \\\\\n  Tầng 5, Tòa nhà Sunwah, 115 Nguyễn Huệ \\\\\n  Quận 1, TP. Hồ Chí Minh\n}\n\n\\opening{Kính gửi chị Trần Thị B,}\n\nTrước hết, tôi xin gửi lời chào trân trọng và lời cảm ơn chân thành nhất tới chị, người đã trực tiếp hướng dẫn, hỗ trợ và tạo điều kiện cho tôi trong suốt thời gian làm việc tại Công ty TNHH ABC. Sau một thời gian dài suy nghĩ và cân nhắc kỹ lưỡng về định hướng nghề nghiệp cá nhân cũng như những mục tiêu dài hạn của bản thân, tôi viết thư này để chính thức thông báo về quyết định nghỉ việc của mình.\n\nTheo đúng quy định của công ty và hợp đồng lao động đã ký kết, tôi xin phép được nghỉ việc với thời hạn báo trước là 30 ngày, tính từ hôm nay. Như vậy, ngày làm việc cuối cùng của tôi tại công ty sẽ là \\textbf{ngày 15 tháng 6 năm 2025}. Tôi hiểu rằng quyết định này có thể gây ra những xáo trộn nhất định cho hoạt động của phòng cũng như các dự án đang triển khai, và tôi thành thật xin lỗi về sự bất tiện đó.\n\nTôi vô cùng trân trọng những cơ hội mà công ty và chị đã trao cho tôi. Làm việc dưới sự dẫn dắt của chị, tôi đã học hỏi được rất nhiều kiến thức chuyên môn, kỹ năng quản lý khách hàng và đặc biệt là tinh thần làm việc nhóm bền bỉ. Những kinh nghiệm quý báu trong việc xây dựng chiến lược kinh doanh, đàm phán với đối tác và xử lý các tình huống phát sinh sẽ mãi là hành trang vững chắc cho con đường sự nghiệp của tôi sau này.\n\nTrong 30 ngày làm việc còn lại, tôi cam kết sẽ nỗ lực hết sức để hoàn thành các công việc đang dang dở, đặc biệt là báo cáo tổng kết quý II và đề xuất mở rộng thị trường miền Trung đang ở giai đoạn cuối. Tôi sẵn sàng phối hợp cùng chị để lên kế hoạch bàn giao chi tiết, tập huấn cho nhân sự kế nhiệm (nếu có), và hỗ trợ đồng nghiệp trong bất kỳ nhiệm vụ nào cần thiết nhằm bảo đảm quá trình chuyển giao diễn ra suôn sẻ, không ảnh hưởng đến tiến độ chung.\n\nMột lần nữa, tôi xin bày tỏ lòng biết ơn sâu sắc tới chị và toàn thể anh chị em trong phòng Phát triển Kinh doanh. Tôi hy vọng rằng dù không còn là đồng nghiệp, chúng ta vẫn sẽ giữ được mối quan hệ tốt đẹp và có dịp hợp tác trong tương lai. Kính chúc chị dồi dào sức khỏe, gia đình hạnh phúc và đạt được nhiều thành công hơn nữa trong sự nghiệp quản lý.\n\n\\closing{Trân trọng,}\n\n\\ps{P.S. Tôi sẽ gửi bản mềm đơn xin nghỉ việc qua email trong ngày hôm nay để chị tiện theo dõi.}\n\n\\encl{Đơn xin nghỉ việc (bản in đính kèm)}\n\n\\end{letter}\n\n\\end{document}\n",
+          "metadata": {
+            "finishReason": "stop",
+            "rawFinishReason": "end_turn",
+            "usage": {
+              "inputTokens": 1123,
+              "outputTokens": 2101,
+              "totalTokens": 3224
+            }
+          }
+        },
+        "score": 1,
+        "success": true,
+        "testCase": {
+          "description": "resignation — thư xin nghỉ việc",
+          "vars": {
+            "templateId": "letter",
+            "description": "Viết thư xin nghỉ việc gửi quản lý trực tiếp, thông báo trước 30 ngày."
+          },
+          "assert": [
+            {
+              "type": "regex",
+              "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{letter\\}"
+            },
+            {
+              "type": "contains",
+              "value": "\\begin{letter}"
+            },
+            {
+              "type": "contains",
+              "value": "\\opening{"
+            },
+            {
+              "type": "contains",
+              "value": "\\closing{"
+            },
+            {
+              "type": "not-contains",
+              "value": "\\section"
+            },
+            {
+              "type": "contains",
+              "value": "\\end{document}"
+            },
+            {
+              "type": "javascript",
+              "value": "file://./scorers/validate-latex.ts"
+            }
+          ],
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 1,
+        "tokenUsage": {
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "total": 0,
+          "numRequests": 1,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          },
+          "assertions": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          }
+        },
+        "vars": {
+          "templateId": "letter",
+          "description": "Viết thư xin nghỉ việc gửi quản lý trực tiếp, thông báo trước 30 ngày."
+        },
+        "metadata": {
+          "finishReason": "stop",
+          "rawFinishReason": "end_turn",
+          "usage": {
+            "inputTokens": 1123,
+            "outputTokens": 2101,
+            "totalTokens": 3224
+          },
+          "_promptfooFileMetadata": {}
+        },
+        "failureReason": 0
+      },
+      {
+        "cost": 0,
+        "gradingResult": {
+          "pass": true,
+          "score": 1,
+          "reason": "All assertions passed",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0
+          },
+          "componentResults": [
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "regex",
+                "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{letter\\}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\begin{letter}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\opening{"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\closing{"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "not-contains",
+                "value": "\\section"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\end{document}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "validateLatex: OK — không có diagnostic.",
+              "assertion": {
+                "type": "javascript",
+                "value": "file://./scorers/validate-latex.ts"
+              }
+            }
+          ]
+        },
+        "id": "5e33b54f-5c4d-447d-93ac-641199e3299b",
+        "latencyMs": 59136,
+        "namedScores": {},
+        "prompt": {
+          "raw": "Viết thư giới thiệu một sinh viên xin học bổng sau đại học.",
+          "label": "{{description}}",
+          "config": {}
+        },
+        "promptId": "1e6bd1d5aab4bf787795c1f9955d1ac1cc90fa253cfff6883a3c44dd53037d25",
+        "promptIdx": 0,
+        "provider": {
+          "id": "letter-real-ai-provider",
+          "label": "letter-real-ai"
+        },
+        "response": {
+          "output": "\\documentclass{letter}\n\\usepackage{fontspec}\n\\usepackage[top=2cm, bottom=2cm, left=2.5cm, right=2.5cm, a4paper]{geometry}\n\\usepackage{hyperref}\n\\hypersetup{hidelinks}\n\n\\address{Khoa Toán -- Thống kê \\\\ Trường Đại học Đà Lạt \\\\ 01 Phù Đổng Thiên Vương, P.8 \\\\ Đà Lạt, Lâm Đồng, Việt Nam}\n\n\\signature{PGS. TS. Nguyễn Thị Lan \\\\ Email: lan.nguyen@dlu.edu.vn \\\\ ĐT: 0912 345 678}\n\n\\date{Đà Lạt, ngày 15 tháng 6 năm 2025}\n\n\\begin{document}\n\\begin{letter}{\nHội đồng Tuyển chọn Học bổng Sau đại học \\\\\nTrường Đại học Bách khoa Hà Nội \\\\\nSố 1 Đại Cồ Việt, Hai Bà Trưng \\\\\nHà Nội}\n\\opening{Kính gửi Quý Hội đồng,}\n\nTôi viết thư này để nhiệt liệt giới thiệu sinh viên Lê Minh Tuấn, ứng viên mà tôi đã trực tiếp hướng dẫn và theo dõi trong suốt bốn năm học tại Khoa Công nghệ Thông tin, Trường Đại học Đà Lạt. Với tư cách là giảng viên phụ trách nhiều môn chuyên ngành cốt lõi và là người đồng hành cùng em trong nhóm nghiên cứu, tôi có đủ cơ sở để khẳng định rằng Tuấn là một trong những sinh viên xuất sắc và giàu tiềm năng nhất mà tôi từng có cơ hội giảng dạy. Khả năng tự học, tư duy phân tích sắc bén cùng tinh thần cầu thị đã tạo cho em một nền tảng vững chắc để tiếp tục chinh phục bậc học sau đại học.\n\nTrong suốt quá trình học tập, Tuấn luôn đứng đầu khóa ở các môn đòi hỏi tư duy thuật toán và khả năng trừu tượng cao như Cấu trúc dữ liệu và giải thuật, Trí tuệ nhân tạo và Học máy. Điểm trung bình tích lũy toàn khóa của em đạt 3.82/4.0, nằm trong nhóm 2\\% sinh viên xuất sắc nhất của trường năm 2025. Không dừng lại ở thành tích lớp học, Tuấn còn chủ động tham gia vào nhóm nghiên cứu Xử lý tiếng nói và Ngôn ngữ tự nhiên do tôi điều phối. Tại đây, em đã đóng vai trò nòng cốt trong dự án xây dựng hệ thống nhận dạng tiếng Việt từ các cuộc hội thoại y tế, một bài toán vừa có ý nghĩa thực tiễn vừa đặt ra nhiều thách thức về nhiễu và đa dạng giọng vùng miền. Kết quả nghiên cứu đã được chúng tôi công bố tại Hội nghị Khoa học Công nghệ Quốc gia lần thứ XXVI và nhận được phản hồi tích cực từ cộng đồng. Quá trình làm việc cùng Tuấn cho thấy em không chỉ nắm vững các mô hình học sâu như Transformer, Conformer mà còn có khả năng thực nghiệm cẩn trọng và thói quen viết báo cáo rõ ràng, chuẩn mực – những phẩm chất không thể thiếu của một nghiên cứu viên tương lai.\n\nVề phẩm chất cá nhân, Tuấn là người khiêm tốn, chăm chỉ và đặc biệt kiên trì trước những bài toán khó. Tôi từng chứng kiến em dành nhiều tuần liên tục để gỡ lỗi một mô‑đun trích xuất đặc trưng âm thanh, kiểm tra tỉ mỉ từng khung dữ liệu thay vì vội vàng chuyển hướng. Sự chín chắn đó, kết hợp với tinh thần sẵn sàng hỗ trợ các bạn cùng nhóm, khiến Tuấn trở thành một thành viên đáng tin cậy trong bất kỳ môi trường học thuật nào. Tôi tin tưởng rằng với năng lực chuyên môn và thái độ làm việc nghiêm túc, em hoàn toàn có thể thành công ở chương trình thạc sĩ hoặc tiến sĩ và sớm có những đóng góp thiết thực cho lĩnh vực trí tuệ nhân tạo ứng dụng.\n\nVì những lý do trên, tôi xin dành cho Lê Minh Tuấn sự tiến cử mạnh mẽ nhất. Quý Hội đồng có thể hoàn toàn yên tâm về năng lực học thuật, phẩm chất đạo đức cũng như tiềm năng phát triển của em. Nếu cần thêm bất kỳ thông tin chi tiết nào, xin đừng ngần ngại liên hệ với tôi qua email hoặc điện thoại đã nêu dưới chữ ký.\n\n\\closing{Trân trọng,}\n\n\\ps{Xin vui lòng liên hệ với tôi qua email \\texttt{lan.nguyen@dlu.edu.vn} hoặc số điện thoại 0912 345 678 nếu Quý Hội đồng cần trao đổi thêm.}\n\n\\end{letter}\n\\end{document}\n",
+          "metadata": {
+            "finishReason": "stop",
+            "rawFinishReason": "end_turn",
+            "usage": {
+              "inputTokens": 1113,
+              "outputTokens": 3438,
+              "totalTokens": 4551
+            }
+          }
+        },
+        "score": 1,
+        "success": true,
+        "testCase": {
+          "description": "recommendation — thư giới thiệu",
+          "vars": {
+            "templateId": "letter",
+            "description": "Viết thư giới thiệu một sinh viên xin học bổng sau đại học."
+          },
+          "assert": [
+            {
+              "type": "regex",
+              "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{letter\\}"
+            },
+            {
+              "type": "contains",
+              "value": "\\begin{letter}"
+            },
+            {
+              "type": "contains",
+              "value": "\\opening{"
+            },
+            {
+              "type": "contains",
+              "value": "\\closing{"
+            },
+            {
+              "type": "not-contains",
+              "value": "\\section"
+            },
+            {
+              "type": "contains",
+              "value": "\\end{document}"
+            },
+            {
+              "type": "javascript",
+              "value": "file://./scorers/validate-latex.ts"
+            }
+          ],
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 2,
+        "tokenUsage": {
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "total": 0,
+          "numRequests": 1,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          },
+          "assertions": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          }
+        },
+        "vars": {
+          "templateId": "letter",
+          "description": "Viết thư giới thiệu một sinh viên xin học bổng sau đại học."
+        },
+        "metadata": {
+          "finishReason": "stop",
+          "rawFinishReason": "end_turn",
+          "usage": {
+            "inputTokens": 1113,
+            "outputTokens": 3438,
+            "totalTokens": 4551
+          },
+          "_promptfooFileMetadata": {}
+        },
+        "failureReason": 0
+      },
+      {
+        "cost": 0,
+        "gradingResult": {
+          "pass": true,
+          "score": 1,
+          "reason": "All assertions passed",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0
+          },
+          "componentResults": [
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "regex",
+                "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{letter\\}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\begin{letter}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\opening{"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\closing{"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "not-contains",
+                "value": "\\section"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\end{document}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "validateLatex: OK — không có diagnostic.",
+              "assertion": {
+                "type": "javascript",
+                "value": "file://./scorers/validate-latex.ts"
+              }
+            }
+          ]
+        },
+        "id": "1e79f6f8-34e5-40d6-a0dd-28ec319681bb",
+        "latencyMs": 32729,
+        "namedScores": {},
+        "prompt": {
+          "raw": "Viết thư cảm ơn đối tác đã hỗ trợ dự án, gửi tới giám đốc công ty.",
+          "label": "{{description}}",
+          "config": {}
+        },
+        "promptId": "1e6bd1d5aab4bf787795c1f9955d1ac1cc90fa253cfff6883a3c44dd53037d25",
+        "promptIdx": 0,
+        "provider": {
+          "id": "letter-real-ai-provider",
+          "label": "letter-real-ai"
+        },
+        "response": {
+          "output": "\\documentclass{letter}\n\\usepackage[top=2.5cm, bottom=2.5cm, left=2.5cm, right=2.5cm]{geometry}\n\\usepackage{hyperref}\n\\usepackage{xcolor}\n\n\\signature{Nguyễn Văn A \\\\ \\small{Giám đốc Kinh doanh, Công ty ABC}}\n\n\\address{Công ty Cổ phần ABC \\\\ Tầng 5, Tòa nhà Sunrise, 123 Đường Lê Lợi \\\\ Quận 1, TP. Hồ Chí Minh \\\\ Điện thoại: (028) 1234 5678 \\\\ Email: \\href{mailto:nguyenvana@abc.com.vn}{nguyenvana@abc.com.vn}}\n\n\\begin{document}\n\n\\begin{letter}{Ông/Bà Trần Thị B \\\\ Giám đốc Công ty TNHH XYZ \\\\ 456 Đường Trần Hưng Đạo \\\\ Quận 5, TP. Hồ Chí Minh}\n\n\\opening{Kính gửi Ông/Bà Trần Thị B,}\n\nTrước hết, thay mặt Công ty Cổ phần ABC, tôi xin gửi lời cảm ơn chân thành và sâu sắc nhất đến cá nhân Ông/Bà và toàn thể đội ngũ Công ty TNHH XYZ vì sự hỗ trợ quý báu và hợp tác chặt chẽ trong suốt thời gian triển khai Dự án Hiện đại hóa Hạ tầng Công nghệ Thông tin vừa qua. Sự đồng hành của Quý công ty đã đóng góp một phần không nhỏ vào thành công chung của dự án.\n\nTrong quá trình thực hiện, những tư vấn kỹ thuật chuyên sâu, giải pháp xử lý linh hoạt khi phát sinh sự cố, cùng với sự chia sẻ nguồn lực kịp thời từ phía XYZ đã giúp chúng tôi vượt qua nhiều thách thức, đảm bảo tiến độ và chất lượng công việc. Đặc biệt, sự có mặt thường xuyên của đội ngũ kỹ sư tại hiện trường và tinh thần cầu thị, trách nhiệm cao đã tạo nên một môi trường phối hợp hiệu quả, gắn kết giữa hai bên. Chúng tôi đánh giá rất cao năng lực chuyên môn, đạo đức nghề nghiệp và thiện chí hợp tác mà Quý đối tác đã thể hiện.\n\nThành công của dự án không chỉ mở ra cơ hội phát triển mới cho ABC mà còn minh chứng cho sức mạnh của mối quan hệ đối tác chiến lược giữa hai công ty. Tôi tin tưởng rằng với nền tảng hợp tác bền vững này, chúng ta sẽ tiếp tục gặt hái thêm nhiều thành tựu trong các dự án sắp tới. Công ty ABC rất mong muốn được đồng hành cùng XYZ trong những giai đoạn tiếp theo, mở rộng phạm vi hợp tác sang các lĩnh vực liên quan đến chuyển đổi số và an ninh mạng.\n\nMột lần nữa, tôi xin chân thành cảm ơn sự hỗ trợ quý báu của Ông/Bà và tập thể Công ty XYZ. Kính chúc Ông/Bà cùng toàn thể cán bộ nhân viên dồi dào sức khỏe, hạnh phúc và thành công. Chúc Quý công ty ngày càng phát triển vững mạnh.\n\nHy vọng sẽ có dịp gặp lại Ông/Bà trong buổi họp tổng kết dự án dự kiến vào cuối tháng này để cùng nhìn lại những kết quả đã đạt được và định hướng cho chặng đường sắp tới.\n\n\\closing{Trân trọng,}\n\n\\cc{Phòng Dự án – Công ty ABC}\n\\encl{Báo cáo tổng kết Dự án Hiện đại hóa Hạ tầng CNTT}\n\\ps{Tái bút: Tôi chân thành cảm ơn sự chu đáo của đội kỹ thuật XYZ trong đợt chạy thử nghiệm cuối cùng; sự tỉ mỉ đó đã tạo ấn tượng rất tốt với khách hàng của chúng tôi.}\n\n\\end{letter}\n\n\\end{document}\n",
+          "metadata": {
+            "finishReason": "stop",
+            "rawFinishReason": "end_turn",
+            "usage": {
+              "inputTokens": 1126,
+              "outputTokens": 1899,
+              "totalTokens": 3025
+            }
+          }
+        },
+        "score": 1,
+        "success": true,
+        "testCase": {
+          "description": "thank-you — thư cảm ơn trang trọng",
+          "vars": {
+            "templateId": "letter",
+            "description": "Viết thư cảm ơn đối tác đã hỗ trợ dự án, gửi tới giám đốc công ty."
+          },
+          "assert": [
+            {
+              "type": "regex",
+              "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{letter\\}"
+            },
+            {
+              "type": "contains",
+              "value": "\\begin{letter}"
+            },
+            {
+              "type": "contains",
+              "value": "\\opening{"
+            },
+            {
+              "type": "contains",
+              "value": "\\closing{"
+            },
+            {
+              "type": "not-contains",
+              "value": "\\section"
+            },
+            {
+              "type": "contains",
+              "value": "\\end{document}"
+            },
+            {
+              "type": "javascript",
+              "value": "file://./scorers/validate-latex.ts"
+            }
+          ],
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 3,
+        "tokenUsage": {
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "total": 0,
+          "numRequests": 1,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          },
+          "assertions": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          }
+        },
+        "vars": {
+          "templateId": "letter",
+          "description": "Viết thư cảm ơn đối tác đã hỗ trợ dự án, gửi tới giám đốc công ty."
+        },
+        "metadata": {
+          "finishReason": "stop",
+          "rawFinishReason": "end_turn",
+          "usage": {
+            "inputTokens": 1126,
+            "outputTokens": 1899,
+            "totalTokens": 3025
+          },
+          "_promptfooFileMetadata": {}
+        },
+        "failureReason": 0
+      }
+    ],
+    "stats": {
+      "successes": 4,
+      "failures": 0,
+      "errors": 0,
+      "tokenUsage": {
+        "prompt": 0,
+        "completion": 0,
+        "cached": 0,
+        "total": 0,
+        "numRequests": 4,
+        "completionDetails": {
+          "reasoning": 0,
+          "acceptedPrediction": 0,
+          "rejectedPrediction": 0,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0
+        },
+        "assertions": {
+          "total": 0,
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "numRequests": 0,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          }
+        }
+      },
+      "durationMs": 59243,
+      "evaluationDurationMs": 59243
+    }
+  },
+  "config": {
+    "tags": {},
+    "description": "Letter template — AI THẬT trên dataset letter/",
+    "prompts": [
+      "{{description}}"
+    ],
+    "providers": [
+      {
+        "id": "file://./providers/letter-real-ai-provider.ts",
+        "label": "letter-real-ai"
+      }
+    ],
+    "tests": [
+      "file://./datasets/letter/cases.yaml"
+    ],
+    "env": {},
+    "defaultTest": {
+      "assert": [
+        {
+          "type": "regex",
+          "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{letter\\}"
+        },
+        {
+          "type": "contains",
+          "value": "\\begin{letter}"
+        },
+        {
+          "type": "contains",
+          "value": "\\opening{"
+        },
+        {
+          "type": "contains",
+          "value": "\\closing{"
+        },
+        {
+          "type": "not-contains",
+          "value": "\\section"
+        },
+        {
+          "type": "contains",
+          "value": "\\end{document}"
+        },
+        {
+          "type": "javascript",
+          "value": "file://./scorers/validate-latex.ts"
+        }
+      ],
+      "vars": {},
+      "options": {},
+      "metadata": {}
+    },
+    "outputPath": [
+      "lib/prompt-eval/results/letter-real-ai-run-2026-07-17.json"
+    ],
+    "extensions": [],
+    "metadata": {},
+    "evaluateOptions": {}
+  },
+  "shareableUrl": null,
+  "metadata": {
+    "promptfooVersion": "0.121.18",
+    "nodeVersion": "v24.16.0",
+    "platform": "win32",
+    "arch": "x64",
+    "exportedAt": "2026-07-17T10:10:29.096Z",
+    "evaluationCreatedAt": "2026-07-17T10:09:29.693Z"
+  },
+  "vars": [
+    "templateId",
+    "description"
+  ],
+  "runtimeOptions": {
+    "eventSource": "cli",
+    "showProgressBar": true,
+    "repeat": 1,
+    "maxConcurrency": 4,
+    "cache": false
+  }
+}

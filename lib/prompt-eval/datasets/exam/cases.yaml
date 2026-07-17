@@ -1,0 +1,29 @@
+# lib/prompt-eval/datasets/exam/cases.yaml
+# Test case cho template `exam` (document class exam: \question/\begin{solution}). Theo pattern
+# physics/chemistry cases.yaml. vars.templateId = "exam" (validate-latex scorer đọc allowlist +
+# knownTheoremEnvironments của exam). Assertion chung (documentclass exam, questions, \question,
+# validate-latex) đặt ở defaultTest của config.
+
+- description: "basic-exam — đề tự luận có điểm + lời giải"
+  vars:
+    templateId: exam
+    description: "Soạn đề kiểm tra Toán gồm 3 câu tự luận có thang điểm và lời giải mẫu."
+  assert: []
+
+- description: "mcq-exam — trắc nghiệm nhiều lựa chọn"
+  vars:
+    templateId: exam
+    description: "Soạn đề trắc nghiệm Vật lý gồm 4 câu, mỗi câu 4 phương án, có đánh dấu đáp án đúng."
+  assert: []
+
+- description: "parts-exam — câu hỏi chia nhiều ý (parts)"
+  vars:
+    templateId: exam
+    description: "Soạn đề Hóa học có câu hỏi chia thành nhiều ý nhỏ (a, b, c) kèm điểm từng ý."
+  assert: []
+
+- description: "vietnamese-exam — tiếng Việt đầy đủ dấu"
+  vars:
+    templateId: exam
+    description: "Soạn đề kiểm tra 15 phút môn Toán lớp 10 về phương trình bậc hai, kèm lời giải."
+  assert: []

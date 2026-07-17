@@ -55,12 +55,13 @@ interface DocumentSummaryRow {
   template: TemplateId;
   attempts: number;
   has_pdf: boolean;
+  is_project: boolean;
   created_at: string;
   updated_at: string;
 }
 
 const SUMMARY_COLUMNS =
-  "id,title,doc_type,template,attempts,has_pdf,created_at,updated_at";
+  "id,title,doc_type,template,attempts,has_pdf,is_project,created_at,updated_at";
 
 async function sb() {
   return createClient(await cookies());
@@ -97,6 +98,7 @@ function summaryRowToSummary(row: DocumentSummaryRow): DocumentSummary {
     template: row.template,
     attempts: row.attempts,
     hasPdf: row.has_pdf,
+    isProject: row.is_project,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };

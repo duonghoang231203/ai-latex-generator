@@ -1,0 +1,939 @@
+{
+  "evalId": "eval-rLV-2026-07-17T10:21:07",
+  "results": {
+    "version": 3,
+    "timestamp": "2026-07-17T10:21:07.778Z",
+    "prompts": [
+      {
+        "id": "1e6bd1d5aab4bf787795c1f9955d1ac1cc90fa253cfff6883a3c44dd53037d25",
+        "raw": "{{description}}",
+        "label": "{{description}}",
+        "provider": "cv-real-ai",
+        "metrics": {
+          "score": 4,
+          "testPassCount": 4,
+          "testFailCount": 0,
+          "testErrorCount": 0,
+          "assertPassCount": 28,
+          "assertFailCount": 0,
+          "totalLatencyMs": 403309,
+          "tokenUsage": {
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "total": 0,
+            "numRequests": 4,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            },
+            "assertions": {
+              "total": 0,
+              "prompt": 0,
+              "completion": 0,
+              "cached": 0,
+              "numRequests": 0,
+              "completionDetails": {
+                "reasoning": 0,
+                "acceptedPrediction": 0,
+                "rejectedPrediction": 0,
+                "cacheReadInputTokens": 0,
+                "cacheCreationInputTokens": 0
+              }
+            }
+          },
+          "namedScores": {},
+          "namedScoresCount": {},
+          "namedScoreWeights": {},
+          "cost": 0
+        }
+      }
+    ],
+    "results": [
+      {
+        "cost": 0,
+        "gradingResult": {
+          "pass": true,
+          "score": 1,
+          "reason": "All assertions passed",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0
+          },
+          "componentResults": [
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "regex",
+                "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{article\\}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\section"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "not-contains",
+                "value": "moderncv"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "not-contains",
+                "value": "\\cventry"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "not-contains",
+                "value": "\\includegraphics"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\end{document}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "validateLatex: OK — không có diagnostic.",
+              "assertion": {
+                "type": "javascript",
+                "value": "file://./scorers/validate-latex.ts"
+              }
+            }
+          ]
+        },
+        "id": "b2e2e5c6-9d60-4781-ac05-62e1fdcaa3ca",
+        "latencyMs": 89775,
+        "namedScores": {},
+        "prompt": {
+          "raw": "Viết CV cho một kỹ sư phần mềm 3 năm kinh nghiệm, gồm kinh nghiệm, học vấn, kỹ năng.",
+          "label": "{{description}}",
+          "config": {}
+        },
+        "promptId": "1e6bd1d5aab4bf787795c1f9955d1ac1cc90fa253cfff6883a3c44dd53037d25",
+        "promptIdx": 0,
+        "provider": {
+          "id": "cv-real-ai-provider",
+          "label": "cv-real-ai"
+        },
+        "response": {
+          "output": "\\documentclass[11pt,a4paper]{article}\n\\usepackage{fontspec}\n\\usepackage[a4paper, margin=2cm]{geometry}\n\\usepackage{xcolor}\n\\definecolor{myblue}{HTML}{2E86C1}\n\\usepackage{hyperref}\n\\hypersetup{\n  colorlinks=true,\n  linkcolor=myblue,\n  urlcolor=myblue,\n}\n\\usepackage{enumitem}\n\\usepackage{tikz}\n\\usepackage{array}\n\\usepackage{tabularx}\n\\usepackage{booktabs}\n\\usepackage{titlesec}\n\n\\titleformat{\\section}\n  {\\normalfont\\Large\\bfseries\\color{myblue}}\n  {}{0em}{#1}[\\vspace{-0.5ex}\\rule{\\textwidth}{0.4pt}]\n\n\\begin{document}\n\n%========= HEADER =========\n\\begin{center}\n  \\begin{minipage}[c]{0.65\\textwidth}\n    \\centering\n    {\\LARGE\\bfseries Lê Minh Hoàng}\\\\[4pt]\n    {\\large Kỹ sư Phần mềm}\\\\[8pt]\n    \\small\n    \\href{mailto:minhhoang@example.com}{minhhoang@example.com} \n    $\\cdot$ 0901 234 567 \n    $\\cdot$ Hà Nội, Việt Nam\n  \\end{minipage}%\n  \\hfill\n  \\begin{minipage}[c]{0.30\\textwidth}\n    \\centering\n    \\begin{tikzpicture}\n      \\fill[gray!20] (0,0) rectangle (2.5,3);\n      \\draw (0,0) rectangle (2.5,3);\n      \\node[font=\\tiny\\sffamily] at (1.25,1.5) {Chân dung};\n    \\end{tikzpicture}\n  \\end{minipage}\n\\end{center}\n\n%========= TÓM TẮT =========\n\\section*{Tóm tắt}\nKỹ sư phần mềm với hơn 3 năm kinh nghiệm phát triển ứng dụng web và hệ thống doanh nghiệp. \nThành thạo phân tích yêu cầu, thiết kế RESTful API, xây dựng backend bằng Java/Spring Boot và frontend bằng React. \nĐã triển khai thành công các giải pháp thanh toán, tối ưu hiệu năng và áp dụng CI/CD giúp rút ngắn chu kỳ phát hành sản phẩm. \nTinh thần học hỏi, khả năng làm việc nhóm và giao tiếp bằng tiếng Anh tốt.\n\n%========= KINH NGHIỆM LÀM VIỆC =========\n\\section*{Kinh nghiệm làm việc}\n\n\\textbf{Công ty Cổ phần Công nghệ ABC} \\hfill 01/2022 -- nay\\\\\n\\textit{Software Engineer}\n\\begin{itemize}[leftmargin=*]\n  \\item Phát triển và bảo trì hệ thống backend sử dụng Java Spring Boot, xử lý hơn 10.000 giao dịch mỗi ngày.\n  \\item Thiết kế và triển khai RESTful APIs cho ứng dụng di động, đảm bảo hiệu năng và bảo mật.\n  \\item Tích hợp cổng thanh toán VNPay, MoMo, giúp tăng tỷ lệ chuyển đổi 15\\%.\n  \\item Thiết lập CI/CD pipeline với GitHub Actions, triển khai ứng dụng lên AWS ECS, giảm 40\\% thời gian release.\n  \\item Hỗ trợ code review và refactor các module quan trọng, giảm 20\\% lỗi trong môi trường production.\n\\end{itemize}\n\n\\textbf{Công ty TNHH XYZ} \\hfill 07/2021 -- 12/2021\\\\\n\\textit{Junior Software Developer}\n\\begin{itemize}[leftmargin=*]\n  \\item Phát triển giao diện người dùng bằng React kết hợp Redux, đảm bảo khả năng tái sử dụng component.\n  \\item Xây dựng module quản lý người dùng và phân quyền, đáp ứng yêu cầu của hơn 2.000 tài khoản.\n  \\item Viết unit test với Jest, đạt độ phủ trên 80\\% code frontend.\n  \\item Hợp tác với team QA để xác định và sửa lỗi, rút ngắn thời gian kiểm thử hồi quy.\n\\end{itemize}\n\n%========= KỸ NĂNG =========\n\\section*{Kỹ năng}\n\\begin{itemize}[leftmargin=*]\n  \\item \\textbf{Ngôn ngữ lập trình:} Java, Python, JavaScript/TypeScript, C\\#, SQL.\n  \\item \\textbf{Framework \\& Thư viện:} Spring Boot, Hibernate, React.js, Angular, Django REST, Express.js.\n  \\item \\textbf{Cơ sở dữ liệu:} PostgreSQL, MySQL, MongoDB, Redis, Elasticsearch.\n  \\item \\textbf{DevOps \\& Công cụ:} Git, Docker, Jenkins, AWS (EC2, S3, ECS), Linux, CI/CD (GitHub Actions).\n  \\item \\textbf{Ngoại ngữ:} Tiếng Anh (TOEIC 850), tiếng Nhật (cơ bản).\n\\end{itemize}\n\n%========= HỌC VẤN =========\n\\section*{Học vấn}\n\\textbf{Trường Đại học Bách khoa Hà Nội} \\hfill 2017 -- 2021\\\\\n\\textit{Cử nhân Kỹ thuật Phần mềm} (GPA: 3.4/4.0)\n\\begin{itemize}[leftmargin=*]\n  \\item Đồ án tốt nghiệp: “Xây dựng hệ thống gợi ý sản phẩm dựa trên học sâu” – hạng Giỏi.\n  \\item Tham gia cuộc thi lập trình ACM/ICPC vòng quốc gia (năm 2019).\n\\end{itemize}\n\n%========= DỰ ÁN TIÊU BIỂU =========\n\\section*{Dự án tiêu biểu}\n\\begin{itemize}[leftmargin=*]\n  \\item \\textbf{Hệ thống Quản lý Đơn hàng (OMS)} – Xây dựng backend microservices với Spring Cloud; đồng bộ dữ liệu từ nhiều kênh bán hàng, phục vụ hơn 500 cửa hàng.\n  \\item \\textbf{Ứng dụng di động Giao hàng nhanh} – Phát triển API và tích hợp Google Maps để tối ưu lộ trình, giúp giảm 30\\% thời gian giao hàng, hỗ trợ 10.000+ đơn mỗi ngày.\n\\end{itemize}\n\n\\end{document}\n",
+          "metadata": {
+            "finishReason": "stop",
+            "rawFinishReason": "end_turn",
+            "usage": {
+              "inputTokens": 1235,
+              "outputTokens": 5222,
+              "totalTokens": 6457
+            }
+          }
+        },
+        "score": 1,
+        "success": true,
+        "testCase": {
+          "description": "software-engineer — CV kỹ sư phần mềm có kinh nghiệm",
+          "vars": {
+            "templateId": "cv",
+            "description": "Viết CV cho một kỹ sư phần mềm 3 năm kinh nghiệm, gồm kinh nghiệm, học vấn, kỹ năng."
+          },
+          "assert": [
+            {
+              "type": "regex",
+              "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{article\\}"
+            },
+            {
+              "type": "contains",
+              "value": "\\section"
+            },
+            {
+              "type": "not-contains",
+              "value": "moderncv"
+            },
+            {
+              "type": "not-contains",
+              "value": "\\cventry"
+            },
+            {
+              "type": "not-contains",
+              "value": "\\includegraphics"
+            },
+            {
+              "type": "contains",
+              "value": "\\end{document}"
+            },
+            {
+              "type": "javascript",
+              "value": "file://./scorers/validate-latex.ts"
+            }
+          ],
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 0,
+        "tokenUsage": {
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "total": 0,
+          "numRequests": 1,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          },
+          "assertions": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          }
+        },
+        "vars": {
+          "templateId": "cv",
+          "description": "Viết CV cho một kỹ sư phần mềm 3 năm kinh nghiệm, gồm kinh nghiệm, học vấn, kỹ năng."
+        },
+        "metadata": {
+          "finishReason": "stop",
+          "rawFinishReason": "end_turn",
+          "usage": {
+            "inputTokens": 1235,
+            "outputTokens": 5222,
+            "totalTokens": 6457
+          },
+          "_promptfooFileMetadata": {}
+        },
+        "failureReason": 0
+      },
+      {
+        "cost": 0,
+        "gradingResult": {
+          "pass": true,
+          "score": 1,
+          "reason": "All assertions passed",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0
+          },
+          "componentResults": [
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "regex",
+                "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{article\\}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\section"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "not-contains",
+                "value": "moderncv"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "not-contains",
+                "value": "\\cventry"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "not-contains",
+                "value": "\\includegraphics"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\end{document}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "validateLatex: OK — không có diagnostic.",
+              "assertion": {
+                "type": "javascript",
+                "value": "file://./scorers/validate-latex.ts"
+              }
+            }
+          ]
+        },
+        "id": "7f4afa91-1424-4c94-a2c7-d0f780ae6fc6",
+        "latencyMs": 135108,
+        "namedScores": {},
+        "prompt": {
+          "raw": "Viết CV cho sinh viên mới tốt nghiệp ngành CNTT, nhấn mạnh dự án và kỹ năng.",
+          "label": "{{description}}",
+          "config": {}
+        },
+        "promptId": "1e6bd1d5aab4bf787795c1f9955d1ac1cc90fa253cfff6883a3c44dd53037d25",
+        "promptIdx": 0,
+        "provider": {
+          "id": "cv-real-ai-provider",
+          "label": "cv-real-ai"
+        },
+        "response": {
+          "output": "\\documentclass[a4paper,11pt]{article}\n\n% Allowed packages\n\\usepackage[top=2cm,bottom=2cm,left=2cm,right=2cm]{geometry}\n\\usepackage[colorlinks=true,linkcolor=blue,urlcolor=blue]{hyperref}\n\\usepackage{enumitem}\n\\setlist{nosep,leftmargin=*}\n\\usepackage{xcolor}\n\\definecolor{sectioncolor}{RGB}{0,51,102}\n\\usepackage{titlesec}\n\\titleformat{\\section}{\\color{sectioncolor}\\normalfont\\Large\\bfseries}{}{0em}{}[\\titlerule]\n\\titlespacing*{\\section}{0pt}{12pt}{6pt}\n\\usepackage{tikz}\n\\usepackage{array}\n\\usepackage{tabularx}\n\\usepackage{booktabs}\n\\usepackage{multirow}\n% fontspec is added automatically by the engine, not included explicitly.\n\n\\begin{document}\n\n% ========== HEADER ==========\n\\begin{center}\n\\begin{tabular}{@{}m{0.72\\linewidth} m{0.25\\linewidth}@{}}\n\\raggedright\n    {\\LARGE\\textbf{Nguyễn Minh Tuấn}}\\\\[3mm]\n    \\textit{Lập trình viên mới tốt nghiệp -- Công nghệ thông tin}\\\\[3mm]\n    \\small\n    Email: \\href{mailto:minhtuan.nguyen@example.com}{minhtuan.nguyen@example.com}\n    \\quad $\\cdot$ \\quad ĐT: 0987\\,654\\,321 \\\\\n    Địa chỉ: Quận 1, TP. Hồ Chí Minh\n    \\quad $\\cdot$ \\quad \\href{https://github.com/minhtuan}{GitHub: minhtuan}\n&\n\\centering\n    \\begin{tikzpicture}\n        \\draw[gray,thick] (0,0) rectangle (2.5,3);\n        \\node[font=\\Large\\bfseries] at (1.25,1.5) {Ảnh};\n    \\end{tikzpicture}\n\\end{tabular}\n\\end{center}\n\n% ========== TÓM TẮT NGHỀ NGHIỆP ==========\n\\section*{Tóm tắt nghề nghiệp}\nSinh viên mới tốt nghiệp ngành Công nghệ thông tin với nền tảng lập trình vững chắc và đam mê xây dựng sản phẩm công nghệ. Có khả năng làm việc độc lập và nhóm, nhanh chóng tiếp thu công nghệ mới. Mong muốn được đóng góp trong môi trường phát triển phần mềm chuyên nghiệp, áp dụng kiến thức về phát triển web, machine learning và DevOps để giải quyết các bài toán thực tế.\n\n% ========== HỌC VẤN ==========\n\\section*{Học vấn}\n\\begin{tabularx}{\\textwidth}{@{}>{\\raggedright\\arraybackslash}X r@{}}\n\\textbf{Đại học Bách khoa Hà Nội} -- Khoa Công nghệ thông tin & \\textbf{2020--2024} \\\\\nCử nhân Công nghệ thông tin, chuyên ngành Kỹ thuật phần mềm. &\n\\\\\nGPA: 3.35/4.0 \\hspace{1cm} Đề tài tốt nghiệp: \\textit{Phát triển hệ thống gợi ý sản phẩm dựa trên deep learning}. &\n\\end{tabularx}\n\n% ========== KỸ NĂNG ==========\n\\section*{Kỹ năng}\n\\begin{itemize}\n    \\item \\textbf{Ngôn ngữ lập trình:} Python (thành thạo cho phân tích dữ liệu và machine learning), Java (Spring Boot), JavaScript/TypeScript, SQL.\n    \\item \\textbf{Phát triển web:} HTML5, CSS3, React, Vue.js, Node.js, Express, RESTful API, GraphQL (cơ bản).\n    \\item \\textbf{Cơ sở dữ liệu:} MySQL, PostgreSQL, MongoDB; thiết kế CSDL và tối ưu truy vấn.\n    \\item \\textbf{Công cụ \\& DevOps:} Git, GitHub Actions, Docker, Kubernetes (tìm hiểu), Linux, Trello.\n    \\item \\textbf{Kỹ năng mềm:} Giải quyết vấn đề, làm việc nhóm, thuyết trình, quản lý thời gian, tiếng Anh giao tiếp tốt (IELTS 6.5).\n\\end{itemize}\n\n% ========== DỰ ÁN CÁ NHÂN ==========\n\\section*{Dự án cá nhân}\n% Project 1\n\\begin{tabularx}{\\textwidth}{@{}>{\\raggedright\\arraybackslash}X r@{}}\n\\textbf{Website thương mại điện tử} -- \\textit{React + Node.js + MongoDB} & \\textbf{01/2024--04/2024} \\\\\n\\end{tabularx}\n\\begin{itemize}\n    \\item Xây dựng nền tảng bán hàng đầy đủ chức năng: đăng ký/đăng nhập, giỏ hàng, thanh toán tích hợp VNPay sandbox.\n    \\item Thiết kế giao diện responsive bằng Bootstrap, triển khai RESTful API với JWT authentication.\n    \\item Tối ưu thời gian tải trang xuống dưới 2 giây nhờ lazy loading và caching Redis.\n    \\item Triển khai ứng dụng trên Heroku và Netlify, quản lý source code với Git.\n\\end{itemize}\n\n% Project 2\n\\begin{tabularx}{\\textwidth}{@{}>{\\raggedright\\arraybackslash}X r@{}}\n\\textbf{Hệ thống nhận diện khuôn mặt thời gian thực} -- \\textit{Python, OpenCV, TensorFlow} & \\textbf{10/2023--12/2023} \\\\\n\\end{tabularx}\n\\begin{itemize}\n    \\item Phát triển mô hình nhận diện khuôn mặt sử dụng MTCNN và FaceNet, đạt độ chính xác 94\\% trên tập kiểm tra.\n    \\item Xây dựng pipeline xử lý video thời gian thực từ webcam, tích hợp cơ sở dữ liệu SQLite để lưu danh sách nhân viên.\n    \\item Viết tài liệu hướng dẫn cài đặt và sử dụng chi tiết; mã nguồn đăng tải trên GitHub (\\href{https://github.com/minhtuan/face-recognition}{github.com/minhtuan/face-recognition}).\n\\end{itemize}\n\n% Project 3\n\\begin{tabularx}{\\textwidth}{@{}>{\\raggedright\\arraybackslash}X r@{}}\n\\textbf{Trang portfolio cá nhân} -- \\textit{Next.js, Tailwind CSS} & \\textbf{06/2023--08/2023} \\\\\n\\end{tabularx}\n\\begin{itemize}\n    \\item Thiết kế và phát triển trang web giới thiệu bản thân, blog, trưng bày dự án với hiệu ứng chuyển động mượt.\n    \\item Tối ưu SEO cơ bản, đạt điểm Lighthouse 95+ cho cả Performance và Accessibility; triển khai bằng Vercel.\n\\end{itemize}\n\n% ========== KINH NGHIỆM ==========\n\\section*{Kinh nghiệm}\n\\begin{tabularx}{\\textwidth}{@{}>{\\raggedright\\arraybackslash}X r@{}}\n\\textbf{Công ty TNHH Phần mềm FPT Software} -- \\textit{Thực tập sinh phát triển ứng dụng} & \\textbf{06/2023--09/2023} \\\\\n\\end{tabularx}\n\\begin{itemize}\n    \\item Tham gia nhóm phát triển module quản lý khách hàng của hệ thống ERP nội bộ, sử dụng Java Spring và Angular.\n    \\item Viết unit test và tham gia code review, giảm lỗi 20\\% trước khi bàn giao.\n    \\item Hỗ trợ triển khai CI/CD pipeline bằng GitLab CI, rút ngắn thời gian phát hành bản cập nhật từ 2 ngày xuống 4 giờ.\n\\end{itemize}\n\n\\begin{tabularx}{\\textwidth}{@{}>{\\raggedright\\arraybackslash}X r@{}}\n\\textbf{Câu lạc bộ Lập trình ĐH Bách Khoa} -- \\textit{Trưởng nhóm sự kiện} & \\textbf{2022--2023} \\\\\n\\end{tabularx}\n\\begin{itemize}\n    \\item Tổ chức workshop ``Build Your First API'' với hơn 80 sinh viên tham dự.\n    \\item Quản lý nhóm 5 người, lên kế hoạch và điều phối các buổi coding dojo hàng tuần.\n\\end{itemize}\n\n% ========== CHỨNG CHỈ & GIẢI THƯỞNG ==========\n\\section*{Chứng chỉ \\& Giải thưởng}\n\\begin{itemize}\n    \\item \\textbf{AWS Certified Cloud Practitioner} -- Amazon Web Services, 2023.\n    \\item \\textbf{Google Data Analytics Professional Certificate} -- Coursera, 2023.\n    \\item Giải Nhì cuộc thi \\textit{Sáng tạo trẻ CNTT} -- Đại học Bách khoa Hà Nội, 2022.\n\\end{itemize}\n\n\\end{document}\n",
+          "metadata": {
+            "finishReason": "stop",
+            "rawFinishReason": "end_turn",
+            "usage": {
+              "inputTokens": 1231,
+              "outputTokens": 7973,
+              "totalTokens": 9204
+            }
+          }
+        },
+        "score": 1,
+        "success": true,
+        "testCase": {
+          "description": "fresh-graduate — CV sinh viên mới tốt nghiệp",
+          "vars": {
+            "templateId": "cv",
+            "description": "Viết CV cho sinh viên mới tốt nghiệp ngành CNTT, nhấn mạnh dự án và kỹ năng."
+          },
+          "assert": [
+            {
+              "type": "regex",
+              "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{article\\}"
+            },
+            {
+              "type": "contains",
+              "value": "\\section"
+            },
+            {
+              "type": "not-contains",
+              "value": "moderncv"
+            },
+            {
+              "type": "not-contains",
+              "value": "\\cventry"
+            },
+            {
+              "type": "not-contains",
+              "value": "\\includegraphics"
+            },
+            {
+              "type": "contains",
+              "value": "\\end{document}"
+            },
+            {
+              "type": "javascript",
+              "value": "file://./scorers/validate-latex.ts"
+            }
+          ],
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 1,
+        "tokenUsage": {
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "total": 0,
+          "numRequests": 1,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          },
+          "assertions": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          }
+        },
+        "vars": {
+          "templateId": "cv",
+          "description": "Viết CV cho sinh viên mới tốt nghiệp ngành CNTT, nhấn mạnh dự án và kỹ năng."
+        },
+        "metadata": {
+          "finishReason": "stop",
+          "rawFinishReason": "end_turn",
+          "usage": {
+            "inputTokens": 1231,
+            "outputTokens": 7973,
+            "totalTokens": 9204
+          },
+          "_promptfooFileMetadata": {}
+        },
+        "failureReason": 0
+      },
+      {
+        "cost": 0,
+        "gradingResult": {
+          "pass": true,
+          "score": 1,
+          "reason": "All assertions passed",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0
+          },
+          "componentResults": [
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "regex",
+                "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{article\\}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\section"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "not-contains",
+                "value": "moderncv"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "not-contains",
+                "value": "\\cventry"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "not-contains",
+                "value": "\\includegraphics"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\end{document}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "validateLatex: OK — không có diagnostic.",
+              "assertion": {
+                "type": "javascript",
+                "value": "file://./scorers/validate-latex.ts"
+              }
+            }
+          ]
+        },
+        "id": "8c2aba96-e38c-46e7-9423-b05daf3769d8",
+        "latencyMs": 103212,
+        "namedScores": {},
+        "prompt": {
+          "raw": "Viết CV học thuật cho ứng viên tiến sĩ: học vấn, công bố, kinh nghiệm giảng dạy.",
+          "label": "{{description}}",
+          "config": {}
+        },
+        "promptId": "1e6bd1d5aab4bf787795c1f9955d1ac1cc90fa253cfff6883a3c44dd53037d25",
+        "promptIdx": 0,
+        "provider": {
+          "id": "cv-real-ai-provider",
+          "label": "cv-real-ai"
+        },
+        "response": {
+          "output": "\\documentclass[a4paper,11pt]{article}\n\\usepackage{fontspec}\n\\usepackage{geometry}\n\\geometry{left=2cm, right=2cm, top=2cm, bottom=2cm}\n\\usepackage{hyperref}\n\\hypersetup{\n    colorlinks=true,\n    linkcolor=darkblue,\n    urlcolor=darkblue,\n    pdfauthor={Nguyễn Minh Tuấn},\n    pdftitle={CV Học thuật - Ứng viên Tiến sĩ}\n}\n\\usepackage{enumitem}\n\\usepackage{xcolor}\n\\definecolor{darkblue}{HTML}{003366}\n\\usepackage{titlesec}\n\\titleformat{\\section}{\\Large\\bfseries\\color{darkblue}}{}{0em}{}[\\vspace{-0.5em}\\rule{\\linewidth}{0.5pt}\\vspace{0.5em}]\n\\usepackage{tikz}\n\\usepackage{array}\n\\usepackage{tabularx}\n\\usepackage{booktabs}\n\\usepackage{multirow}\n\n\\begin{document}\n\n% HEADER (no \\maketitle)\n\\begin{center}\n    {\\LARGE\\textbf{Nguyễn Minh Tuấn}} \\\\[2mm]\n    {\\large Ứng viên Tiến sĩ Khoa học Máy tính} \\\\[2mm]\n    \\href{mailto:minhtuan.nguyen@vnu.edu.vn}{minhtuan.nguyen@vnu.edu.vn} \\quad$\\cdot$\\quad\n    +84\\,912\\,345\\,678 \\quad$\\cdot$\\quad\n    Hà Nội, Việt Nam \\\\\n    \\href{https://scholar.google.com/...}{Google Scholar} \\quad$\\cdot$\\quad\n    \\href{https://github.com/minhtuan}{GitHub}\n\\end{center}\n\\vspace{-2mm}\n\n\\section*{Giới thiệu}\nTôi là ứng viên tiến sĩ với định hướng nghiên cứu trong lĩnh vực Trí tuệ Nhân tạo và Xử lý Ngôn ngữ Tự nhiên. Hiện tại tôi đang tìm kiếm một vị trí nghiên cứu sinh tại một phòng thí nghiệm hàng đầu để phát triển các mô hình học sâu cho tiếng Việt, xây dựng hệ thống hỏi đáp thông minh và phân tích dữ liệu văn bản lớn. Với nền tảng vững chắc về toán ứng dụng và kinh nghiệm triển khai thực tế, tôi mong muốn đóng góp vào các dự án có tầm ảnh hưởng và tiếp tục công bố các kết quả nghiên cứu chất lượng cao.\n\n\\section*{Học vấn}\n\\textbf{Trường Đại học Công nghệ, Đại học Quốc gia Hà Nội} \\hfill 2021--2023\\\\\n\\textit{Thạc sĩ Khoa học Máy tính} \\hfill GPA: 3.82/4.0\\\\\nLuận văn: “Ứng dụng mô hình ngôn ngữ lớn trong tóm tắt văn bản tiếng Việt đa lĩnh vực”\\\\\nHọc bổng toàn phần Vallet (2021--2023).\n\n\\textbf{Trường Đại học Công nghệ, Đại học Quốc gia Hà Nội} \\hfill 2017--2021\\\\\n\\textit{Cử nhân Công nghệ Thông tin (loại Giỏi)} \\hfill GPA: 3.45/4.0\\\\\nĐồ án tốt nghiệp: “Phát hiện tin giả tiếng Việt dựa trên đồ thị tri thức và mạng nơ-ron tích chập đồ thị”.\n\n\\section*{Kinh nghiệm nghiên cứu}\n\\textbf{Phòng thí nghiệm AI, Đại học Công nghệ} \\hfill 2021--nay\\\\\n\\textit{Nghiên cứu viên / Trợ lý nghiên cứu}\n\\begin{itemize}[leftmargin=*]\n    \\item Tham gia đề tài cấp Nhà nước “Nghiên cứu phát triển trợ lý ảo thông minh hỗ trợ công tác hành chính công” (mã số KC-4.0/22). Thiết kế kiến trúc pipeline thu thập, tiền xử lý và tinh chỉnh mô hình ngôn ngữ cho miền hành chính.\n    \\item Phát triển công cụ trích xuất thực thể có tên (NER) cho văn bản y tế tiếng Việt, đạt F1 = 0.91, ứng dụng tại Bệnh viện Bạch Mai (thí điểm).\n    \\item Đồng tác giả hai bài báo trên tạp chí ISI/Scopus và một bài hội thảo quốc tế về mô hình BERT đa ngôn ngữ và học tăng cường cho tác vụ phân loại văn bản.\n\\end{itemize}\n\n\\textbf{Trung tâm Nghiên cứu Dữ liệu Lớn, Viện CNTT, ĐHQGHN} \\hfill 2020--2021\\\\\n\\textit{Thực tập nghiên cứu}\n\\begin{itemize}[leftmargin=*]\n    \\item Xây dựng pipeline thu thập và phân tích hàng triệu bài báo tiếng Việt phục vụ hệ thống khuyến nghị tin tức.\n    \\item Cài đặt mô hình topic modeling động (DTM) và đánh giá sự thay đổi chủ đề trong 10 năm. Kết quả được trình bày tại Hội thảo Quốc gia FAIR 2020.\n\\end{itemize}\n\n\\section*{Công bố khoa học}\n\\begin{enumerate}[label={[\\arabic*]}, leftmargin=*]\n    \\item \\textbf{Nguyễn Minh Tuấn}, Trần Văn Bình, Lê Thị Mai. “A Multi-Task BERT-Based Framework for Vietnamese Sentiment Analysis and Intent Detection”. \\textit{Journal of Information and Telecommunication}, tập 7, số 2, tr. 145--162, 2023. (ISI/Scopus Q2)\n    \\item \\textbf{Nguyễn Minh Tuấn}, Phạm Quốc Huy. “Phân tích cảm xúc dựa trên mô hình BERT đa ngôn ngữ kết hợp tri thức miền”. \\textit{Kỷ yếu Hội thảo Quốc gia lần thứ XXV về Công nghệ Thông tin (FAIR)}, tr. 112--120, 2022.\n    \\item \\textbf{Nguyễn Minh Tuấn}, Đỗ Hoàng Long, Nguyễn Thị Hoa. “Ứng dụng mạng nơ-ron tích chập đồ thị trong phát hiện tin giả tiếng Việt”. \\textit{Tạp chí Tin học và Điều khiển học}, tập 38, số 2, tr. 45--56, 2022.\n    \\item Lê Thanh Sơn, \\textbf{Nguyễn Minh Tuấn}, Hoàng Thị Phương. “Towards a Vietnamese Medical NER Using Adversarial Domain Adaptation”. \\textit{Proceedings of the 14th International Conference on Knowledge and Systems Engineering (KSE)}, IEEE, tr. 1--6, 2022.\n\\end{enumerate}\n\n\\section*{Kinh nghiệm giảng dạy}\n\\textbf{Trường Đại học Công nghệ, ĐHQGHN} \\hfill 2020--2022\\\\\n\\textit{Trợ giảng}\n\\begin{itemize}[leftmargin=*]\n    \\item Môn \\textbf{Cấu trúc dữ liệu và giải thuật} (kỳ 1, 2020--2021): hướng dẫn bài tập thực hành C++, chấm bài tập lớn, hỗ trợ sinh viên trong giờ thực hành.\n    \\item Môn \\textbf{Trí tuệ nhân tạo} (kỳ 2, 2021--2022): soạn slide mở rộng về tìm kiếm heuristic và học máy cơ bản, hướng dẫn đồ án cuối kỳ, tổ chức phụ đạo.\n    \\item Môn \\textbf{Nhập môn Xử lý Ngôn ngữ Tự nhiên} (kỳ 1, 2022--2023): thiết kế bài tập thực hành trên Python (NLTK, spaCy), xây dựng bộ kiểm thử đánh giá mô hình.\n    \\item Nhận phản hồi tích cực từ sinh viên (điểm đánh giá trung bình 4.6/5.0).\n\\end{itemize}\n\n\\textbf{Trung tâm Đào tạo lập trình CodeHub} \\hfill 2021--2023\\\\\n\\textit{Giảng viên thỉnh giảng}\n\\begin{itemize}[leftmargin=*]\n    \\item Thiết kế và giảng dạy khóa “Python cho Khoa học dữ liệu” (60 giờ) cho hơn 40 học viên. \n    \\item Xây dựng giáo trình và bài tập thực hành, hỗ trợ các dự án cuối khóa về phân tích dữ liệu thực tế.\n\\end{itemize}\n\n\\section*{Kỹ năng}\n\\begin{tabularx}{\\linewidth}{@{}>{\\bfseries}l X@{}}\n\\toprule\nLập trình & Python, C/C++, Java, R, SQL, LaTeX \\\\\nHọc máy \\& DL & PyTorch, TensorFlow, Keras, Hugging Face Transformers, Scikit-learn \\\\\nCông cụ & Git, Docker, Weights \\& Biases, Jupyter, VS Code \\\\\nDữ liệu & Xử lý dữ liệu lớn (PySpark cơ bản), ElasticSearch cơ bản \\\\\nNgôn ngữ & Tiếng Việt (bản ngữ), Tiếng Anh (IELTS 7.0, đọc hiểu tài liệu chuyên ngành) \\\\\nKhác & Làm việc nhóm, thuyết trình, viết báo khoa học, quản lý dự án nhỏ \\\\\n\\bottomrule\n\\end{tabularx}\n\n\\section*{Dự án tiêu biểu}\n\\begin{itemize}[leftmargin=*]\n    \\item \\textbf{Hệ thống tóm tắt văn bản tiếng Việt đa miền} (2022--2023): sử dụng mô hình ViT5 và LongT5, tinh chỉnh trên bộ dữ liệu tự xây dựng 120\\,000 mẫu. Hệ thống tích hợp giao diện web (Streamlit) và API REST; demo được sử dụng tại Trường Đại học Công nghệ.\n    \\item \\textbf{Công cụ phân tích cảm xúc mạng xã hội} (2021): thu thập hơn 500\\,000 bình luận từ các nền tảng mạng xã hội, xây dựng pipeline Svm/BERT và tích hợp dashboard trực quan (Dash). Kết quả trình bày tại Hội nghị sinh viên nghiên cứu khoa học.\n    \\item \\textbf{Phát hiện sớm bệnh võng mạc đái tháo đường} (2020): huấn luyện EfficientNet-B4 trên tập dữ liệu APTOS 2019, triển khai mobile app demo bằng TensorFlow Lite. Đạt giải Nhì cuộc thi “Sinh viên với ATGT” (hạng mục ứng dụng y tế).\n\\end{itemize}\n\n\\section*{Giải thưởng và học bổng}\n\\begin{itemize}[leftmargin=*]\n    \\item Học bổng toàn phần Vallet dành cho học viên thạc sĩ xuất sắc (2021--2023).\n    \\item Giải Nhất Hội nghị sinh viên nghiên cứu khoa học cấp trường (2020).\n    \\item Học bổng Khuyến khích học tập của ĐHQGHN (2018--2021).\n    \\item Travel grant tham dự Hội thảo quốc tế KSE 2022.\n\\end{itemize}\n\n\\section*{Hoạt động ngoại khóa}\n\\begin{itemize}[leftmargin=*]\n    \\item Thành viên Ban tổ chức Hội thảo “AI for Social Good” tại Trường ĐH Công nghệ (2023).\n    \\item Tình nguyện viên dạy lập trình cho học sinh vùng cao (chương trình “IT-Up”, 2021--2022).\n\\end{itemize}\n\n\\end{document}\n",
+          "metadata": {
+            "finishReason": "stop",
+            "rawFinishReason": "end_turn",
+            "usage": {
+              "inputTokens": 1229,
+              "outputTokens": 5658,
+              "totalTokens": 6887
+            }
+          }
+        },
+        "score": 1,
+        "success": true,
+        "testCase": {
+          "description": "academic-cv — CV học thuật (ứng viên tiến sĩ)",
+          "vars": {
+            "templateId": "cv",
+            "description": "Viết CV học thuật cho ứng viên tiến sĩ: học vấn, công bố, kinh nghiệm giảng dạy."
+          },
+          "assert": [
+            {
+              "type": "regex",
+              "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{article\\}"
+            },
+            {
+              "type": "contains",
+              "value": "\\section"
+            },
+            {
+              "type": "not-contains",
+              "value": "moderncv"
+            },
+            {
+              "type": "not-contains",
+              "value": "\\cventry"
+            },
+            {
+              "type": "not-contains",
+              "value": "\\includegraphics"
+            },
+            {
+              "type": "contains",
+              "value": "\\end{document}"
+            },
+            {
+              "type": "javascript",
+              "value": "file://./scorers/validate-latex.ts"
+            }
+          ],
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 2,
+        "tokenUsage": {
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "total": 0,
+          "numRequests": 1,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          },
+          "assertions": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          }
+        },
+        "vars": {
+          "templateId": "cv",
+          "description": "Viết CV học thuật cho ứng viên tiến sĩ: học vấn, công bố, kinh nghiệm giảng dạy."
+        },
+        "metadata": {
+          "finishReason": "stop",
+          "rawFinishReason": "end_turn",
+          "usage": {
+            "inputTokens": 1229,
+            "outputTokens": 5658,
+            "totalTokens": 6887
+          },
+          "_promptfooFileMetadata": {}
+        },
+        "failureReason": 0
+      },
+      {
+        "cost": 0,
+        "gradingResult": {
+          "pass": true,
+          "score": 1,
+          "reason": "All assertions passed",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0
+          },
+          "componentResults": [
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "regex",
+                "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{article\\}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\section"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "not-contains",
+                "value": "moderncv"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "not-contains",
+                "value": "\\cventry"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "not-contains",
+                "value": "\\includegraphics"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\end{document}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "validateLatex: OK — không có diagnostic.",
+              "assertion": {
+                "type": "javascript",
+                "value": "file://./scorers/validate-latex.ts"
+              }
+            }
+          ]
+        },
+        "id": "3f4d6d7b-8365-4a31-b5d5-4f7ff1e006c9",
+        "latencyMs": 75214,
+        "namedScores": {},
+        "prompt": {
+          "raw": "Viết sơ yếu lý lịch cho vị trí nhân viên kinh doanh, đầy đủ thông tin liên hệ và kinh nghiệm.",
+          "label": "{{description}}",
+          "config": {}
+        },
+        "promptId": "1e6bd1d5aab4bf787795c1f9955d1ac1cc90fa253cfff6883a3c44dd53037d25",
+        "promptIdx": 0,
+        "provider": {
+          "id": "cv-real-ai-provider",
+          "label": "cv-real-ai"
+        },
+        "response": {
+          "output": "\\documentclass[a4paper,11pt]{article}\n\\usepackage{geometry}\n\\geometry{margin=0.75in}\n\\usepackage{hyperref}\n\\hypersetup{\n    colorlinks=true,\n    linkcolor=blue,\n    urlcolor=blue,\n    citecolor=blue\n}\n\\usepackage{enumitem}\n\\usepackage{xcolor}\n\\usepackage{titlesec}\n\\titleformat{\\section}\n  {\\large\\bfseries}\n  {}\n  {0em}\n  {}\n  [\\color{gray!70}\\titlerule]\n\\usepackage{fontspec} % XeLaTeX / Latin Modern handles Vietnamese diacritics\n\n\\begin{document}\n\n% ====== HEADER ======\n\\begin{center}\n    {\\LARGE\\textbf{LÊ THANH HƯƠNG}} \\\\[4pt]\n    {\\large Nhân viên Kinh doanh · Phát triển Thị trường} \\\\[6pt]\n    \\texttt{\\href{mailto:huong.le@kinhdoanh.vn}{huong.le@kinhdoanh.vn}} \\,\\(\\cdot\\)\\,\n    0987 654 321 \\,\\(\\cdot\\)\\, Hà Nội, Việt Nam\n\\end{center}\n\\medskip\n\\rule{\\textwidth}{0.4pt}\n\\smallskip\n\n% ====== TÓM TẮT CHUYÊN MÔN ======\n\\section*{Tóm tắt chuyên môn}\nVới hơn 5 năm kinh nghiệm trong lĩnh vực bán hàng và phát triển thị trường, tôi sở hữu thế mạnh về xây dựng mối quan hệ khách hàng, đàm phán hợp đồng và quản lý kênh phân phối. \nTôi đã đạt mức tăng trưởng doanh số bình quân 25\\%/năm tại các vị trí đảm nhiệm và luôn hướng tới mục tiêu mở rộng thị phần bền vững.\n\n% ====== KINH NGHIỆM LÀM VIỆC ======\n\\section*{Kinh nghiệm làm việc}\n\\textbf{Công ty TNHH Sản xuất và Thương mại Á Đông} \\hfill 05/2021 -- nay\\\\\n\\textit{Trường nhóm Kinh doanh}\n\\begin{itemize}[leftmargin=*]\n    \\item Dẫn dắt đội ngũ 8 nhân viên, xây dựng kế hoạch kinh doanh quý và hệ thống KPIs rõ ràng; đội đạt doanh thu hơn 12 tỷ đồng/năm.\n    \\item Thuyết phục ký kết thành công hợp đồng độc quyền với chuỗi siêu thị lớn, đóng góp 30\\% tổng doanh số.\n    \\item Đề xuất chiến lược ra mắt dòng sản phẩm mới, giúp biên lợi nhuận tăng 8\\% và mở rộng tập khách hàng trẻ.\n    \\item Triển khai phần mềm CRM (HubSpot) cho toàn đội, rút ngắn 20\\% thời gian xử lý đơn hàng và chăm sóc khách hàng.\n\\end{itemize}\n\n\\textbf{Công ty Cổ phần Thương mại và Dịch vụ Hòa Bình} \\hfill 03/2019 -- 04/2021\\\\\n\\textit{Nhân viên Kinh doanh}\n\\begin{itemize}[leftmargin=*]\n    \\item Phụ trách khu vực miền Trung, phát triển mạng lưới 20 đại lý mới trong năm đầu tiên, tăng doanh số khu vực 30\\% so với cùng kỳ.\n    \\item Duy trì và chăm sóc ổn định 50 khách hàng doanh nghiệp (B2B), tỷ lệ gia hạn hợp đồng đạt 95\\%.\n    \\item Phối hợp phòng marketing xây dựng chương trình khuyến mãi mùa Tết, đẩy doanh thu tháng lên 45\\% so với trung bình.\n    \\item Đào tạo và hướng dẫn 3 nhân viên mới về sản phẩm và quy trình bán hàng.\n\\end{itemize}\n\n% ====== HỌC VẤN ======\n\\section*{Học vấn}\n\\textbf{Đại học Kinh tế Quốc dân} \\hfill 2015 -- 2019\\\\\nCử nhân Quản trị Kinh doanh, GPA 3.4/4.0.\\\\\nLuận văn tốt nghiệp: “Phân tích hành vi mua hàng của khách hàng doanh nghiệp trong ngành thực phẩm”.\n\n% ====== KỸ NĂNG ======\n\\section*{Kỹ năng}\n\\begin{itemize}[leftmargin=*]\n    \\item \\textbf{Bán hàng \\& Đàm phán:} Kỹ năng thuyết phục, xử lý từ chối, chốt đơn hàng; quen thuộc với phương pháp SPIN Selling.\n    \\item \\textbf{Quản lý khách hàng:} Sử dụng thành thạo CRM (HubSpot, Salesforce); phân tích dữ liệu khách hàng để tối ưu chiến lược chăm sóc.\n    \\item \\textbf{Tin học văn phòng:} Thành thạo Microsoft Office (Word, Excel, PowerPoint), chứng chỉ MOS Excel Expert.\n    \\item \\textbf{Ngoại ngữ:} Tiếng Anh giao tiếp và thương mại (IELTS 7.0); tiếng Trung cơ bản.\n    \\item \\textbf{Làm việc nhóm \\& lãnh đạo:} Kinh nghiệm dẫn dắt nhóm, phân công nhiệm vụ và truyền động lực.\n\\end{itemize}\n\n% ====== CHỨNG CHỈ ======\n\\section*{Chứng chỉ}\n\\begin{itemize}[leftmargin=*]\n    \\item Chứng chỉ Kỹ năng Bán hàng Chuyên nghiệp -- Trung tâm Đào tạo Bán hàng Việt (2020).\n    \\item Chứng chỉ Đàm phán Kinh doanh -- Trung tâm Phát triển Kỹ năng Doanh nhân (2021).\n    \\item Chứng chỉ Tin học văn phòng Quốc tế (MOS) -- Microsoft Office Specialist Excel Expert (2018).\n\\end{itemize}\n\n% ====== DỰ ÁN NỔI BẬT ======\n\\section*{Dự án nổi bật}\n\\begin{itemize}[leftmargin=*]\n    \\item \\textbf{Chiến dịch “Tết sum vầy”:} Thiết kế gói combo sản phẩm cho doanh nghiệp làm quà Tết, tiếp cận hơn 200 khách hàng mới, doanh số đợt Tết tăng 45\\%, vượt mục tiêu 25\\%.\n    \\item \\textbf{Xây dựng kênh phân phối online:} Phối hợp với phòng Marketing triển khai bán hàng trên sàn thương mại điện tử (Tiki, Shopee); sau 6 tháng, kênh đóng góp 15\\% tổng doanh thu.\n    \\item \\textbf{Đào tạo đội ngũ bán hàng:} Xây dựng quy trình onboarding và bộ tài liệu đào tạo giúp nhân viên mới đạt chỉ tiêu sau 2 tháng (rút ngắn 30\\% so với trước).\n\\end{itemize}\n\n\\end{document}\n",
+          "metadata": {
+            "finishReason": "stop",
+            "rawFinishReason": "end_turn",
+            "usage": {
+              "inputTokens": 1237,
+              "outputTokens": 4374,
+              "totalTokens": 5611
+            }
+          }
+        },
+        "score": 1,
+        "success": true,
+        "testCase": {
+          "description": "vietnamese-cv — sơ yếu lý lịch tiếng Việt đầy đủ dấu",
+          "vars": {
+            "templateId": "cv",
+            "description": "Viết sơ yếu lý lịch cho vị trí nhân viên kinh doanh, đầy đủ thông tin liên hệ và kinh nghiệm."
+          },
+          "assert": [
+            {
+              "type": "regex",
+              "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{article\\}"
+            },
+            {
+              "type": "contains",
+              "value": "\\section"
+            },
+            {
+              "type": "not-contains",
+              "value": "moderncv"
+            },
+            {
+              "type": "not-contains",
+              "value": "\\cventry"
+            },
+            {
+              "type": "not-contains",
+              "value": "\\includegraphics"
+            },
+            {
+              "type": "contains",
+              "value": "\\end{document}"
+            },
+            {
+              "type": "javascript",
+              "value": "file://./scorers/validate-latex.ts"
+            }
+          ],
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 3,
+        "tokenUsage": {
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "total": 0,
+          "numRequests": 1,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          },
+          "assertions": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          }
+        },
+        "vars": {
+          "templateId": "cv",
+          "description": "Viết sơ yếu lý lịch cho vị trí nhân viên kinh doanh, đầy đủ thông tin liên hệ và kinh nghiệm."
+        },
+        "metadata": {
+          "finishReason": "stop",
+          "rawFinishReason": "end_turn",
+          "usage": {
+            "inputTokens": 1237,
+            "outputTokens": 4374,
+            "totalTokens": 5611
+          },
+          "_promptfooFileMetadata": {}
+        },
+        "failureReason": 0
+      }
+    ],
+    "stats": {
+      "successes": 4,
+      "failures": 0,
+      "errors": 0,
+      "tokenUsage": {
+        "prompt": 0,
+        "completion": 0,
+        "cached": 0,
+        "total": 0,
+        "numRequests": 4,
+        "completionDetails": {
+          "reasoning": 0,
+          "acceptedPrediction": 0,
+          "rejectedPrediction": 0,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0
+        },
+        "assertions": {
+          "total": 0,
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "numRequests": 0,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          }
+        }
+      },
+      "durationMs": 135174,
+      "evaluationDurationMs": 135174
+    }
+  },
+  "config": {
+    "tags": {},
+    "description": "CV template — AI THẬT trên dataset cv/",
+    "prompts": [
+      "{{description}}"
+    ],
+    "providers": [
+      {
+        "id": "file://./providers/cv-real-ai-provider.ts",
+        "label": "cv-real-ai"
+      }
+    ],
+    "tests": [
+      "file://./datasets/cv/cases.yaml"
+    ],
+    "env": {},
+    "defaultTest": {
+      "assert": [
+        {
+          "type": "regex",
+          "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{article\\}"
+        },
+        {
+          "type": "contains",
+          "value": "\\section"
+        },
+        {
+          "type": "not-contains",
+          "value": "moderncv"
+        },
+        {
+          "type": "not-contains",
+          "value": "\\cventry"
+        },
+        {
+          "type": "not-contains",
+          "value": "\\includegraphics"
+        },
+        {
+          "type": "contains",
+          "value": "\\end{document}"
+        },
+        {
+          "type": "javascript",
+          "value": "file://./scorers/validate-latex.ts"
+        }
+      ],
+      "vars": {},
+      "options": {},
+      "metadata": {}
+    },
+    "outputPath": [
+      "lib/prompt-eval/results/cv-real-ai-run-2026-07-17.json"
+    ],
+    "extensions": [],
+    "metadata": {},
+    "evaluateOptions": {}
+  },
+  "shareableUrl": null,
+  "metadata": {
+    "promptfooVersion": "0.121.18",
+    "nodeVersion": "v24.16.0",
+    "platform": "win32",
+    "arch": "x64",
+    "exportedAt": "2026-07-17T10:23:23.070Z",
+    "evaluationCreatedAt": "2026-07-17T10:21:07.778Z"
+  },
+  "vars": [
+    "templateId",
+    "description"
+  ],
+  "runtimeOptions": {
+    "eventSource": "cli",
+    "showProgressBar": true,
+    "repeat": 1,
+    "maxConcurrency": 4,
+    "cache": false
+  }
+}

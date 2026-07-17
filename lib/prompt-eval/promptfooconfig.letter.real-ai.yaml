@@ -1,0 +1,35 @@
+# lib/prompt-eval/promptfooconfig.letter.real-ai.yaml
+# Eval template `letter` bằng AI THẬT (đọc .env qua getProvider(); AI_PROVIDER=sotatek-anthropic,
+# AI_MODEL=deepseek/deepseek-v4-pro). TỐN API QUOTA THẬT mỗi lần chạy. Theo pattern
+# promptfooconfig.physics.real-ai.yaml.
+#   npx promptfoo eval -c lib/prompt-eval/promptfooconfig.letter.real-ai.yaml -o <out>.json
+description: "Letter template — AI THẬT trên dataset letter/"
+
+prompts:
+  - "{{description}}"
+
+providers:
+  - id: file://./providers/letter-real-ai-provider.ts
+    label: letter-real-ai
+
+tests:
+  - file://./datasets/letter/cases.yaml
+
+defaultTest:
+  assert:
+    # regex: chấp nhận \documentclass[opt]{letter}. Backslash PHẢI escape (\\).
+    - type: regex
+      value: '\\documentclass(\[[^\]]*\])?\{letter\}'
+    - type: contains
+      value: "\\begin{letter}"
+    - type: contains
+      value: "\\opening{"
+    - type: contains
+      value: "\\closing{"
+    # letter KHÔNG có sectioning
+    - type: not-contains
+      value: "\\section"
+    - type: contains
+      value: "\\end{document}"
+    - type: javascript
+      value: file://./scorers/validate-latex.ts

@@ -1,0 +1,827 @@
+{
+  "evalId": "eval-hJj-2026-07-17T09:34:52",
+  "results": {
+    "version": 3,
+    "timestamp": "2026-07-17T09:34:52.277Z",
+    "prompts": [
+      {
+        "id": "1e6bd1d5aab4bf787795c1f9955d1ac1cc90fa253cfff6883a3c44dd53037d25",
+        "raw": "{{description}}",
+        "label": "{{description}}",
+        "provider": "exam-real-ai",
+        "metrics": {
+          "score": 4,
+          "testPassCount": 4,
+          "testFailCount": 0,
+          "testErrorCount": 0,
+          "assertPassCount": 20,
+          "assertFailCount": 0,
+          "totalLatencyMs": 296035,
+          "tokenUsage": {
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "total": 0,
+            "numRequests": 4,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            },
+            "assertions": {
+              "total": 0,
+              "prompt": 0,
+              "completion": 0,
+              "cached": 0,
+              "numRequests": 0,
+              "completionDetails": {
+                "reasoning": 0,
+                "acceptedPrediction": 0,
+                "rejectedPrediction": 0,
+                "cacheReadInputTokens": 0,
+                "cacheCreationInputTokens": 0
+              }
+            }
+          },
+          "namedScores": {},
+          "namedScoresCount": {},
+          "namedScoreWeights": {},
+          "cost": 0
+        }
+      }
+    ],
+    "results": [
+      {
+        "cost": 0,
+        "gradingResult": {
+          "pass": true,
+          "score": 1,
+          "reason": "All assertions passed",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0
+          },
+          "componentResults": [
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "regex",
+                "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{exam\\}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\begin{questions}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\question"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\end{document}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "validateLatex: OK — không có diagnostic.",
+              "assertion": {
+                "type": "javascript",
+                "value": "file://./scorers/validate-latex.ts"
+              }
+            }
+          ]
+        },
+        "id": "977fcc03-8a58-4808-be78-febe31663957",
+        "latencyMs": 60904,
+        "namedScores": {},
+        "prompt": {
+          "raw": "Soạn đề kiểm tra Toán gồm 3 câu tự luận có thang điểm và lời giải mẫu.",
+          "label": "{{description}}",
+          "config": {}
+        },
+        "promptId": "1e6bd1d5aab4bf787795c1f9955d1ac1cc90fa253cfff6883a3c44dd53037d25",
+        "promptIdx": 0,
+        "provider": {
+          "id": "exam-real-ai-provider",
+          "label": "exam-real-ai"
+        },
+        "response": {
+          "output": "\\documentclass[12pt,a4paper]{exam}\n\\usepackage[top=2cm, bottom=2cm, left=2 cm, right=2 cm]{geometry}\n\\usepackage{amsmath,amssymb}\n\\usepackage{tikz}\n\\usepackage{hyperref}\n\\usepackage{siunitx}\n\n% Show solutions\n\\printanswers\n\n% Exam header\n\\title{ĐỀ KIỂM TRA TOÁN}\n\\author{Thời gian làm bài: 90 phút}\n\\date{Học kỳ I -- Năm học 2025--2026}\n\n\\begin{document}\n\n\\maketitle\n\n\\begin{center}\n\\textbf{Họ và tên:} \\hrulefill\\quad \\textbf{Lớp:} \\hrulefill\n\\end{center}\n\n\\vspace{1cm}\n\n\\begin{questions}\n\n% Question 1\n\\question[3] Giải phương trình\n\\[\n|2x-1| = x+3.\n\\]\n\n\\begin{solution}\nTa xét hai trường hợp dựa trên dấu của biểu thức trong dấu giá trị tuyệt đối.\n\n\\textbf{Trường hợp 1:} $2x-1 \\ge 0 \\Leftrightarrow x \\ge \\frac12$.\nKhi đó $|2x-1| = 2x-1$, phương trình trở thành\n\\[\n2x-1 = x+3 \\quad\\Longrightarrow\\quad x = 4.\n\\]\nGiá trị $x=4$ thỏa mãn điều kiện $x \\ge \\frac12$ nên nhận.\n\n\\textbf{Trường hợp 2:} $2x-1 < 0 \\Leftrightarrow x < \\frac12$.\nKhi đó $|2x-1| = -(2x-1) = -2x+1$, phương trình trở thành\n\\[\n-2x+1 = x+3 \\quad\\Longrightarrow\\quad -3x = 2 \\quad\\Longrightarrow\\quad x = -\\frac23.\n\\]\nGiá trị $x = -\\frac23$ thỏa mãn điều kiện $x < \\frac12$ nên nhận.\n\nVậy tập nghiệm của phương trình là $S = \\left\\{-\\dfrac23;\\,4\\right\\}$.\n\\end{solution}\n\n% Question 2\n\\question[3] Tính giới hạn\n\\[\nL = \\lim_{x\\to 2} \\frac{x^3 - 8}{x^2 - 4}.\n\\]\n\n\\begin{solution}\nKhi $x\\to 2$, cả tử và mẫu đều dần tới $0$ (dạng vô định $\\frac{0}{0}$).\nTa phân tích tử và mẫu thành nhân tử.\n\n\\begin{align*}\nx^3 - 8 &= (x-2)(x^2 + 2x + 4),\\\\\nx^2 - 4 &= (x-2)(x+2).\n\\end{align*}\n\nDo đó, với $x\\neq 2$,\n\\[\n\\frac{x^3 - 8}{x^2 - 4}\n= \\frac{(x-2)(x^2+2x+4)}{(x-2)(x+2)}\n= \\frac{x^2 + 2x + 4}{x+2}.\n\\]\n\nÁp dụng quy tắc giới hạn của hàm phân thức xác định tại điểm $x=2$, ta có\n\\[\nL = \\lim_{x\\to 2} \\frac{x^2 + 2x + 4}{x+2}\n   = \\frac{2^2 + 2\\cdot 2 + 4}{2+2}\n   = \\frac{4 + 4 + 4}{4}\n   = \\frac{12}{4} = 3.\n\\]\n\nVậy $L = 3$.\n\\end{solution}\n\n% Question 3 with TikZ figure\n\\question[4] Cho hình chóp $S.ABC$ có đáy $ABC$ là tam giác vuông cân tại $B$, $AB = a$, cạnh bên $SA$ vuông góc với mặt phẳng đáy và $SA = a\\sqrt{2}$.\n\n\\begin{parts}\n\\part[2] Tính thể tích khối chóp $S.ABC$ theo $a$.\n\\part[2] Tính khoảng cách từ điểm $A$ đến mặt phẳng $(SBC)$.\n\\end{parts}\n\n\\begin{solution}\n(Tham khảo hình vẽ minh họa.)\n\n\\begin{center}\n\\begin{tikzpicture}[scale=1.2,\n    x={(0.7cm,0.4cm)},\n    y={(0cm,1cm)},\n    z={(-0.7cm,0.4cm)}]\n% Coordinates\n\\coordinate (A) at (0,0,0);\n\\coordinate (B) at (2,0,0);\n\\coordinate (C) at (2,2,0);\n\\coordinate (S) at (0,0,3.5);\n% Draw edges\n\\draw[thick] (A) -- (B) node[midway,below] {$a$};\n\\draw[thick] (A) -- (C);\n\\draw[thick] (B) -- (C) node[midway,right] {$a$};\n\\draw[thick] (S) -- (A) node[midway,left] {$a\\sqrt{2}$};\n\\draw[thick] (S) -- (B);\n\\draw[thick] (S) -- (C);\n\\draw[dashed] (A) -- (C);\n% Nodes\n\\node[left] at (A) {$A$};\n\\node[right] at (B) {$B$};\n\\node[right] at (C) {$C$};\n\\node[above] at (S) {$S$};\n% Right angle at B\n\\draw (B) -- ++(-0.3,0,0) -- ++(0,0.3,0) -- ++(0.3,-0.3,0);\n\\end{tikzpicture}\n\\end{center}\n\n\\underline{\\textbf{Câu a:}} Tam giác $ABC$ vuông cân tại $B$ với $AB = a$, $BC = a$.\nDiện tích đáy:\n\\[\nS_{\\triangle ABC} = \\frac12 \\cdot AB \\cdot BC = \\frac12 \\cdot a \\cdot a = \\frac{a^2}{2}.\n\\]\n\nChiều cao $SA$ vuông góc với đáy, $SA = a\\sqrt{2}$.\nThể tích khối chóp:\n\\[\nV_{S.ABC} = \\frac13 \\cdot S_{\\triangle ABC} \\cdot SA\n            = \\frac13 \\cdot \\frac{a^2}{2} \\cdot a\\sqrt{2}\n            = \\frac{a^3\\sqrt{2}}{6}.\n\\]\n\n\\underline{\\textbf{Câu b:}} Chọn hệ trục tọa độ $Axyz$ như sau:\n$A(0;0;0)$, $B(a;0;0)$, $C(a;a;0)$, $S(0;0;a\\sqrt{2})$.\n(AB nằm trên trục $Ox$, hướng $AB$ dương; $BC$ song song với trục $Oy$; $AS$ nằm trên trục $Oz$.)\n\nTọa độ các điểm:\n\\[\nA(0;0;0),\\quad B(a;0;0),\\quad C(a;a;0),\\quad S(0;0;a\\sqrt{2}).\n\\]\n\nVectơ pháp tuyến của mặt phẳng $(SBC)$:\n\\[\n\\overrightarrow{SB} = (a; 0; -a\\sqrt{2}),\\qquad\n\\overrightarrow{SC} = (a; a; -a\\sqrt{2}).\n\\]\nTích có hướng:\n\\[\n\\vec{n} = \\bigl[\\overrightarrow{SB},\\overrightarrow{SC}\\bigr]\n        = \\begin{vmatrix}\n          \\mathbf{i} & \\mathbf{j} & \\mathbf{k}\\\\\n          a          & 0          & -a\\sqrt{2}\\\\\n          a          & a          & -a\\sqrt{2}\n          \\end{vmatrix}\n        = (a^2\\sqrt{2};\\, 0;\\, a^2).\n\\]\n\nDiện tích tam giác $SBC$:\n\\[\nS_{\\triangle SBC} = \\frac12 \\bigl|\\vec{n}\\bigr|\n                   = \\frac12 \\sqrt{(a^2\\sqrt{2})^2 + 0 + (a^2)^2}\n                   = \\frac12 \\sqrt{2a^4 + a^4}\n                   = \\frac{a^2\\sqrt{3}}{2}.\n\\]\n\nKhoảng cách từ $A$ đến mặt phẳng $(SBC)$ được tính qua thể tích khối chóp $A.SBC$ (cũng là khối $S.ABC$):\n\\[\nd\\bigl(A,(SBC)\\bigr) = \\frac{3\\,V_{S.ABC}}{S_{\\triangle SBC}}\n                     = \\frac{3\\cdot \\dfrac{a^3\\sqrt{2}}{6}}{\\dfrac{a^2\\sqrt{3}}{2}}\n                     = \\frac{\\dfrac{a^3\\sqrt{2}}{2}}{\\dfrac{a^2\\sqrt{3}}{2}}\n                     = \\frac{a\\sqrt{2}}{\\sqrt{3}}\n                     = \\frac{a\\sqrt{6}}{3}.\n\\]\n\nVậy thể tích khối chóp là $\\displaystyle \\frac{a^3\\sqrt{2}}{6}$ và khoảng cách từ $A$ đến $(SBC)$ bằng $\\displaystyle \\frac{a\\sqrt{6}}{3}$.\n\\end{solution}\n\n\\end{questions}\n\n\\end{document}\n",
+          "metadata": {
+            "finishReason": "stop",
+            "rawFinishReason": "end_turn",
+            "usage": {
+              "inputTokens": 1168,
+              "outputTokens": 4612,
+              "totalTokens": 5780
+            }
+          }
+        },
+        "score": 1,
+        "success": true,
+        "testCase": {
+          "description": "basic-exam — đề tự luận có điểm + lời giải",
+          "vars": {
+            "templateId": "exam",
+            "description": "Soạn đề kiểm tra Toán gồm 3 câu tự luận có thang điểm và lời giải mẫu."
+          },
+          "assert": [
+            {
+              "type": "regex",
+              "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{exam\\}"
+            },
+            {
+              "type": "contains",
+              "value": "\\begin{questions}"
+            },
+            {
+              "type": "contains",
+              "value": "\\question"
+            },
+            {
+              "type": "contains",
+              "value": "\\end{document}"
+            },
+            {
+              "type": "javascript",
+              "value": "file://./scorers/validate-latex.ts"
+            }
+          ],
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 0,
+        "tokenUsage": {
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "total": 0,
+          "numRequests": 1,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          },
+          "assertions": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          }
+        },
+        "vars": {
+          "templateId": "exam",
+          "description": "Soạn đề kiểm tra Toán gồm 3 câu tự luận có thang điểm và lời giải mẫu."
+        },
+        "metadata": {
+          "finishReason": "stop",
+          "rawFinishReason": "end_turn",
+          "usage": {
+            "inputTokens": 1168,
+            "outputTokens": 4612,
+            "totalTokens": 5780
+          },
+          "_promptfooFileMetadata": {}
+        },
+        "failureReason": 0
+      },
+      {
+        "cost": 0,
+        "gradingResult": {
+          "pass": true,
+          "score": 1,
+          "reason": "All assertions passed",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0
+          },
+          "componentResults": [
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "regex",
+                "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{exam\\}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\begin{questions}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\question"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\end{document}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "validateLatex: OK — không có diagnostic.",
+              "assertion": {
+                "type": "javascript",
+                "value": "file://./scorers/validate-latex.ts"
+              }
+            }
+          ]
+        },
+        "id": "48b617ad-5a8e-44de-83ab-1050fa83ae8c",
+        "latencyMs": 39410,
+        "namedScores": {},
+        "prompt": {
+          "raw": "Soạn đề trắc nghiệm Vật lý gồm 4 câu, mỗi câu 4 phương án, có đánh dấu đáp án đúng.",
+          "label": "{{description}}",
+          "config": {}
+        },
+        "promptId": "1e6bd1d5aab4bf787795c1f9955d1ac1cc90fa253cfff6883a3c44dd53037d25",
+        "promptIdx": 0,
+        "provider": {
+          "id": "exam-real-ai-provider",
+          "label": "exam-real-ai"
+        },
+        "response": {
+          "output": "\\documentclass[12pt,a4paper]{exam}\n\\usepackage{fontspec}\n\\usepackage{geometry}\n\\geometry{top=2cm,bottom=2cm,left=2.5cm,right=2.5cm}\n\\usepackage{amsmath,amssymb}\n\\usepackage{siunitx}\n\\sisetup{per-mode=symbol,detect-all}\n\\usepackage{xcolor}\n\\usepackage{hyperref}\n\\hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue}\n\n% Vietnamese-friendly formatting\n\\pointpoints{điểm}{điểm}\n\\qformat{\\textbf{Câu \\thequestion} (\\totalpoints\\ điểm)\\hfill}\n\\renewcommand{\\solutiontitle}{\\noindent\\textbf{Đáp án và lời giải:}\\enspace}\n\n\\title{ĐỀ TRẮC NGHIỆM MÔN VẬT LÝ}\n\\author{Lớp 10 -- Thời gian làm bài: 45 phút}\n\\date{}\n\n\\printanswers % Hiển thị đáp án\n\n\\begin{document}\n\\maketitle\n\n\\noindent\n\\textbf{Hướng dẫn:} Hãy khoanh tròn vào chữ cái đứng trước phương án đúng (mỗi câu 1,0 điểm).\n\n\\vspace{1em}\n\n\\begin{questions}\n\n\\question[1]\nMột vật rơi tự do từ độ cao \\(45\\,\\si{\\meter}\\) so với mặt đất. Lấy gia tốc rơi tự do \\(g = 10\\,\\si{\\meter\\per\\second\\squared}\\). Thời gian rơi của vật là\n\\begin{choices}\n\\choice \\(2,0\\,\\si{\\second}\\)\n\\choice \\(4,0\\,\\si{\\second}\\)\n\\CorrectChoice \\(3,0\\,\\si{\\second}\\)\n\\choice \\(1,5\\,\\si{\\second}\\)\n\\end{choices}\n\n\\begin{solution}\nThời gian rơi tự do: \\(t = \\sqrt{\\dfrac{2h}{g}} = \\sqrt{\\dfrac{2\\cdot 45}{10}} = 3,0\\,\\si{\\second}\\).\n\\end{solution}\n\n\\question[1]\nMột vật có khối lượng \\(2\\,\\si{\\kilo\\gram}\\) chịu tác dụng của một lực không đổi có độ lớn \\(6\\,\\si{\\newton}\\) theo phương ngang (bỏ qua ma sát). Gia tốc của vật là\n\\begin{choices}\n\\choice \\(2,0\\,\\si{\\meter\\per\\second\\squared}\\)\n\\CorrectChoice \\(3,0\\,\\si{\\meter\\per\\second\\squared}\\)\n\\choice \\(4,0\\,\\si{\\meter\\per\\second\\squared}\\)\n\\choice \\(6,0\\,\\si{\\meter\\per\\second\\squared}\\)\n\\end{choices}\n\n\\begin{solution}\nĐịnh luật II Newton: \\(a = \\dfrac{F}{m} = \\dfrac{6}{2} = 3,0\\,\\si{\\meter\\per\\second\\squared}\\).\n\\end{solution}\n\n\\question[1]\nMột lò xo có độ cứng \\(k = 100\\,\\si{\\newton\\per\\meter}\\) bị nén một đoạn \\(5\\,\\si{\\centi\\meter}\\). Thế năng đàn hồi của lò xo là\n\\begin{choices}\n\\CorrectChoice \\(0,125\\,\\si{\\joule}\\)\n\\choice \\(0,25\\,\\si{\\joule}\\)\n\\choice \\(0,50\\,\\si{\\joule}\\)\n\\choice \\(1,25\\,\\si{\\joule}\\)\n\\end{choices}\n\n\\begin{solution}\nĐổi \\(x = 5\\,\\si{\\centi\\meter} = 0,05\\,\\si{\\meter}\\).\\\\\nThế năng đàn hồi: \\(W_t = \\dfrac{1}{2} k x^2 = \\dfrac{1}{2} \\cdot 100 \\cdot (0,05)^2 = 0,125\\,\\si{\\joule}\\).\n\\end{solution}\n\n\\question[1]\nMột điện trở thuần \\(R = 10\\,\\si{\\ohm}\\) được mắc vào hai cực của một nguồn điện có suất điện động (hiệu điện thế không đổi) \\(5\\,\\si{\\volt}\\). Cường độ dòng điện qua điện trở là\n\\begin{choices}\n\\choice \\(2,0\\,\\si{\\ampere}\\)\n\\CorrectChoice \\(0,5\\,\\si{\\ampere}\\)\n\\choice \\(5,0\\,\\si{\\ampere}\\)\n\\choice \\(50\\,\\si{\\ampere}\\)\n\\end{choices}\n\n\\begin{solution}\nĐịnh luật Ohm: \\(I = \\dfrac{U}{R} = \\dfrac{5}{10} = 0,5\\,\\si{\\ampere}\\).\n\\end{solution}\n\n\\end{questions}\n\n\\vspace{1cm}\n\\noindent\n\\textit{--- Hết ---}\n\\end{document}\n",
+          "metadata": {
+            "finishReason": "stop",
+            "rawFinishReason": "end_turn",
+            "usage": {
+              "inputTokens": 1180,
+              "outputTokens": 2772,
+              "totalTokens": 3952
+            }
+          }
+        },
+        "score": 1,
+        "success": true,
+        "testCase": {
+          "description": "mcq-exam — trắc nghiệm nhiều lựa chọn",
+          "vars": {
+            "templateId": "exam",
+            "description": "Soạn đề trắc nghiệm Vật lý gồm 4 câu, mỗi câu 4 phương án, có đánh dấu đáp án đúng."
+          },
+          "assert": [
+            {
+              "type": "regex",
+              "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{exam\\}"
+            },
+            {
+              "type": "contains",
+              "value": "\\begin{questions}"
+            },
+            {
+              "type": "contains",
+              "value": "\\question"
+            },
+            {
+              "type": "contains",
+              "value": "\\end{document}"
+            },
+            {
+              "type": "javascript",
+              "value": "file://./scorers/validate-latex.ts"
+            }
+          ],
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 1,
+        "tokenUsage": {
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "total": 0,
+          "numRequests": 1,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          },
+          "assertions": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          }
+        },
+        "vars": {
+          "templateId": "exam",
+          "description": "Soạn đề trắc nghiệm Vật lý gồm 4 câu, mỗi câu 4 phương án, có đánh dấu đáp án đúng."
+        },
+        "metadata": {
+          "finishReason": "stop",
+          "rawFinishReason": "end_turn",
+          "usage": {
+            "inputTokens": 1180,
+            "outputTokens": 2772,
+            "totalTokens": 3952
+          },
+          "_promptfooFileMetadata": {}
+        },
+        "failureReason": 0
+      },
+      {
+        "cost": 0,
+        "gradingResult": {
+          "pass": true,
+          "score": 1,
+          "reason": "All assertions passed",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0
+          },
+          "componentResults": [
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "regex",
+                "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{exam\\}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\begin{questions}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\question"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\end{document}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "validateLatex: OK — không có diagnostic.",
+              "assertion": {
+                "type": "javascript",
+                "value": "file://./scorers/validate-latex.ts"
+              }
+            }
+          ]
+        },
+        "id": "9dde90ab-e4a4-41dd-bc1c-67f20d547672",
+        "latencyMs": 124721,
+        "namedScores": {},
+        "prompt": {
+          "raw": "Soạn đề Hóa học có câu hỏi chia thành nhiều ý nhỏ (a, b, c) kèm điểm từng ý.",
+          "label": "{{description}}",
+          "config": {}
+        },
+        "promptId": "1e6bd1d5aab4bf787795c1f9955d1ac1cc90fa253cfff6883a3c44dd53037d25",
+        "promptIdx": 0,
+        "provider": {
+          "id": "exam-real-ai-provider",
+          "label": "exam-real-ai"
+        },
+        "response": {
+          "output": "\\documentclass[12pt,a4paper,addpoints]{exam}\n\\usepackage{geometry}\n\\geometry{margin=2.5cm}\n\\usepackage{amsmath,amssymb}\n\\usepackage{siunitx}\n\\usepackage{xcolor}\n\\usepackage{enumitem}\n\\usepackage[hidelinks]{hyperref}\n\n% --- Cấu hình ngôn ngữ tiếng Việt (không dùng babel/polyglossia) ---\n\\pointname{điểm}\n\\pointpoints{điểm}{điểm}\n\\renewcommand{\\questionlabel}{\\textbf{Câu \\thequestion.}}\n\\renewcommand{\\partlabel}{\\textbf{\\thepartno.}}\n\\qformat{\\textbf{Câu \\thequestion} ({\\totalpoints} điểm)\\hfill}\n\\nopointsinmargin               % Ẩn điểm ở lề (đã hiển thị trong qformat)\n\n% --- In đáp án (xóa dòng này nếu chỉ muốn đề mà không có lời giải) ---\n\\printanswers\n\n\\begin{document}\n\n\\title{\\textbf{ĐỀ KIỂM TRA HÓA HỌC 10}\\\\\n       \\large Thời gian: 45 phút}\n\\author{}\n\\date{}\n\\maketitle\n\\thispagestyle{empty}\n\n\\vspace{-1cm}\n\\begin{center}\n\\textit{(Thí sinh không được sử dụng tài liệu. Cán bộ coi thi không giải thích gì thêm.)}\n\\end{center}\n\n\\section*{Phần tự luận}\n\\begin{questions}\n\n% ===================== CÂU 1 =====================\n\\question[3] (Cân bằng phản ứng oxi hóa -- khử)\nXác định chất khử, chất oxi hóa và cân bằng các phản ứng sau bằng phương pháp \\textbf{thăng bằng electron}:\n\n\\begin{enumerate}[label=\\alph*), itemsep=8pt, leftmargin=*]\n    \\item $\\mathrm{Fe} + \\mathrm{HNO_3} \\rightarrow \\mathrm{Fe(NO_3)_3} + \\mathrm{NO} + \\mathrm{H_2O}$\n    \\hfill (1,5 điểm)\n    \n    \\item $\\mathrm{KMnO_4} + \\mathrm{HCl} \\rightarrow \\mathrm{KCl} + \\mathrm{MnCl_2} + \\mathrm{Cl_2} + \\mathrm{H_2O}$\n    \\hfill (1,5 điểm)\n\\end{enumerate}\n\n\\begin{solution}\n\\noindent \\textbf{a)} \\textit{Các bước cân bằng:}\n\\begin{itemize}[leftmargin=*, itemsep=3pt]\n    \\item Xác định số oxi hóa: $\\overset{0}{\\mathrm{Fe}} + \\mathrm{H}\\overset{+5}{\\mathrm{N}}\\mathrm{O_3} \\rightarrow \\overset{+3}{\\mathrm{Fe}}\\mathrm{(NO_3)_3} + \\overset{+2}{\\mathrm{N}}\\mathrm{O} + \\mathrm{H_2O}$\n    \\item Quá trình oxi hóa: $\\overset{0}{\\mathrm{Fe}} \\rightarrow \\overset{+3}{\\mathrm{Fe}} + 3e^-$ \\quad ($\\times 1$)\n    \\item Quá trình khử: $\\overset{+5}{\\mathrm{N}} + 3e^- \\rightarrow \\overset{+2}{\\mathrm{N}}$ \\quad ($\\times 1$)\n    \\item Hệ số: 1 Fe nhường 3e, 1 N nhận 3e $\\rightarrow$ tỉ lệ $1:1$.\\\\\n          Thêm $\\mathrm{HNO_3}$ để tạo môi trường và muối: cần 3 gốc $\\mathrm{NO_3^-}$ cho $\\mathrm{Fe(NO_3)_3}$ và 1 cho NO $\\rightarrow$ tổng 4 $\\mathrm{HNO_3}$.\n    \\item Phương trình hoàn chỉnh:\n    \\[\\boxed{\\mathrm{Fe} + 4\\mathrm{HNO_3} \\longrightarrow \\mathrm{Fe(NO_3)_3} + \\mathrm{NO} + 2\\mathrm{H_2O}}\\]\n    \\item \\textbf{Chất khử:} Fe \\hspace{1cm} \\textbf{Chất oxi hóa:} $\\mathrm{HNO_3}$ (nguyên tử N)\n\\end{itemize}\n\n\\noindent \\textbf{b)} \\textit{Các bước cân bằng:}\n\\begin{itemize}[leftmargin=*, itemsep=3pt]\n    \\item Số oxi hóa: $\\mathrm{K}\\overset{+7}{\\mathrm{Mn}}\\mathrm{O_4} + \\mathrm{H}\\overset{-1}{\\mathrm{Cl}} \\rightarrow \\mathrm{K}\\overset{-1}{\\mathrm{Cl}} + \\overset{+2}{\\mathrm{Mn}}\\mathrm{Cl_2} + \\overset{0}{\\mathrm{Cl_2}} + \\mathrm{H_2O}$\n    \\item Quá trình khử: $\\overset{+7}{\\mathrm{Mn}} + 5e^- \\rightarrow \\overset{+2}{\\mathrm{Mn}}$ \\quad ($\\times 2$)\n    \\item Quá trình oxi hóa: $2\\overset{-1}{\\mathrm{Cl}} \\rightarrow \\overset{0}{\\mathrm{Cl_2}} + 2e^-$ \\quad ($\\times 5$)\n    \\item Nhân chéo: 2 Mn nhận 10e, cần 10$\\mathrm{Cl^-}$ cho 5$\\mathrm{Cl_2}$.\\\\\n          Tính lượng HCl: 2$\\mathrm{KCl}$ + 2$\\mathrm{MnCl_2}$ dùng 6$\\mathrm{Cl^-}$, cộng với 10$\\mathrm{Cl^-}$ cho $\\mathrm{Cl_2}$ $\\rightarrow$ tổng 16 HCl.\n    \\item Phương trình:\n    \\[\\boxed{2\\mathrm{KMnO_4} + 16\\mathrm{HCl} \\longrightarrow 2\\mathrm{KCl} + 2\\mathrm{MnCl_2} + 5\\mathrm{Cl_2} + 8\\mathrm{H_2O}}\\]\n    \\item \\textbf{Chất khử:} $\\mathrm{HCl}$ (ion $\\mathrm{Cl^-}$) \\hspace{1cm} \\textbf{Chất oxi hóa:} $\\mathrm{KMnO_4}$ (ion $\\mathrm{MnO_4^-}$, nguyên tử Mn)\n\\end{itemize}\n\\end{solution}\n\n% ===================== CÂU 2 =====================\n\\question[4] (Bài toán hỗn hợp)\nHòa tan hoàn toàn 5,6 gam sắt (Fe) trong dung dịch axit clohiđric (HCl) dư, thu được dung dịch X và khí Y thoát ra ở điều kiện tiêu chuẩn (đktc).\n\n\\begin{enumerate}[label=\\alph*), itemsep=8pt, leftmargin=*]\n    \\item Viết phương trình hóa học của phản ứng. \\hfill (1,0 điểm)\n    \\item Tính thể tích khí Y thu được (ở đktc). \\hfill (1,5 điểm)\n    \\item Cô cạn dung dịch X thu được bao nhiêu gam muối khan? \\hfill (1,5 điểm)\n\\end{enumerate}\n\n\\begin{solution}\n\\noindent \\textbf{a)} Phương trình hóa học:\n\\[\\boxed{\\mathrm{Fe} + 2\\mathrm{HCl} \\longrightarrow \\mathrm{FeCl_2} + \\mathrm{H_2}\\uparrow}\\]\nKhí Y là $\\mathrm{H_2}$, dung dịch X chứa $\\mathrm{FeCl_2}$.\n\n\\noindent \\textbf{b)} Số mol Fe ban đầu:\n\\[n_{\\mathrm{Fe}} = \\frac{m_{\\mathrm{Fe}}}{M_{\\mathrm{Fe}}} = \\frac{5,6}{56} = 0,1\\,\\text{mol.}\\]\nTheo phương trình phản ứng:\n\\[n_{\\mathrm{H_2}} = n_{\\mathrm{Fe}} = 0,1\\,\\text{mol.}\\]\nThể tích khí $\\mathrm{H_2}$ ở đktc:\n\\[V_{\\mathrm{H_2}} = n_{\\mathrm{H_2}} \\times 22,4 = 0,1 \\times 22,4 = 2,24\\,\\text{lít.}\\]\nVậy thể tích khí Y là $\\mathbf{2,24}$ lít.\n\n\\noindent \\textbf{c)} Theo phương trình: $n_{\\mathrm{FeCl_2}} = n_{\\mathrm{Fe}} = 0,1$\\,mol.\nKhối lượng muối khan $\\mathrm{FeCl_2}$:\n\\[m_{\\mathrm{FeCl_2}} = n_{\\mathrm{FeCl_2}} \\times M_{\\mathrm{FeCl_2}} = 0,1 \\times (56 + 2\\times 35,5) = 0,1 \\times 127 = 12,7\\,\\text{gam.}\\]\nVậy khối lượng muối khan thu được là $\\mathbf{12,7}$ gam.\n\\end{solution}\n\n% ===================== CÂU 3 =====================\n\\question[3] (Nhận biết chất)\nCó 3 lọ mất nhãn, mỗi lọ đựng một dung dịch không màu sau: natri hiđroxit ($\\mathrm{NaOH}$), axit clohiđric ($\\mathrm{HCl}$) và natri nitrat ($\\mathrm{NaNO_3}$). Chỉ được dùng thêm \\textbf{một} thuốc thử, hãy nhận biết các dung dịch trên.\n\n\\begin{enumerate}[label=\\alph*), itemsep=8pt, leftmargin=*]\n    \\item Nêu cách nhận biết (mô tả hiện tượng). \\hfill (1,5 điểm)\n    \\item Viết phương trình hóa học minh họa (nếu có). \\hfill (1,5 điểm)\n\\end{enumerate}\n\n\\begin{solution}\n\\noindent \\textbf{a)} Phương pháp nhận biết:\n\\begin{itemize}[leftmargin=*, itemsep=3pt]\n    \\item \\textbf{Thuốc thử lựa chọn:} quỳ tím (giấy quỳ hoặc dung dịch quỳ tím).\n    \\item \\textbf{Cách tiến hành:} Nhỏ lần lượt mỗi dung dịch lên một mẩu quỳ tím, quan sát sự đổi màu.\n    \\item \\textbf{Hiện tượng và kết luận:}\n    \\begin{itemize}[leftmargin=*]\n        \\item Dung dịch làm quỳ tím chuyển sang màu \\textbf{xanh} $\\rightarrow$ dung dịch $\\mathrm{NaOH}$ (bazơ).\n        \\item Dung dịch làm quỳ tím chuyển sang màu \\textbf{đỏ} $\\rightarrow$ dung dịch $\\mathrm{HCl}$ (axit).\n        \\item Dung dịch \\textbf{không làm đổi màu} quỳ tím $\\rightarrow$ dung dịch $\\mathrm{NaNO_3}$ (muối trung tính).\n    \\end{itemize}\n\\end{itemize}\n\n\\noindent \\textbf{b)} Phương trình hóa học minh họa:\nPhản ứng trung hòa không xảy ra trực tiếp trên quỳ tím; tuy nhiên bản chất sự đổi màu là do sự điện li của axit và bazơ trong nước:\n\\begin{align*}\n    \\mathrm{HCl} &\\longrightarrow \\mathrm{H^+} + \\mathrm{Cl^-} \\quad \\text{(môi trường axit làm quỳ hóa đỏ)}\\\\\n    \\mathrm{NaOH} &\\longrightarrow \\mathrm{Na^+} + \\mathrm{OH^-} \\quad \\text{(môi trường bazơ làm quỳ hóa xanh)}\n\\end{align*}\n$\\mathrm{NaNO_3}$ điện li cho $\\mathrm{Na^+}$ và $\\mathrm{NO_3^-}$, không làm thay đổi pH đáng kể nên quỳ tím không đổi màu. Do đó không có phương trình phản ứng thu gọn đặc trưng cho sự nhận biết ngoài quá trình điện li.\n\\end{solution}\n\n\\end{questions}\n\n\\vfill\n\\begin{center}\n--- Hết ---\n\\end{center}\n\n\\end{document}\n",
+          "metadata": {
+            "finishReason": "stop",
+            "rawFinishReason": "end_turn",
+            "usage": {
+              "inputTokens": 1175,
+              "outputTokens": 8007,
+              "totalTokens": 9182
+            }
+          }
+        },
+        "score": 1,
+        "success": true,
+        "testCase": {
+          "description": "parts-exam — câu hỏi chia nhiều ý (parts)",
+          "vars": {
+            "templateId": "exam",
+            "description": "Soạn đề Hóa học có câu hỏi chia thành nhiều ý nhỏ (a, b, c) kèm điểm từng ý."
+          },
+          "assert": [
+            {
+              "type": "regex",
+              "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{exam\\}"
+            },
+            {
+              "type": "contains",
+              "value": "\\begin{questions}"
+            },
+            {
+              "type": "contains",
+              "value": "\\question"
+            },
+            {
+              "type": "contains",
+              "value": "\\end{document}"
+            },
+            {
+              "type": "javascript",
+              "value": "file://./scorers/validate-latex.ts"
+            }
+          ],
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 2,
+        "tokenUsage": {
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "total": 0,
+          "numRequests": 1,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          },
+          "assertions": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          }
+        },
+        "vars": {
+          "templateId": "exam",
+          "description": "Soạn đề Hóa học có câu hỏi chia thành nhiều ý nhỏ (a, b, c) kèm điểm từng ý."
+        },
+        "metadata": {
+          "finishReason": "stop",
+          "rawFinishReason": "end_turn",
+          "usage": {
+            "inputTokens": 1175,
+            "outputTokens": 8007,
+            "totalTokens": 9182
+          },
+          "_promptfooFileMetadata": {}
+        },
+        "failureReason": 0
+      },
+      {
+        "cost": 0,
+        "gradingResult": {
+          "pass": true,
+          "score": 1,
+          "reason": "All assertions passed",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0
+          },
+          "componentResults": [
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "regex",
+                "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{exam\\}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\begin{questions}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\question"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\end{document}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "validateLatex: OK — không có diagnostic.",
+              "assertion": {
+                "type": "javascript",
+                "value": "file://./scorers/validate-latex.ts"
+              }
+            }
+          ]
+        },
+        "id": "87c81bac-5f52-4be7-b3bc-3880d1ea38a6",
+        "latencyMs": 71000,
+        "namedScores": {},
+        "prompt": {
+          "raw": "Soạn đề kiểm tra 15 phút môn Toán lớp 10 về phương trình bậc hai, kèm lời giải.",
+          "label": "{{description}}",
+          "config": {}
+        },
+        "promptId": "1e6bd1d5aab4bf787795c1f9955d1ac1cc90fa253cfff6883a3c44dd53037d25",
+        "promptIdx": 0,
+        "provider": {
+          "id": "exam-real-ai-provider",
+          "label": "exam-real-ai"
+        },
+        "response": {
+          "output": "\\documentclass[12pt,a4paper,addpoints,pointsinmargin]{exam}\n\\usepackage[top=2cm, bottom=2cm, left=2.5cm, right=2cm]{geometry}\n\\usepackage{amsmath,amssymb}\n\\usepackage{hyperref}\n\\renewcommand{\\solutiontitle}{\\noindent\\textbf{Lời giải:}\\par\\noindent}\n\\bracketedpoints\n\\pointpoints{điểm}{điểm}\n\\firstpageheader{TRƯỜNG THPT CHU VĂN AN \\\\ TỔ TOÁN}{ĐỀ KIỂM TRA 15 PHÚT \\\\ MÔN: TOÁN 10}{Họ và tên: \\hspace{3cm} \\\\ Lớp: \\hspace{2cm} \\\\ Ngày: \\hspace{2cm}}\n\\runningheader{}{}{}\n\\chead{}\n\\rhead{}\n\n\\begin{document}\n\\printanswers\n\n\\noindent\\textit{Thời gian làm bài: 15 phút (không kể thời gian phát đề). Đề gồm 4 câu, thang điểm 10.}\n\n\\vspace{0.3cm}\n\n\\begin{questions}\n\n\\question[2] Giải phương trình sau:\n\\[ 2x^2 - 5x + 2 = 0. \\]\n\\begin{solution}\nTa có $\\Delta = (-5)^2 - 4 \\cdot 2 \\cdot 2 = 25 - 16 = 9 > 0$. Phương trình có hai nghiệm phân biệt:\n\\[ x_1 = \\frac{5 + 3}{4} = 2,\\qquad x_2 = \\frac{5 - 3}{4} = \\frac{1}{2}. \\]\nVậy tập nghiệm $S = \\left\\{2;\\,\\frac{1}{2}\\right\\}$.\n\\end{solution}\n\n\\question[3] Cho phương trình $x^2 - 2(m-2)x + m^2 - 3m + 5 = 0$, với $m$ là tham số.\nTìm giá trị của $m$ để phương trình có nghiệm kép. Tính nghiệm kép đó.\n\\begin{solution}\nTính biệt thức thu gọn: $\\Delta' = (m-2)^2 - (m^2 - 3m + 5) = m^2 - 4m + 4 - m^2 + 3m - 5 = -m - 1$.\n\nPhương trình có nghiệm kép khi $\\Delta' = 0 \\iff -m - 1 = 0 \\iff m = -1$.\n\nKhi $m = -1$, nghiệm kép là:\n\\[ x = -\\frac{b'}{a} = \\frac{2(m-2)}{2} = m-2 = -1 - 2 = -3. \\]\nVậy $m = -1$ và nghiệm kép $x = -3$.\n\\end{solution}\n\n\\question[2] Không giải phương trình, hãy tính tổng và tích các nghiệm (nếu có) của phương trình:\n\\[ 3x^2 - 7x - 6 = 0. \\]\n\\begin{solution}\nTa có $a = 3$, $b = -7$, $c = -6$. Tính $\\Delta = (-7)^2 - 4 \\cdot 3 \\cdot (-6) = 49 + 72 = 121 > 0$, do đó phương trình có hai nghiệm phân biệt.\n\nTheo định lí Viète:\n\\[ S = x_1 + x_2 = -\\frac{b}{a} = \\frac{7}{3},\\qquad P = x_1 x_2 = \\frac{c}{a} = \\frac{-6}{3} = -2. \\]\nVậy tổng các nghiệm bằng $\\dfrac{7}{3}$, tích các nghiệm bằng $-2$.\n\\end{solution}\n\n\\question[3] Tìm hai số $u$ và $v$ biết $u + v = 5$ và $u \\cdot v = -24$.\n\\begin{solution}\nHai số $u$, $v$ là nghiệm của phương trình bậc hai:\n\\[ X^2 - SX + P = 0 \\implies X^2 - 5X - 24 = 0. \\]\nGiải phương trình: $\\Delta = 25 + 96 = 121$, $\\sqrt{\\Delta} = 11$.\n\\[ X_1 = \\frac{5 + 11}{2} = 8,\\qquad X_2 = \\frac{5 - 11}{2} = -3. \\]\nVậy $(u; v) = (8; -3)$ hoặc $(u; v) = (-3; 8)$.\n\\end{solution}\n\n\\end{questions}\n\n\\vspace{0.5cm}\n\\noindent\\textbf{Tổng điểm: \\totalpoints}\n\n\\end{document}\n",
+          "metadata": {
+            "finishReason": "stop",
+            "rawFinishReason": "end_turn",
+            "usage": {
+              "inputTokens": 1170,
+              "outputTokens": 5121,
+              "totalTokens": 6291
+            }
+          }
+        },
+        "score": 1,
+        "success": true,
+        "testCase": {
+          "description": "vietnamese-exam — tiếng Việt đầy đủ dấu",
+          "vars": {
+            "templateId": "exam",
+            "description": "Soạn đề kiểm tra 15 phút môn Toán lớp 10 về phương trình bậc hai, kèm lời giải."
+          },
+          "assert": [
+            {
+              "type": "regex",
+              "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{exam\\}"
+            },
+            {
+              "type": "contains",
+              "value": "\\begin{questions}"
+            },
+            {
+              "type": "contains",
+              "value": "\\question"
+            },
+            {
+              "type": "contains",
+              "value": "\\end{document}"
+            },
+            {
+              "type": "javascript",
+              "value": "file://./scorers/validate-latex.ts"
+            }
+          ],
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 3,
+        "tokenUsage": {
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "total": 0,
+          "numRequests": 1,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          },
+          "assertions": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          }
+        },
+        "vars": {
+          "templateId": "exam",
+          "description": "Soạn đề kiểm tra 15 phút môn Toán lớp 10 về phương trình bậc hai, kèm lời giải."
+        },
+        "metadata": {
+          "finishReason": "stop",
+          "rawFinishReason": "end_turn",
+          "usage": {
+            "inputTokens": 1170,
+            "outputTokens": 5121,
+            "totalTokens": 6291
+          },
+          "_promptfooFileMetadata": {}
+        },
+        "failureReason": 0
+      }
+    ],
+    "stats": {
+      "successes": 4,
+      "failures": 0,
+      "errors": 0,
+      "tokenUsage": {
+        "prompt": 0,
+        "completion": 0,
+        "cached": 0,
+        "total": 0,
+        "numRequests": 4,
+        "completionDetails": {
+          "reasoning": 0,
+          "acceptedPrediction": 0,
+          "rejectedPrediction": 0,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0
+        },
+        "assertions": {
+          "total": 0,
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "numRequests": 0,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          }
+        }
+      },
+      "durationMs": 124838,
+      "evaluationDurationMs": 124838
+    }
+  },
+  "config": {
+    "tags": {},
+    "description": "Exam template — AI THẬT trên dataset exam/",
+    "prompts": [
+      "{{description}}"
+    ],
+    "providers": [
+      {
+        "id": "file://./providers/exam-real-ai-provider.ts",
+        "label": "exam-real-ai"
+      }
+    ],
+    "tests": [
+      "file://./datasets/exam/cases.yaml"
+    ],
+    "env": {},
+    "defaultTest": {
+      "assert": [
+        {
+          "type": "regex",
+          "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{exam\\}"
+        },
+        {
+          "type": "contains",
+          "value": "\\begin{questions}"
+        },
+        {
+          "type": "contains",
+          "value": "\\question"
+        },
+        {
+          "type": "contains",
+          "value": "\\end{document}"
+        },
+        {
+          "type": "javascript",
+          "value": "file://./scorers/validate-latex.ts"
+        }
+      ],
+      "vars": {},
+      "options": {},
+      "metadata": {}
+    },
+    "outputPath": [
+      "lib/prompt-eval/results/exam-real-ai-run-2026-07-17.json"
+    ],
+    "extensions": [],
+    "metadata": {},
+    "evaluateOptions": {}
+  },
+  "shareableUrl": null,
+  "metadata": {
+    "promptfooVersion": "0.121.18",
+    "nodeVersion": "v24.16.0",
+    "platform": "win32",
+    "arch": "x64",
+    "exportedAt": "2026-07-17T09:36:57.231Z",
+    "evaluationCreatedAt": "2026-07-17T09:34:52.277Z"
+  },
+  "vars": [
+    "templateId",
+    "description"
+  ],
+  "runtimeOptions": {
+    "eventSource": "cli",
+    "showProgressBar": true,
+    "repeat": 1,
+    "maxConcurrency": 4,
+    "cache": false
+  }
+}

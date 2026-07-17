@@ -1,0 +1,29 @@
+# lib/prompt-eval/datasets/cv/cases.yaml
+# Test case cho template `cv` (article tự layout, KHÔNG moderncv/ảnh). Theo pattern letter/exam.
+# vars.templateId = "cv". Assertion chung (documentclass article, \section, KHÔNG moderncv/
+# \cventry/\includegraphics, validate-latex) đặt ở defaultTest của config — đúng trọng tâm rủi ro
+# của cv (tránh moderncv + ảnh ngoài).
+
+- description: "software-engineer — CV kỹ sư phần mềm có kinh nghiệm"
+  vars:
+    templateId: cv
+    description: "Viết CV cho một kỹ sư phần mềm 3 năm kinh nghiệm, gồm kinh nghiệm, học vấn, kỹ năng."
+  assert: []
+
+- description: "fresh-graduate — CV sinh viên mới tốt nghiệp"
+  vars:
+    templateId: cv
+    description: "Viết CV cho sinh viên mới tốt nghiệp ngành CNTT, nhấn mạnh dự án và kỹ năng."
+  assert: []
+
+- description: "academic-cv — CV học thuật (ứng viên tiến sĩ)"
+  vars:
+    templateId: cv
+    description: "Viết CV học thuật cho ứng viên tiến sĩ: học vấn, công bố, kinh nghiệm giảng dạy."
+  assert: []
+
+- description: "vietnamese-cv — sơ yếu lý lịch tiếng Việt đầy đủ dấu"
+  vars:
+    templateId: cv
+    description: "Viết sơ yếu lý lịch cho vị trí nhân viên kinh doanh, đầy đủ thông tin liên hệ và kinh nghiệm."
+  assert: []

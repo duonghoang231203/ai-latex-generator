@@ -193,10 +193,10 @@ export const TEMPLATES: Record<TemplateId, DocumentTemplate> = {
   // ── 1. Academic paper ──────────────────────────────────────────────────
   academic: defineTemplate({
     id: "academic",
-    label: "Academic Paper",
-    category: "Academic",
+    label: "Bài báo học thuật",
+    category: "Học thuật",
     description:
-      "Scientific paper: abstract, standard sections, citations, and bibliography.",
+      "Bài báo khoa học: tóm tắt (abstract), các mục chuẩn, trích dẫn và tài liệu tham khảo.",
     documentClass: "article",
     packages: ["geometry", "amsmath", "graphicx", "hyperref"],
 
@@ -283,10 +283,10 @@ export const TEMPLATES: Record<TemplateId, DocumentTemplate> = {
   // ── 2. Mathematics ────────────────────────────────────────────────────
   math: defineTemplate({
     id: "math",
-    label: "Mathematics",
-    category: "Science",
+    label: "Toán học",
+    category: "Khoa học",
     description:
-      "Theorems, lemmas, proofs, numbered equations, and formal mathematical exposition.",
+      "Định lý, bổ đề, chứng minh, phương trình đánh số và trình bày toán học hình thức.",
     documentClass: "article",
     packages: ["geometry", "amsmath", "amssymb", "amsthm", "mathtools"],
 
@@ -517,10 +517,10 @@ export const TEMPLATES: Record<TemplateId, DocumentTemplate> = {
   // ── 3. Thesis / Long report ───────────────────────────────────────────
   thesis: defineTemplate({
     id: "thesis",
-    label: "Thesis / Long Report",
-    category: "Academic",
+    label: "Luận văn / Báo cáo dài",
+    category: "Học thuật",
     description:
-      "Long multi-chapter document: title page, TOC, chapters, appendix, bibliography.",
+      "Tài liệu dài nhiều chương: trang bìa, mục lục, các chương, phụ lục, tài liệu tham khảo.",
     documentClass: "report",
     packages: ["geometry", "amsmath", "graphicx", "hyperref"],
 
@@ -620,13 +620,144 @@ export const TEMPLATES: Record<TemplateId, DocumentTemplate> = {
       ),
   }),
 
-  // ── 4. Beamer slides ─────────────────────────────────────────────────
+  // ── 4. Report — general / technical report (section-based, no chapters) ──
+  report: defineTemplate({
+    id: "report",
+    label: "Báo cáo",
+    category: "Học thuật",
+    description:
+      "Báo cáo tổng quát: tiêu đề, tóm tắt, các mục đánh số kèm bảng/hình — ngắn hơn luận văn, không chia chương.",
+    documentClass: "report",
+    packages: ["geometry", "amsmath", "graphicx", "hyperref"],
+
+    capabilities: {
+      headings: true,             // \section / \subsection (NOT \chapter)
+      lists: true,
+      tables: true,
+      basicMath: true,
+      advancedMath: true,
+      theoremEnvironments: false,
+      tikzDiagrams: true,         // figures drawn with TikZ
+      citations: true,            // optional references at end
+      codeListings: true,         // technical reports often include code
+      abstract: true,             // executive summary
+      beamerFrames: false,
+    },
+
+    packageAllowlist: [
+      "geometry", "amsmath", "amssymb", "graphicx", "hyperref", "tikz", "pgfplots", "xcolor", "listings",
+      // Common, sandbox-safe table/figure/list packages a general report legitimately uses
+      // (macro-only — no shell-escape, no external file access). Broadened deliberately after a
+      // real-AI eval (docs/.../results/report-real-ai-run-*) showed the model naturally reaches
+      // for these (float/array/longtable/caption/amssymb/...) — a report is general-purpose, unlike
+      // the intentionally-narrow `math` allowlist. Long-tail packages the model occasionally picks
+      // (e.g. makecell) are left to the production repair loop, not chased into the allowlist.
+      "booktabs", "array", "longtable", "tabularx", "multirow", "caption", "subcaption", "float", "enumitem",
+    ],
+
+    repairHints: [
+      {
+        errorPattern: "PACKAGE_ERROR",
+        action:
+          "Only the report allowlist is permitted: geometry, amsmath, amssymb, graphicx, hyperref, tikz, " +
+          "pgfplots, xcolor, listings, enumitem, and table/figure packages (booktabs, array, longtable, " +
+          "tabularx, multirow, caption, subcaption, float). Remove anything else (no moderncv, fancyhdr, titlesec).",
+      },
+      {
+        errorPattern: "SYNTAX_ERROR",
+        action:
+          "This report is SECTION-based — do NOT use \\chapter{}. Use \\section{}/\\subsection{} at the top level. " +
+          "The template preamble already sets \\renewcommand{\\thesection}{\\arabic{section}} so sections number 1, 2, 3.",
+      },
+      {
+        errorPattern: "bibliography",
+        action:
+          "Replace \\bibliography{}/\\bibliographystyle{} with \\begin{thebibliography}{99}...\\end{thebibliography}. " +
+          "BibTeX .bib files do not exist in the sandbox.",
+      },
+    ],
+    // NOTE: the "ALLOWED PACKAGES" line in promptGuidance is hand-mirrored from `packageAllowlist`
+    // above — buildGeneratePrompt() only injects `packages` (the 4 base), NOT the allowlist, so the
+    // AI must be told the full constraint here. Keep the two in sync if packageAllowlist changes.
+    promptGuidance: [
+      "TYPE: General/technical report (report class, but SECTION-based — the top level is \\section, NEVER \\chapter).",
+
+      "Structure: \\title{} \\author{} \\date{} → \\maketitle → \\begin{abstract}...\\end{abstract} (executive summary)",
+      "→ \\section{Introduction} (purpose, scope, background)",
+      "→ \\section{...} body sections with \\subsection{} as needed (methods, analysis, results)",
+      "→ \\section{Conclusion} (findings, recommendations)",
+      "→ optionally \\begin{thebibliography}{99} ... \\end{thebibliography}.",
+      "Keep it focused — a report is shorter than a thesis and needs no chapters, no long TOC, and no appendix.",
+      "The template preamble already sets \\renewcommand{\\thesection}{\\arabic{section}} so \\section numbers 1, 2, 3.",
+
+      // Package contract — hard constraint (pre-compile validation rejects anything outside the list).
+      "ALLOWED PACKAGES (exhaustive — use ONLY these, and \\usepackage NOTHING outside this list):",
+      "geometry, amsmath, amssymb, graphicx, hyperref, tikz, pgfplots, xcolor, listings, enumitem,",
+      "booktabs, array, longtable, tabularx, multirow, caption, subcaption, float.",
+      "This set already covers every common need — do NOT reach for extra packages:",
+      "math symbols → amssymb (do NOT add mathtools/physics/bm);",
+      "tables → tabular/tabularx/longtable/booktabs/array/multirow (do NOT add makecell/tabu/xltabular);",
+      "captions/subfigures → caption/subcaption (do NOT add subfig/subfigure/floatrow);",
+      "figure placement → float ([H]); lists → enumitem; code → listings; colour → xcolor.",
+      "If a feature would need a package outside the list, achieve it with an allowed package or plain LaTeX.",
+
+      "Required use: geometry (margins), amsmath+amssymb (math), graphicx (figure envs — draw with TikZ,",
+      "NOT external \\includegraphics), hyperref (\\ref/\\label/\\cite). Use \\label{}+\\ref{} for cross-references.",
+
+      "FORBIDDEN: \\chapter{} and \\part{} — this report is section-based (\\section is the top level).",
+      "FORBIDDEN: \\usepackage of ANYTHING not in the ALLOWED PACKAGES list above.",
+      "FORBIDDEN: \\usepackage{inputenc} or \\usepackage{fontenc} — this compiles with XeLaTeX + fontspec",
+      "(loaded automatically) which handles UTF-8 natively; inputenc/fontenc are pdfLaTeX-only and will be rejected.",
+      "FORBIDDEN: \\bibliography or \\bibliographystyle (use thebibliography directly — no .bib in sandbox).",
+      "FORBIDDEN: \\includegraphics with external file paths (sandbox has no files).",
+      "FORBIDDEN: \\setmainfont or \\babelfont (use the fontspec default font).",
+
+      "EXAMPLE: \\section{Introduction}",
+      "This report summarizes the results of ... Its scope covers ...",
+      "\\subsection{Objectives}",
+      "The objectives are: (1) ...; (2) ...",
+    ].join(" "),
+    renderMock: (d) =>
+      wrap(
+        "report",
+        ["geometry", "amsmath", "graphicx", "hyperref"],
+        // Section-based report: number top-level \section as 1, 2, 3. Without this, the report
+        // class renders "0.1" because no \chapter has reset the section counter.
+        ["\\renewcommand{\\thesection}{\\arabic{section}}"],
+        [
+          "\\begin{abstract}",
+          `${d}`,
+          "\\end{abstract}",
+          "\\section{Introduction}",
+          "Purpose, scope, and background of this report.",
+          "\\section{Analysis}",
+          "\\subsection{Overview}",
+          "Main body of the report.",
+          "\\subsection{Findings}",
+          "Key findings, summarized in the table below.",
+          "\\begin{center}",
+          "\\begin{tabular}{ll}",
+          "Metric & Value \\\\",
+          "Coverage & 92\\% \\\\",
+          "Open issues & 3 \\\\",
+          "\\end{tabular}",
+          "\\end{center}",
+          "\\section{Conclusion}",
+          "Summary and recommendations.",
+          "\\begin{thebibliography}{9}",
+          "\\bibitem{ref1} A. Author. \\textit{Title of Reference}. Publisher, 2020.",
+          "\\end{thebibliography}",
+        ],
+      ),
+  }),
+
+  // ── 5. Beamer slides ─────────────────────────────────────────────────
   slides: defineTemplate({
     id: "slides",
-    label: "Presentation (Beamer)",
-    category: "Presentation",
+    label: "Trình chiếu (Beamer)",
+    category: "Trình chiếu",
     description:
-      "Beamer slide deck: title frame, content frames, blocks, equations, lists.",
+      "Bộ slide Beamer: khung tiêu đề, các khung nội dung, block, phương trình, danh sách.",
     documentClass: "beamer",
     packages: ["amsmath"],
 
@@ -740,6 +871,621 @@ export const TEMPLATES: Record<TemplateId, DocumentTemplate> = {
           "\\item Directions for future work.",
           "\\end{itemize}",
           "\\end{frame}",
+        ],
+      ),
+  }),
+  // ── 6. Chemistry — chemical equations & formulas via mhchem ────────────
+  chemistry: defineTemplate({
+    id: "chemistry",
+    label: "Hóa học",
+    category: "Khoa học",
+    description:
+      "Tài liệu hóa học: phương trình phản ứng và công thức qua mhchem (\\ce{}), đơn vị (siunitx), bảng số liệu.",
+    documentClass: "article",
+    packages: ["geometry", "amsmath", "amssymb", "mhchem"],
+
+    capabilities: {
+      headings: true,
+      lists: true,
+      tables: true,
+      basicMath: true,
+      advancedMath: true,
+      theoremEnvironments: false,
+      tikzDiagrams: true,          // reaction schemes / structures drawn with TikZ
+      citations: true,
+      codeListings: false,
+      abstract: true,
+      beamerFrames: false,
+    },
+
+    packageAllowlist: [
+      "geometry", "amsmath", "amssymb", "mhchem", "siunitx", "graphicx", "hyperref", "xcolor", "tikz",
+      // safe, macro-only table/figure packages (same rationale as `report`)
+      "booktabs", "array", "longtable", "tabularx", "multirow", "caption", "float",
+    ],
+
+    repairHints: [
+      {
+        errorPattern: "PACKAGE_ERROR",
+        action:
+          "Only the chemistry allowlist is permitted: mhchem, siunitx, amsmath, amssymb, geometry, " +
+          "graphicx, hyperref, tikz, xcolor, and table/figure packages (booktabs, array, longtable, " +
+          "tabularx, multirow, caption, float). Remove anything else; never use inputenc/fontenc.",
+      },
+      {
+        errorPattern: "mhchem",
+        action:
+          "All chemical species/reactions go inside \\ce{...} (mhchem, loaded by the template). " +
+          "Check \\ce{} braces are balanced. Use -> (reaction), <=> (equilibrium), ->[\\Delta] " +
+          "(conditions above the arrow), and (s)/(l)/(g)/(aq) for physical states.",
+      },
+      {
+        errorPattern: "MATH_ERROR",
+        action:
+          "\\ce{} works in both text and math mode. For a displayed reaction use \\[ \\ce{...} \\] or an " +
+          "equation environment — NEVER $$ ... $$.",
+      },
+    ],
+    promptGuidance: [
+      "TYPE: Chemistry document (article class) — chemical formulas and reaction equations via the mhchem package.",
+
+      "Structure: \\title{} \\author{} \\date{} → \\maketitle → \\begin{abstract}...\\end{abstract}",
+      "→ \\section{Introduction} → \\section{...} (reactions, methods, results) → \\section{Conclusion}",
+      "→ optionally \\begin{thebibliography}{99} ... \\end{thebibliography}.",
+
+      "Chemistry notation (REQUIRED): write EVERY species and reaction with mhchem's \\ce{...} —",
+      "e.g. \\ce{H2O}, \\ce{H2SO4}, \\ce{2H2 + O2 -> 2H2O}. Do NOT hand-typeset formulas like H$_2$O.",
+      "Arrows/states: -> forward, <=> equilibrium, ->[\\Delta] conditions above the arrow,",
+      "(s)/(l)/(g)/(aq) for physical states. Units/quantities: siunitx (\\SI{1.5}{mol/L}, \\num{6.022e23}).",
+      "Math via amsmath/amssymb; draw reaction schemes/structures with TikZ (NOT external \\includegraphics).",
+
+      "FORBIDDEN: typesetting chemistry WITHOUT \\ce{} (no manual formulas like H$_2$O or SO4^{2-}).",
+      "FORBIDDEN: \\includegraphics with external file paths (sandbox has no files).",
+      "FORBIDDEN: \\setmainfont or \\babelfont (use the fontspec default font).",
+
+      "EXAMPLE: Combustion: \\ce{CH4 + 2O2 -> CO2 + 2H2O}.",
+      "Equilibrium (Haber process): \\ce{N2 + 3H2 <=> 2NH3}.",
+      "With conditions: \\ce{CaCO3 ->[\\Delta] CaO + CO2}.",
+    ].join(" "),
+    renderMock: (d) =>
+      wrap(
+        "article",
+        ["geometry", "amsmath", "amssymb", "mhchem"],
+        [],
+        [
+          "\\begin{abstract}",
+          `${d}`,
+          "\\end{abstract}",
+          "\\section{Introduction}",
+          "Chemical species and reactions are typeset with the mhchem package, e.g. \\ce{H2O} and \\ce{H2SO4}.",
+          "\\section{Reactions}",
+          "Combustion of methane:",
+          "\\begin{equation}",
+          "\\ce{CH4 + 2O2 -> CO2 + 2H2O}",
+          "\\end{equation}",
+          "Thermal decomposition of calcium carbonate:",
+          "\\[ \\ce{CaCO3 ->[\\Delta] CaO + CO2} \\]",
+          "The Haber process reaches equilibrium:",
+          "\\[ \\ce{N2 + 3H2 <=> 2NH3} \\]",
+          "\\section{Discussion}",
+          "These reactions illustrate stoichiometry, reaction conditions, and chemical equilibrium.",
+          "\\section{Conclusion}",
+          "Summary of the reactions presented above.",
+        ],
+      ),
+  }),
+  // ── 7. Physics — equations, vector notation, SI units (siunitx) ────────
+  physics: defineTemplate({
+    id: "physics",
+    label: "Vật lý",
+    category: "Khoa học",
+    description:
+      "Tài liệu vật lý: phương trình, ký hiệu vector (\\vec/\\bm), và đơn vị SI qua siunitx.",
+    documentClass: "article",
+    packages: ["geometry", "amsmath", "amssymb", "siunitx", "bm"],
+
+    capabilities: {
+      headings: true,
+      lists: true,
+      tables: true,
+      basicMath: true,
+      advancedMath: true,
+      theoremEnvironments: false,
+      tikzDiagrams: true,          // free-body diagrams / pgfplots graphs
+      citations: true,
+      codeListings: false,
+      abstract: true,
+      beamerFrames: false,
+    },
+
+    packageAllowlist: [
+      "geometry", "amsmath", "amssymb", "siunitx", "bm", "graphicx", "hyperref", "xcolor", "tikz", "pgfplots",
+      // safe, macro-only table/figure packages (same rationale as report/chemistry)
+      "booktabs", "array", "longtable", "tabularx", "multirow", "caption", "float",
+    ],
+
+    repairHints: [
+      {
+        errorPattern: "PACKAGE_ERROR",
+        action:
+          "Only the physics allowlist is permitted: siunitx, bm, amsmath, amssymb, geometry, graphicx, " +
+          "hyperref, tikz, pgfplots, xcolor, and table/figure packages (booktabs, array, longtable, tabularx, " +
+          "multirow, caption, float). Remove anything else; never use inputenc/fontenc.",
+      },
+      {
+        errorPattern: "siunitx",
+        action:
+          "Quantities/units go through siunitx: \\SI{9.81}{\\meter\\per\\second\\squared}, \\si{\\newton}, " +
+          "\\num{6.022e23}. Use unit macros (\\meter, \\second, \\kilogram, \\newton, \\joule, \\kelvin) — " +
+          "do not write units as plain text.",
+      },
+      {
+        errorPattern: "MATH_ERROR",
+        action:
+          "Vectors: \\vec{F} or bold \\bm{F}. Use \\[ \\] or equation/align for display math — NEVER $$ ... $$. " +
+          "Every align row except the last ends with \\\\.",
+      },
+    ],
+    promptGuidance: [
+      "TYPE: Physics document (article class) — equations, vector notation, and SI units.",
+
+      "Structure: \\title{} \\author{} \\date{} → \\maketitle → \\begin{abstract}...\\end{abstract}",
+      "→ \\section{Introduction} → \\section{Theory}/\\section{Methods} → \\section{Results} → \\section{Conclusion}",
+      "→ optionally \\begin{thebibliography}{99} ... \\end{thebibliography}.",
+
+      "Physics notation (REQUIRED): vectors with \\vec{F} or bold \\bm{F}; display equations with amsmath",
+      "(equation/align). Units and quantities MUST use siunitx —",
+      "\\SI{9.81}{\\meter\\per\\second\\squared}, \\si{\\newton}, \\num{6.022e23} — with unit macros",
+      "(\\meter, \\second, \\kilogram, \\newton, \\joule, \\kelvin). Symbols via amssymb (\\nabla, \\partial, \\propto).",
+
+      "FORBIDDEN: writing units as plain text (use \\SI{5}{\\meter} or \\si{\\meter}, not \"5 m\").",
+      "FORBIDDEN: $$ ... $$ display math (use \\[ \\] or equation).",
+      "FORBIDDEN: \\includegraphics with external file paths (draw diagrams/plots with TikZ/pgfplots).",
+      "FORBIDDEN: \\setmainfont or \\babelfont (use the fontspec default font).",
+
+      "EXAMPLE: Newton's second law: \\begin{equation} \\vec{F} = m\\vec{a} \\end{equation}",
+      "Gravitational acceleration \\SI{9.81}{\\meter\\per\\second\\squared}.",
+      "Coulomb's law: \\[ \\lvert \\bm{E} \\rvert = \\frac{1}{4\\pi\\varepsilon_0}\\,\\frac{q}{r^2}. \\]",
+    ].join(" "),
+    renderMock: (d) =>
+      wrap(
+        "article",
+        ["geometry", "amsmath", "amssymb", "siunitx", "bm"],
+        [],
+        [
+          "\\begin{abstract}",
+          `${d}`,
+          "\\end{abstract}",
+          "\\section{Introduction}",
+          "This document uses vector notation and SI units throughout.",
+          "\\section{Theory}",
+          "Newton's second law relates force and acceleration:",
+          "\\begin{equation}",
+          "\\vec{F} = m\\vec{a}.",
+          "\\end{equation}",
+          "The gravitational acceleration near Earth's surface is \\SI{9.81}{\\meter\\per\\second\\squared}.",
+          "\\section{Results}",
+          "The magnitude of the electric field of a point charge is",
+          "\\begin{equation}",
+          "\\lvert \\bm{E} \\rvert = \\frac{1}{4\\pi\\varepsilon_0}\\,\\frac{q}{r^2}.",
+          "\\end{equation}",
+          "\\section{Conclusion}",
+          "Summary of the physical relationships presented above.",
+        ],
+      ),
+  }),
+  // ── 8. Exam — question paper via the `exam` document class ─────────────
+  exam: defineTemplate({
+    id: "exam",
+    label: "Đề thi",
+    category: "Đề thi",
+    description:
+      "Đề thi/kiểm tra: câu hỏi có điểm, ý nhỏ, trắc nghiệm và lời giải qua document class `exam`.",
+    documentClass: "exam",
+    packages: ["geometry", "amsmath", "amssymb"],
+
+    capabilities: {
+      headings: true,
+      lists: true,
+      tables: true,
+      basicMath: true,
+      advancedMath: true,
+      theoremEnvironments: false,  // exam dùng \question/\begin{solution}, KHÔNG amsthm
+      tikzDiagrams: true,
+      citations: false,
+      codeListings: false,
+      abstract: false,             // đề thi không có abstract
+      beamerFrames: false,
+    },
+
+    packageAllowlist: [
+      "geometry", "amsmath", "amssymb", "graphicx", "hyperref", "xcolor", "tikz", "pgfplots", "siunitx",
+      // safe, macro-only table/figure/list packages (same rationale as report/physics)
+      "booktabs", "array", "longtable", "tabularx", "multirow", "caption", "float", "enumitem",
+    ],
+
+    // Môi trường do class `exam` cung cấp (KHÔNG phải amsthm) — liệt kê ở đây để validateLatex nhận
+    // diện đúng (checkUndefinedTheoremEnvironments dùng chung cơ chế). Không có cái nào ⇒ báo lỗi.
+    knownTheoremEnvironments: [
+      "questions", "parts", "subparts", "subsubparts",
+      "choices", "oneparchoices", "checkboxes", "oneparcheckboxes",
+      "solution", "solutionorbox",
+    ],
+
+    repairHints: [
+      {
+        errorPattern: "PACKAGE_ERROR",
+        action:
+          "Only the exam allowlist is permitted: geometry, amsmath, amssymb, graphicx, hyperref, tikz, " +
+          "pgfplots, siunitx, xcolor, and table/figure packages (booktabs, array, longtable, tabularx, " +
+          "multirow, caption, float, enumitem). Remove anything else; never use inputenc/fontenc.",
+      },
+      {
+        errorPattern: "ENVIRONMENT_ERROR",
+        action:
+          "Use ONLY the exam-class environments: questions, parts, subparts, subsubparts, choices, " +
+          "oneparchoices, checkboxes, oneparcheckboxes, solution, solutionorbox. Every \\begin{questions} " +
+          "needs a matching \\end{questions}; \\question/\\part live INSIDE these environments.",
+      },
+      {
+        errorPattern: "SYNTAX_ERROR",
+        action:
+          "Questions go inside \\begin{questions}...\\end{questions} using \\question[points]. Sub-questions " +
+          "use \\begin{parts}\\part...\\end{parts}. Do NOT use amsthm theorem/lemma/proof for exam items.",
+      },
+    ],
+    promptGuidance: [
+      "TYPE: Exam / test paper (exam document class) — numbered questions with points, parts, choices, and solutions.",
+
+      "Structure: \\title{} \\author{} → \\maketitle → (optional \\printanswers to reveal solutions) →",
+      "\\begin{questions} ... \\end{questions} containing \\question[points] items.",
+
+      "Exam-class commands (REQUIRED — this is NOT article): \\question[N] (N = points),",
+      "\\begin{parts}\\part ... \\end{parts} for sub-questions, \\begin{choices}\\choice ... \\CorrectChoice ...",
+      "\\end{choices} for multiple choice, \\begin{checkboxes} for checkbox MCQ,",
+      "\\begin{solution} ... \\end{solution} for model answers. Math via amsmath/amssymb; units via siunitx.",
+      "Allowed exam environments (do NOT invent others): questions, parts, subparts, subsubparts, choices,",
+      "oneparchoices, checkboxes, oneparcheckboxes, solution, solutionorbox.",
+
+      "FORBIDDEN: amsthm theorem/lemma/proof-style environments (this is an exam — use \\question, not theorems).",
+      "FORBIDDEN: putting \\question outside a questions environment.",
+      "FORBIDDEN: \\includegraphics with external file paths (draw figures with TikZ).",
+      "FORBIDDEN: \\setmainfont or \\babelfont (use the fontspec default font).",
+
+      "EXAMPLE: \\begin{questions}",
+      "\\question[10] Solve $x^2 = 4$ for $x$.",
+      "\\begin{solution} $x = \\pm 2$. \\end{solution}",
+      "\\end{questions}",
+    ].join(" "),
+    renderMock: (d) =>
+      wrap(
+        "exam",
+        ["geometry", "amsmath", "amssymb"],
+        ["\\printanswers"],
+        [
+          "\\begin{questions}",
+          "\\question[10]",
+          `${d}`,
+          "\\begin{solution}",
+          "A complete model solution to the question above.",
+          "\\end{solution}",
+          "\\question[5]",
+          "Answer both parts below.",
+          "\\begin{parts}",
+          "\\part First sub-question.",
+          "\\part Second sub-question.",
+          "\\end{parts}",
+          "\\question[5]",
+          "Choose the correct answer.",
+          "\\begin{choices}",
+          "\\choice An incorrect option.",
+          "\\CorrectChoice The correct option.",
+          "\\choice Another incorrect option.",
+          "\\end{choices}",
+          "\\end{questions}",
+        ],
+      ),
+  }),
+  // ── 9. Engineering — technical report: units, circuits, code, data ─────
+  engineering: defineTemplate({
+    id: "engineering",
+    label: "Kỹ thuật",
+    category: "Kỹ thuật",
+    description:
+      "Báo cáo kỹ thuật: phương trình, đơn vị SI (siunitx), sơ đồ mạch (circuitikz), mã/giải thuật (listings), bảng số liệu.",
+    documentClass: "article",
+    packages: ["geometry", "amsmath", "amssymb", "siunitx", "circuitikz"],
+
+    capabilities: {
+      headings: true,
+      lists: true,
+      tables: true,
+      basicMath: true,
+      advancedMath: true,
+      theoremEnvironments: false,
+      tikzDiagrams: true,          // circuitikz (circuits) + pgfplots (graphs)
+      citations: true,
+      codeListings: true,          // algorithms / source snippets
+      abstract: true,
+      beamerFrames: false,
+    },
+
+    packageAllowlist: [
+      "geometry", "amsmath", "amssymb", "siunitx", "circuitikz", "tikz", "pgfplots", "pgfplotstable",
+      "graphicx", "hyperref", "xcolor", "listings",
+      // safe, macro-only table/figure/list packages (same rationale as report/physics)
+      "booktabs", "array", "longtable", "tabularx", "multirow", "caption", "float", "enumitem",
+    ],
+
+    repairHints: [
+      {
+        errorPattern: "PACKAGE_ERROR",
+        action:
+          "Only the engineering allowlist is permitted: siunitx, circuitikz, tikz, pgfplots, amsmath, " +
+          "amssymb, geometry, graphicx, hyperref, xcolor, listings, and table/figure packages. Remove " +
+          "anything else; never use inputenc/fontenc.",
+      },
+      {
+        errorPattern: "circuitikz",
+        action:
+          "Circuits use circuitikz: \\begin{circuitikz}\\draw (0,0) to[R] (2,0) to[C] (2,-2) to[V] (0,-2) -- (0,0);\\end{circuitikz}. " +
+          "Components: to[R] resistor, to[C] capacitor, to[L] inductor, to[V] voltage source, to[I] current source, " +
+          "to[D] diode, to[battery1]. If a specific component is unavailable, use a labelled generic block " +
+          "\\node[draw]{...} — do NOT switch to \\includegraphics or an external image.",
+      },
+      {
+        errorPattern: "siunitx",
+        action:
+          "Units/quantities via siunitx: \\SI{5}{\\volt}, \\SI{220}{\\ohm}, \\si{\\milli\\ampere}, \\num{1e3}. " +
+          "Use unit macros (\\volt, \\ohm, \\ampere, \\watt, \\hertz, \\meter, \\second) — not plain text.",
+      },
+    ],
+    promptGuidance: [
+      "TYPE: Engineering / technical report (article class) — equations, SI units, circuit diagrams, code, and data tables.",
+
+      "Structure: \\title{} \\author{} \\date{} → \\maketitle → \\begin{abstract}...\\end{abstract}",
+      "→ \\section{Introduction} → \\section{Design}/\\section{Methodology} → \\section{Results} → \\section{Conclusion}",
+      "→ optionally \\begin{thebibliography}{99} ... \\end{thebibliography}.",
+
+      "Engineering toolkit (use the right tool per need):",
+      "units/quantities → siunitx (\\SI{5}{\\volt}, \\SI{220}{\\ohm}, \\si{\\hertz}, \\num{});",
+      "circuits → circuitikz (\\begin{circuitikz}\\draw ... to[R]/to[C]/to[L]/to[V]/to[D] ...\\end{circuitikz});",
+      "graphs/plots → pgfplots (axis + \\addplot); code/algorithms → listings (\\begin{lstlisting}...\\end{lstlisting});",
+      "data → tabular/booktabs; math → amsmath/amssymb.",
+
+      // circuitikz positive-alternative (E6 principle) — say what TO DO when a part is missing.
+      "Circuit rule: draw with circuitikz components (to[R], to[C], to[L], to[V], to[I], to[D], to[battery1]).",
+      "If a specific component is not available in circuitikz, represent it with a labelled generic block",
+      "(\\node[draw] {Label};) or describe it in prose — do NOT fall back to \\includegraphics or an image file.",
+
+      "FORBIDDEN: writing units as plain text (use \\SI{5}{\\volt} / \\si{\\ohm}, not \"5 V\").",
+      "FORBIDDEN: \\includegraphics with external file paths (draw with circuitikz/tikz/pgfplots).",
+      "FORBIDDEN: $$ ... $$ display math (use \\[ \\] or equation).",
+      "FORBIDDEN: \\setmainfont or \\babelfont (use the fontspec default font).",
+
+      "EXAMPLE: Ohm's law: \\begin{equation} V = I R \\end{equation} with \\SI{5}{\\volt} across \\SI{220}{\\ohm}.",
+      "\\begin{circuitikz}\\draw (0,0) to[R] (2,0) to[C] (2,-2) to[V] (0,-2) -- (0,0);\\end{circuitikz}",
+    ].join(" "),
+    renderMock: (d) =>
+      wrap(
+        "article",
+        ["geometry", "amsmath", "amssymb", "siunitx", "circuitikz"],
+        [],
+        [
+          "\\begin{abstract}",
+          `${d}`,
+          "\\end{abstract}",
+          "\\section{Introduction}",
+          "This engineering report covers system design, analysis, and measured results.",
+          "\\section{System Model}",
+          "The governing relationship (Ohm's law) is",
+          "\\begin{equation}",
+          "V = I R,",
+          "\\end{equation}",
+          "with a supply voltage of \\SI{5}{\\volt} across a resistance of \\SI{220}{\\ohm}.",
+          "A representative circuit is shown below.",
+          "\\begin{center}",
+          "\\begin{circuitikz}",
+          "\\draw (0,0) to[R] (2,0) to[C] (2,-2) to[V] (0,-2) -- (0,0);",
+          "\\end{circuitikz}",
+          "\\end{center}",
+          "\\section{Results}",
+          "Measured values are summarized below.",
+          "\\begin{center}",
+          "\\begin{tabular}{lll}",
+          "Parameter & Symbol & Value \\\\",
+          "Voltage & $V$ & \\SI{5}{\\volt} \\\\",
+          "Current & $I$ & \\SI{22.7}{\\milli\\ampere} \\\\",
+          "\\end{tabular}",
+          "\\end{center}",
+          "\\section{Conclusion}",
+          "Summary of the design and measurements presented above.",
+        ],
+      ),
+  }),
+  // ── 10. Letter — formal letter via the `letter` document class ─────────
+  letter: defineTemplate({
+    id: "letter",
+    label: "Thư từ",
+    category: "Thư từ",
+    description:
+      "Thư trang trọng: người gửi/nhận, \\opening/\\closing qua document class `letter` (không \\section).",
+    documentClass: "letter",
+    packages: ["geometry"],
+
+    capabilities: {
+      headings: false,             // letters have no \section
+      lists: true,                 // may enumerate points
+      tables: false,
+      basicMath: false,
+      advancedMath: false,
+      theoremEnvironments: false,
+      tikzDiagrams: false,
+      citations: false,
+      codeListings: false,
+      abstract: false,
+      beamerFrames: false,
+    },
+
+    packageAllowlist: ["geometry", "hyperref", "xcolor", "enumitem"],
+
+    repairHints: [
+      {
+        errorPattern: "PACKAGE_ERROR",
+        action:
+          "Only geometry/hyperref/xcolor/enumitem are allowed for a letter. Remove anything else; " +
+          "never use inputenc/fontenc.",
+      },
+      {
+        errorPattern: "SYNTAX_ERROR",
+        action:
+          "A letter has NO \\section/\\chapter/\\maketitle/abstract. Structure: \\signature{}/\\address{} in " +
+          "the preamble, then \\begin{letter}{recipient}...\\opening{...}...body...\\closing{...}\\end{letter}.",
+      },
+    ],
+    promptGuidance: [
+      "TYPE: Formal letter (letter document class) — NOT article; there is NO \\section, \\chapter, \\maketitle, or abstract.",
+
+      "Preamble: \\signature{Sender Name} and \\address{Sender address \\\\ line 2 \\\\ line 3} (sender block).",
+      "Body: \\begin{letter}{Recipient Name \\\\ Recipient address} → \\opening{Dear ...,} → one or more",
+      "prose paragraphs (the letter's content) → \\closing{Sincerely,} → optionally \\cc{}, \\encl{}, \\ps{}",
+      "→ \\end{letter}. You may have multiple \\begin{letter}...\\end{letter} blocks for multiple recipients.",
+
+      "Write natural, well-structured prose paragraphs — a greeting/context paragraph, the main message,",
+      "and a courteous closing paragraph before \\closing. Use the language of the request (Vietnamese if the request is Vietnamese).",
+
+      "FORBIDDEN: \\section / \\chapter / \\subsection / \\maketitle / \\begin{abstract} — a letter uses \\opening/\\closing, not sectioning.",
+      "FORBIDDEN: \\includegraphics with external file paths (a letter needs no images).",
+      "FORBIDDEN: \\setmainfont or \\babelfont (use the fontspec default font).",
+
+      "EXAMPLE: \\signature{Nguyễn Văn A}",
+      "\\begin{letter}{Công ty XYZ \\\\ 123 Đường ABC}",
+      "\\opening{Kính gửi Quý công ty,}",
+      "Tôi viết thư này để ứng tuyển vị trí ...",
+      "\\closing{Trân trọng,}",
+      "\\end{letter}",
+    ].join(" "),
+    renderMock: (d) =>
+      // Letters do NOT use \maketitle — build via docRaw() (generic, no title) with the letter-class
+      // preamble (\signature/\address) and a \begin{letter}...\end{letter} body.
+      docRaw(
+        "letter",
+        ["geometry"],
+        [
+          "\\signature{Người Gửi}",
+          "\\address{Người Gửi \\\\ 123 Đường Nguồn \\\\ Thành phố}",
+        ],
+        [
+          "\\begin{letter}{Người Nhận \\\\ 456 Đường Đích \\\\ Thành phố}",
+          "\\opening{Kính gửi Quý vị,}",
+          `${d}`,
+          "",
+          "Đây là nội dung mẫu của một lá thư trang trọng: đoạn mở đầu nêu bối cảnh, đoạn thân trình bày",
+          "nội dung chính, và một đoạn kết lịch sự trước lời chào.",
+          "\\closing{Trân trọng,}",
+          "\\end{letter}",
+        ],
+      ),
+  }),
+  // ── 11. CV / résumé — plain `article`, self-laid-out (NO moderncv/images) ──
+  cv: defineTemplate({
+    id: "cv",
+    label: "CV / Sơ yếu lý lịch",
+    category: "Hồ sơ",
+    description:
+      "CV/sơ yếu lý lịch: header tự dựng + các mục (Kinh nghiệm, Học vấn, Kỹ năng) trên nền article — KHÔNG moderncv, KHÔNG ảnh ngoài.",
+    documentClass: "article",
+    packages: ["geometry", "hyperref", "enumitem", "xcolor"],
+
+    capabilities: {
+      headings: true,              // \section* for CV sections
+      lists: true,                 // itemize for bullet points
+      tables: true,                // date | detail layout
+      basicMath: false,
+      advancedMath: false,
+      theoremEnvironments: false,
+      tikzDiagrams: true,          // optional photo placeholder / rule decorations
+      citations: false,
+      codeListings: false,
+      abstract: false,
+      beamerFrames: false,
+    },
+
+    packageAllowlist: [
+      "geometry", "hyperref", "enumitem", "xcolor", "titlesec", "tikz",
+      // safe, macro-only table/rule packages for CV layout
+      "array", "tabularx", "booktabs", "multirow",
+    ],
+
+    repairHints: [
+      {
+        errorPattern: "PACKAGE_ERROR",
+        action:
+          "This CV is PLAIN article — only geometry/hyperref/enumitem/xcolor/titlesec/tikz + table " +
+          "packages (array/tabularx/booktabs/multirow) are allowed. Do NOT load moderncv, europasscv, " +
+          "friggeri-cv or any CV class/package; never use inputenc/fontenc.",
+      },
+      {
+        errorPattern: "SYNTAX_ERROR",
+        action:
+          "Build the CV by hand on article: a centered name/contact header (\\textbf/\\Large, no \\maketitle), " +
+          "then \\section*{Experience}/\\section*{Education}/\\section*{Skills} with itemize and \\hfill for dates. " +
+          "Do NOT use moderncv commands like \\cventry/\\cvitem/\\name — they require the moderncv class.",
+      },
+    ],
+    promptGuidance: [
+      "TYPE: Curriculum vitae / résumé — built on PLAIN article, self-laid-out. This is NOT moderncv.",
+
+      "Header (NO \\maketitle): a centered block with the full name (large, e.g. {\\LARGE\\textbf{...}}), a headline/role,",
+      "and one contact line (email, phone, location — separate with $\\cdot$ or |). hyperref may link email/URLs.",
+      "Sections: use \\section*{...} (unnumbered) — e.g. Summary, Experience, Education, Skills, Projects.",
+      "Entries: put the organisation in \\textbf{} and align dates to the right with \\hfill; describe achievements",
+      "with itemize (enumitem: \\begin{itemize}[leftmargin=*]). Use tabular/tabularx for two-column layouts if helpful.",
+
+      "Photo: this template embeds NO external images. If a photo placeholder is desired, draw a simple box with",
+      "TikZ (\\begin{tikzpicture}\\draw (0,0) rectangle (2.5,3); ...\\end{tikzpicture}) — do NOT use \\includegraphics.",
+
+      "FORBIDDEN: \\documentclass{moderncv} / europasscv / friggeri-cv or their commands (\\cventry, \\cvitem, \\name) —",
+      "this template is plain article, laid out by hand.",
+      "FORBIDDEN: \\includegraphics with external file paths (no photo files — use a TikZ box if needed).",
+      "FORBIDDEN: \\maketitle (build the header manually).",
+      "FORBIDDEN: \\setmainfont or \\babelfont (use the fontspec default font).",
+
+      "EXAMPLE: \\begin{center}{\\LARGE\\textbf{Nguyễn Văn A}}\\end{center}",
+      "\\section*{Kinh nghiệm} \\textbf{Công ty ABC} \\hfill 2022--nay",
+      "\\begin{itemize}[leftmargin=*] \\item Phát triển dịch vụ web. \\end{itemize}",
+    ].join(" "),
+    renderMock: (d) =>
+      // Self-laid-out CV: docRaw() (no \maketitle). Header is built by hand; sections are \section*.
+      docRaw(
+        "article",
+        ["geometry", "hyperref", "enumitem", "xcolor"],
+        [],
+        [
+          "\\begin{center}",
+          "{\\LARGE \\textbf{Nguyễn Văn A}}",
+          "",
+          "Kỹ sư phần mềm",
+          "",
+          "email@example.com $\\cdot$ 0900 000 000 $\\cdot$ Thành phố",
+          "\\end{center}",
+          "\\section*{Tóm tắt}",
+          `${d}`,
+          "\\section*{Kinh nghiệm}",
+          "\\textbf{Công ty ABC} \\hfill 2022--nay",
+          "\\begin{itemize}[leftmargin=*]",
+          "\\item Phát triển và bảo trì các dịch vụ web.",
+          "\\item Cải thiện hiệu năng hệ thống backend.",
+          "\\end{itemize}",
+          "\\section*{Học vấn}",
+          "\\textbf{Đại học XYZ} \\hfill 2018--2022",
+          "",
+          "Cử nhân Công nghệ thông tin.",
+          "\\section*{Kỹ năng}",
+          "\\begin{itemize}[leftmargin=*]",
+          "\\item Ngôn ngữ: TypeScript, Python, Go.",
+          "\\item Công cụ: Git, Docker, CI/CD.",
+          "\\end{itemize}",
         ],
       ),
   }),

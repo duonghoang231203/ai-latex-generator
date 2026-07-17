@@ -1,0 +1,30 @@
+# lib/prompt-eval/promptfooconfig.exam.real-ai.yaml
+# Eval template `exam` bằng AI THẬT (đọc .env qua getProvider(); AI_PROVIDER=sotatek-anthropic,
+# AI_MODEL=deepseek/deepseek-v4-pro). TỐN API QUOTA THẬT mỗi lần chạy. Theo pattern
+# promptfooconfig.physics.real-ai.yaml.
+#   npx promptfoo eval -c lib/prompt-eval/promptfooconfig.exam.real-ai.yaml -o <out>.json
+description: "Exam template — AI THẬT trên dataset exam/"
+
+prompts:
+  - "{{description}}"
+
+providers:
+  - id: file://./providers/exam-real-ai-provider.ts
+    label: exam-real-ai
+
+tests:
+  - file://./datasets/exam/cases.yaml
+
+defaultTest:
+  assert:
+    # regex: chấp nhận \documentclass[opt]{exam} (vd [addpoints,answers]). Backslash PHẢI escape (\\).
+    - type: regex
+      value: '\\documentclass(\[[^\]]*\])?\{exam\}'
+    - type: contains
+      value: "\\begin{questions}"
+    - type: contains
+      value: "\\question"
+    - type: contains
+      value: "\\end{document}"
+    - type: javascript
+      value: file://./scorers/validate-latex.ts

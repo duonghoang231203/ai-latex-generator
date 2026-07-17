@@ -1,0 +1,753 @@
+{
+  "evalId": "eval-8ro-2026-07-17T09:55:25",
+  "results": {
+    "version": 3,
+    "timestamp": "2026-07-17T09:55:25.327Z",
+    "prompts": [
+      {
+        "id": "1e6bd1d5aab4bf787795c1f9955d1ac1cc90fa253cfff6883a3c44dd53037d25",
+        "raw": "{{description}}",
+        "label": "{{description}}",
+        "provider": "engineering-real-ai",
+        "metrics": {
+          "score": 3,
+          "testPassCount": 3,
+          "testFailCount": 0,
+          "testErrorCount": 1,
+          "assertPassCount": 15,
+          "assertFailCount": 0,
+          "totalLatencyMs": 634138,
+          "tokenUsage": {
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "total": 0,
+            "numRequests": 4,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            },
+            "assertions": {
+              "total": 0,
+              "prompt": 0,
+              "completion": 0,
+              "cached": 0,
+              "numRequests": 0,
+              "completionDetails": {
+                "reasoning": 0,
+                "acceptedPrediction": 0,
+                "rejectedPrediction": 0,
+                "cacheReadInputTokens": 0,
+                "cacheCreationInputTokens": 0
+              }
+            }
+          },
+          "namedScores": {},
+          "namedScoresCount": {},
+          "namedScoreWeights": {},
+          "cost": 0
+        }
+      }
+    ],
+    "results": [
+      {
+        "cost": 0,
+        "gradingResult": {
+          "pass": true,
+          "score": 1,
+          "reason": "All assertions passed",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0
+          },
+          "componentResults": [
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "regex",
+                "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{article\\}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "regex",
+                "value": "\\\\usepackage(\\[[^\\]]*\\])?\\{siunitx\\}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "regex",
+                "value": "\\\\(SI|si|qty|num)\\{"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\end{document}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "validateLatex: OK — không có diagnostic.",
+              "assertion": {
+                "type": "javascript",
+                "value": "file://./scorers/validate-latex.ts"
+              }
+            }
+          ]
+        },
+        "id": "147e3188-dff7-4c29-bd7b-4464b36560b3",
+        "latencyMs": 115660,
+        "namedScores": {},
+        "prompt": {
+          "raw": "Thiết kế và phân tích mạch lọc thông thấp RC với tần số cắt cho trước, kèm sơ đồ mạch.",
+          "label": "{{description}}",
+          "config": {}
+        },
+        "promptId": "1e6bd1d5aab4bf787795c1f9955d1ac1cc90fa253cfff6883a3c44dd53037d25",
+        "promptIdx": 0,
+        "provider": {
+          "id": "engineering-real-ai-provider",
+          "label": "engineering-real-ai"
+        },
+        "response": {
+          "output": "\\documentclass[a4paper,12pt]{article}\n\\usepackage{geometry}\n\\geometry{margin=2.5cm}\n\\usepackage{amsmath,amssymb}\n\\usepackage{siunitx}\n\\sisetup{output-decimal-marker={.}}\n\\usepackage{circuitikz}\n\\usepackage{pgfplots}\n\\pgfplotsset{compat=1.18}\n\\usepackage{hyperref}\n\\usepackage{booktabs}\n\\usepackage{array}\n\\usepackage{float}\n\\usepackage{caption}\n\\usepackage{enumitem}\n\\usepackage{xcolor}\n\\usepackage{listings}\n\\usepackage{fontspec} % XeLaTeX default font supports Vietnamese diacritics\n\n\\title{\\textbf{Thiết kế và Phân tích Mạch Lọc Thông Thấp RC\\\\ với Tần số Cắt Cho Trước}}\n\\author{Kỹ sư Nguyễn Văn A\\\\ \\small Phòng Nghiên cứu \\& Phát triển}\n\\date{\\today}\n\n\\begin{document}\n\\maketitle\n\n\\begin{abstract}\nBáo cáo này trình bày quy trình thiết kế và phân tích một mạch lọc thông thấp thụ động RC bậc nhất với tần số cắt được xác định trước $f_c = \\SI{1}{\\kilo\\hertz}$. Dựa trên lý thuyết mạch RC cơ bản, các giá trị linh kiện được tính toán và lựa chọn theo dãy tiêu chuẩn E24. Mạch được mô tả bằng sơ đồ nguyên lý vẽ với \\texttt{circuitikz} và đáp ứng tần số (biên độ, pha) được mô phỏng, hiển thị trực quan bằng \\texttt{pgfplots}. Kết quả cho thấy tại tần số cắt, biên độ tín hiệu suy giảm \\SI{3}{\\deci\\bel} và pha lệch \\SI{-45}{\\degree}, hoàn toàn phù hợp với lý thuyết. Ảnh hưởng của dung sai linh kiện cũng được thảo luận. \n\\end{abstract}\n\n\\section{Giới thiệu}\nMạch lọc thông thấp (low‑pass filter – LPF) là một khối chức năng cơ bản trong điện tử, được ứng dụng rộng rãi để loại bỏ nhiễu tần số cao, tách tín hiệu, trong các bộ chuyển đổi tín hiệu số‑tương tự (DAC) và trong các hệ thống âm thanh. Mạch lọc RC bậc nhất là cấu hình đơn giản nhất, chỉ gồm một điện trở và một tụ điện, nhưng vẫn mang đầy đủ các đặc tính quan trọng như tần số cắt $f_c$, độ suy giảm \\SI{20}{\\deci\\bel}/decade và sự dịch pha phụ thuộc tần số.\n\nMục tiêu của báo cáo này là thiết kế một mạch lọc thông thấp RC có tần số cắt $f_c = \\SI{1}{\\kilo\\hertz}$, tính toán các thông số $R$ và $C$, vẽ sơ đồ mạch và mô phỏng đáp ứng tần số để xác nhận hoạt động của mạch. Bên cạnh đó, ảnh hưởng của việc chọn giá trị điện trở theo dãy tiêu chuẩn đến tần số cắt thực tế cũng được phân tích.\n\n\\section{Cơ sở lý thuyết}\n\\subsection{Hàm truyền và tần số cắt}\nXét mạch RC nối tiếp như Hình~\\ref{fig:rc_sch}, trong đó $V_{in}$ là điện áp vào, $V_{out}$ được lấy trên tụ $C$. Theo định luật Kirchhoff về điện áp, hàm truyền trong miền tần số (biến đổi Fourier) được cho bởi:\n\\begin{equation}\nH(j\\omega) = \\frac{V_{out}}{V_{in}} = \\frac{1}{1 + j\\omega RC},\n\\label{eq:transfer}\n\\end{equation}\nvới $\\omega = 2\\pi f$ là tần số góc. Biên độ hàm truyền là:\n\\begin{equation}\n|H(f)| = \\frac{1}{\\sqrt{1 + (2\\pi f RC)^2}} = \\frac{1}{\\sqrt{1 + (f/f_c)^2}},\n\\label{eq:magnitude}\n\\end{equation}\ntrong đó tần số cắt $f_c$ được định nghĩa là tần số mà tại đó biên độ giảm còn $\\frac{1}{\\sqrt{2}}$ (tương đương \\SI{-3}{\\deci\\bel}) so với giá trị một chiều:\n\\begin{equation}\nf_c = \\frac{1}{2\\pi RC}.\n\\label{eq:fc}\n\\end{equation}\nGóc pha của điện áp ra so với điện áp vào được tính bởi:\n\\begin{equation}\n\\phi(f) = -\\arctan\\left(\\frac{f}{f_c}\\right).\n\\label{eq:phase}\n\\end{equation}\nTại $f = f_c$, $|H| = \\frac{1}{\\sqrt{2}} \\approx \\SI{-3.01}{\\deci\\bel}$ và $\\phi = -\\frac{\\pi}{4} = \\SI{-45}{\\degree}$.\n\n\\subsection{Đặc trưng tần số}\nTrong dải thông (passband) $f \\ll f_c$, $|H(f)| \\approx 1$ (\\SI{0}{\\deci\\bel}), tín hiệu gần như không bị suy giảm. Trong dải chắn (stopband) $f \\gg f_c$, $|H(f)| \\approx f_c/f$, tương ứng độ dốc suy giảm \\SI{20}{\\deci\\bel} trên một decade (mười lần tần số). Đây là đặc trưng của bộ lọc bậc nhất. Trong các ứng dụng yêu cầu độ dốc lớn hơn, người ta ghép nhiều tầng RC hoặc sử dụng lọc tích cực (ví dụ bộ lọc Sallen–Key) – nhưng không thuộc phạm vi bài báo cáo này.\n\n\\section{Thiết kế mạch lọc}\n\\subsection{Yêu cầu thiết kế}\nTần số cắt yêu cầu:\n\\begin{equation}\nf_{c,\\text{target}} = \\SI{1}{\\kilo\\hertz}\n\\end{equation}\nDung sai cho phép của tần số cắt thực tế so với yêu cầu là $\\pm\\SI{5}{\\percent}$ trong phạm vi bài toán mẫu. Do mạch chỉ chứa hai linh kiện thụ động, thiết kế tập trung vào việc chọn $R$ và $C$ phù hợp.\n\n\\subsection{Lựa chọn linh kiện}\nTừ phương trình \\eqref{eq:fc}, ta có vô số cặp $(R,C)$ thỏa mãn. Trong thực tế, cần xét đến tính sẵn có của linh kiện và trở kháng đầu vào/ra. Để giảm ảnh hưởng của trở kháng tải, tụ $C$ thường được chọn trong khoảng \\SI{1}{\\nano\\farad} đến \\SI{1}{\\micro\\farad}. Ở đây chọn:\n\\[\nC = \\SI{100}{\\nano\\farad}\n\\]\nlà giá trị thông dụng trong dãy E6/E12. Giá trị điện trở lý thuyết được tính:\n\\[\nR = \\frac{1}{2\\pi f_c C} \n   = \\frac{1}{2\\pi \\times 10^3 \\times 100 \\times 10^{-9}} \n   \\approx \\SI{1591.55}{\\ohm}.\n\\]\n\nDãy tiêu chuẩn E24 (dung sai \\SI{5}{\\percent}) có hai giá trị gần nhất: \\SI{1.6}{\\kilo\\ohm} (mã 1K6) và \\SI{1.5}{\\kilo\\ohm} (mã 1K5). Ta chọn:\n\\[\nR = \\SI{1.6}{\\kilo\\ohm}\n\\]\nvì cho sai số tần số cắt nhỏ hơn:\n\\[\nf_c^{\\text{actual}} = \\frac{1}{2\\pi \\times 1600 \\times 100 \\times 10^{-9}} \\approx \\SI{994.7}{\\hertz},\n\\]\nsai lệch \\SI{-0.53}{\\percent}, nằm trong giới hạn cho phép. Nếu chọn $R = \\SI{1.5}{\\kilo\\ohm}$, $f_c$ sẽ tăng lên \\SI{1061}{\\hertz} (sai lệch \\SI{+6.1}{\\percent}), vượt quá \\SI{5}{\\percent} nếu yêu cầu khắt khe.\n\nBảng~\\ref{tab:components} liệt kê giá trị linh kiện thiết kế cuối cùng.\n\n\\begin{table}[H]\n\\centering\n\\caption{Thông số linh kiện mạch lọc thông thấp RC.}\n\\label{tab:components}\n\\begin{tabular}{@{}lll@{}}\n\\toprule\nLinh kiện & Giá trị & Dãy \\\\\n\\midrule\nĐiện trở $R$ & \\SI{1.6}{\\kilo\\ohm} & E24 (\\SI{5}{\\percent} dung sai) \\\\\nTụ điện $C$   & \\SI{100}{\\nano\\farad} & E6/E12 (phim, gốm) \\\\\n\\bottomrule\n\\end{tabular}\n\\end{table}\n\n\\subsection{Sơ đồ mạch}\nHình~\\ref{fig:rc_sch} minh họa sơ đồ mạch lọc thông thấp RC. Nguồn tín hiệu xoay chiều $V_{in}$ được nối với mạch $R$-$C$ nối tiếp, tín hiệu ra $V_{out}$ lấy trên tụ $C$. Điểm nối đất (GND) là tham chiếu chung.\n\n\\begin{figure}[H]\n\\centering\n\\begin{circuitikz}[american voltages, european resistors]\n    % Nguồn phát, R, C và lối ra\n    \\draw (0,0) node[ground]{} \n          to[sV, v<=$V_{in}$] (0,3)\n          to[R, l=$R=\\SI{1.6}{\\kilo\\ohm}$] (3,3)\n          to[short, -*] (4,3)\n          to[short] (4,2.5) coordinate(c_top);\n    \\draw (c_top) to[C, l=$C=\\SI{100}{\\nF}$] (4,0) node[ground]{};\n    \\draw (c_top) -- (4.5,2.5) to[short, -o] (5.5,2.5) node[right]{$V_{out}$};\n    \\node[above] at (1.5,3.3) {$+$};\n    \\node[below] at (1.5,2.7) {$-$};\n\\end{circuitikz}\n\\caption{Sơ đồ mạch lọc thông thấp thụ động RC bậc nhất.}\n\\label{fig:rc_sch}\n\\end{figure}\n\n\\section{Mô phỏng và phân tích đáp ứng tần số}\n\\subsection{Phương pháp}\nĐáp ứng tần số được mô phỏng dựa trên các biểu thức \\eqref{eq:magnitude} và \\eqref{eq:phase} với $f_c = \\SI{1000}{\\hertz}$ (lý thuyết) và $f_c = \\SI{994.7}{\\hertz}$ (thực tế khi dùng điện trở \\SI{1.6}{\\kilo\\ohm}). Việc vẽ đồ thị sử dụng \\texttt{pgfplots} trên miền tần số từ \\SI{10}{\\hertz} đến \\SI{20}{\\kilo\\hertz}, phủ toàn bộ vùng chuyển tiếp.\n\n\\subsection{Biểu đồ Bode}\nHình~\\ref{fig:bode_mag} và \\ref{fig:bode_phase} lần lượt hiển thị đáp ứng biên độ (theo \\si{\\deci\\bel}) và pha (theo độ) của mạch thiết kế. Đường liền nét biểu thị đáp ứng với $f_c$ thiết kế lý tưởng (\\SI{1000}{\\hertz}); đường đứt nét là đáp ứng thực tế (dùng $R=\\SI{1.6}{\\kilo\\ohm}$, $f_c\\approx\\SI{994.7}{\\hertz}$). Sự khác biệt giữa hai đường hầu như không đáng kể.\n\n\\begin{figure}[H]\n\\centering\n\\begin{tikzpicture}\n\\begin{semilogxaxis}[\n    width=0.9\\textwidth, \n    height=7cm,\n    xlabel={Tần số (Hz)},\n    ylabel={Biên độ (\\si{\\deci\\bel})},\n    xmin=10, xmax=20000,\n    ymin=-50, ymax=3,\n    grid=both,\n    grid style={gray!30},\n    legend pos=north east,\n    legend cell align={left},\n]\n\\addplot[blue, thick, domain=10:20000, samples=500] \n    {20*log10(1/sqrt(1+(x/1000)^2))};\n\\addlegendentry{$f_c = \\SI{1}{\\kilo\\hertz}$ (lý thuyết)}\n\n\\addplot[red, densely dashed, thick, domain=10:20000, samples=500] \n    {20*log10(1/sqrt(1+(x/994.7)^2))};\n\\addlegendentry{$f_c \\approx \\SI{994.7}{\\hertz}$ (thực tế)}\n\n% Đường -3dB ngang\n\\draw[gray, thin, dashed] (axis cs:10,-3) -- (axis cs:20000,-3);\n\\node[gray, anchor=south east] at (axis cs:15000,-3) {\\SI{-3}{\\deci\\bel}};\n% Đường thẳng đứng tại 1 kHz\n\\draw[gray, thin, dashed] (axis cs:1000,-50) -- (axis cs:1000,0);\n\\node[gray, anchor=north west] at (axis cs:1000,-45) {1 kHz};\n\\end{semilogxaxis}\n\\end{tikzpicture}\n\\caption{Đáp ứng biên độ (độ lợi) của mạch lọc thông thấp RC.}\n\\label{fig:bode_mag}\n\\end{figure}\n\n\\begin{figure}[H]\n\\centering\n\\begin{tikzpicture}\n\\begin{semilogxaxis}[\n    width=0.9\\textwidth, \n    height=7cm,\n    xlabel={Tần số (Hz)},\n    ylabel={Pha (\\si{\\degree})},\n    xmin=10, xmax=20000,\n    ymin=-90, ymax=10,\n    grid=both,\n    grid style={gray!30},\n    legend pos=north east,\n    legend cell align={left},\n]\n\\addplot[blue, thick, domain=10:20000, samples=500] \n    {atan(-x/1000)};\n\\addlegendentry{$f_c = \\SI{1}{\\kilo\\hertz}$ (lý thuyết)}\n\n\\addplot[red, densely dashed, thick, domain=10:20000, samples=500] \n    {atan(-x/994.7)};\n\\addlegendentry{$f_c \\approx \\SI{994.7}{\\hertz}$ (thực tế)}\n\n% Đường -45 độ ngang\n\\draw[gray, thin, dashed] (axis cs:10,-45) -- (axis cs:20000,-45);\n\\node[gray, anchor=south east] at (axis cs:15000,-45) {\\SI{-45}{\\degree}};\n% Đường thẳng đứng tại 1 kHz\n\\draw[gray, thin, dashed] (axis cs:1000,-90) -- (axis cs:1000,5);\n\\node[gray, anchor=north west] at (axis cs:1000,-85) {1 kHz};\n\\end{semilogxaxis}\n\\end{tikzpicture}\n\\caption{Đáp ứng pha của mạch lọc thông thấp RC.}\n\\label{fig:bode_phase}\n\\end{figure}\n\n\\subsection{Phân tích kết quả}\nTừ Hình~\\ref{fig:bode_mag}, biên độ tại \\SI{1}{\\kilo\\hertz} xấp xỉ \\SI{-3}{\\deci\\bel}, xác nhận tần số cắt như thiết kế. Dưới \\SI{100}{\\hertz}, độ lợi gần \\SI{0}{\\deci\\bel}, tín hiệu hầu như không bị suy giảm. Trên \\SI{10}{\\kilo\\hertz}, độ dốc tiến tới \\SI{20}{\\deci\\bel}/decade. Hình~\\ref{fig:bode_phase} cho thấy pha tiến từ \\SI{0}{\\degree} ở tần số thấp đến \\SI{-90}{\\degree} ở tần số rất cao, đúng với lý thuyết bậc nhất. Tại $f= f_c$, pha đạt \\SI{-45}{\\degree}.\n\nSự sai khác giữa đường lý thuyết và thực tế (đường đứt nét) là rất nhỏ, chỉ nhận thấy ở vùng tần số sát $f_c$, chứng tỏ việc chọn giá trị điện trở tiêu chuẩn \\SI{1.6}{\\kilo\\ohm} có dung sai \\SI{5}{\\percent} là hoàn toàn chấp nhận được. Trong các ứng dụng yêu cầu độ chính xác cao, có thể sử dụng điện trở biến trở kết hợp với điện trở cố định hoặc mắc nối tiếp nhiều điện trở để đạt giá trị chính xác hơn.\n\n\\subsection{Ảnh hưởng của dung sai linh kiện}\nDung sai của điện trở (\\SI{5}{\\percent}) và tụ điện (ví dụ \\SI{10}{\\percent} đối với tụ gốm) có thể làm thay đổi tần số cắt. Trong trường hợp xấu nhất (tất cả dung sai cùng chiều bất lợi), $f_c$ có thể lệch tới \\SI{15}{\\percent}. Tuy nhiên, do tính đơn giản của mạch, ảnh hưởng này thường được chấp nhận trong các hệ thống không yêu cầu độ chính xác cao. Đối với mạch lọc chính xác hơn, nên dùng linh kiện có dung sai \\SI{1}{\\percent} hoặc các kiến trúc lọc tích cực.\n\n\\section{Kết luận}\nBáo cáo đã trình bày chi tiết quy trình thiết kế và phân tích mạch lọc thông thấp RC bậc nhất với tần số cắt $f_c = \\SI{1}{\\kilo\\hertz}$. Bằng cách chọn $C = \\SI{100}{\\nano\\farad}$ và $R = \\SI{1.6}{\\kilo\\ohm}$ (dãy E24), mạch đạt tần số cắt thực tế \\SI{994.7}{\\hertz}, sai lệch chỉ \\SI{-0.53}{\\percent}. Sơ đồ mạch được vẽ bằng \\texttt{circuitikz} và đáp ứng tần số được mô phỏng trực quan bằng \\texttt{pgfplots}, cho thấy sự phù hợp tốt với lý thuyết. \n\nNhững kết quả này khẳng định tính hiệu quả của mạch lọc RC thụ động trong các ứng dụng cần sự đơn giản, chi phí thấp và không đòi hỏi độ dốc suy giảm lớn. Bài báo cáo cũng cung cấp một quy trình thiết kế mẫu mà kỹ sư có thể áp dụng khi cần một bộ lọc thông thấp có tần số cắt bất kỳ.\n\n\\vspace{0.5cm}\n\\begin{center}\n\\rule{0.4\\textwidth}{0.4pt}\n\\end{center}\n\n\\begin{thebibliography}{1}\n\\bibitem{sedra} A.~S.~Sedra, K.~C.~Smith, \\emph{Microelectronic Circuits}, 7th ed., Oxford University Press, 2015.\n\\bibitem{mancini} R.~Mancini, \\emph{Op Amps for Everyone}, 4th ed., Newnes, 2017.\n\\end{thebibliography}\n\n\\end{document}\n",
+          "metadata": {
+            "finishReason": "stop",
+            "rawFinishReason": "end_turn",
+            "usage": {
+              "inputTokens": 1356,
+              "outputTokens": 8058,
+              "totalTokens": 9414
+            }
+          }
+        },
+        "score": 1,
+        "success": true,
+        "testCase": {
+          "description": "rc-filter — thiết kế mạch lọc thông thấp RC (đơn vị + mạch)",
+          "vars": {
+            "templateId": "engineering",
+            "description": "Thiết kế và phân tích mạch lọc thông thấp RC với tần số cắt cho trước, kèm sơ đồ mạch."
+          },
+          "assert": [
+            {
+              "type": "regex",
+              "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{article\\}"
+            },
+            {
+              "type": "regex",
+              "value": "\\\\usepackage(\\[[^\\]]*\\])?\\{siunitx\\}"
+            },
+            {
+              "type": "regex",
+              "value": "\\\\(SI|si|qty|num)\\{"
+            },
+            {
+              "type": "contains",
+              "value": "\\end{document}"
+            },
+            {
+              "type": "javascript",
+              "value": "file://./scorers/validate-latex.ts"
+            }
+          ],
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 0,
+        "tokenUsage": {
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "total": 0,
+          "numRequests": 1,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          },
+          "assertions": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          }
+        },
+        "vars": {
+          "templateId": "engineering",
+          "description": "Thiết kế và phân tích mạch lọc thông thấp RC với tần số cắt cho trước, kèm sơ đồ mạch."
+        },
+        "metadata": {
+          "finishReason": "stop",
+          "rawFinishReason": "end_turn",
+          "usage": {
+            "inputTokens": 1356,
+            "outputTokens": 8058,
+            "totalTokens": 9414
+          },
+          "_promptfooFileMetadata": {}
+        },
+        "failureReason": 0
+      },
+      {
+        "cost": 0,
+        "gradingResult": {
+          "pass": true,
+          "score": 1,
+          "reason": "All assertions passed",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0
+          },
+          "componentResults": [
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "regex",
+                "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{article\\}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "regex",
+                "value": "\\\\usepackage(\\[[^\\]]*\\])?\\{siunitx\\}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "regex",
+                "value": "\\\\(SI|si|qty|num)\\{"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\end{document}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "validateLatex: OK — không có diagnostic.",
+              "assertion": {
+                "type": "javascript",
+                "value": "file://./scorers/validate-latex.ts"
+              }
+            }
+          ]
+        },
+        "id": "763640e4-b3f6-4b94-a0dd-1ebd1226848b",
+        "latencyMs": 103215,
+        "namedScores": {},
+        "prompt": {
+          "raw": "Trình bày mạch khuếch đại không đảo dùng op-amp, tính hệ số khuếch đại và điện trở.",
+          "label": "{{description}}",
+          "config": {}
+        },
+        "promptId": "1e6bd1d5aab4bf787795c1f9955d1ac1cc90fa253cfff6883a3c44dd53037d25",
+        "promptIdx": 0,
+        "provider": {
+          "id": "engineering-real-ai-provider",
+          "label": "engineering-real-ai"
+        },
+        "response": {
+          "output": "\\documentclass{article}\n\\usepackage[left=2.5cm, right=2.5cm, top=2.5cm, bottom=2.5cm]{geometry}\n\\usepackage{amsmath, amssymb}\n\\usepackage{siunitx}\n\\usepackage{circuitikz}\n\\usepackage{tikz}\n\\usepackage{pgfplots}\n\\pgfplotsset{compat=1.18}\n\\usepackage{booktabs}\n\\usepackage{hyperref}\n\\usepackage{caption}\n\\usepackage{float}\n\\usepackage{enumitem}\n\\usepackage{xcolor}\n\n\\title{Mạch Khuếch đại Không Đảo dùng Op-Amp: Nguyên lý, Thiết kế và Tính toán}\n\\author{Khoa Kỹ thuật Điện -- Điện tử}\n\\date{\\today}\n\n\\begin{document}\n\n\\maketitle\n\n\\begin{abstract}\nMạch khuếch đại không đảo sử dụng khuếch đại thuật toán (op-amp) là một trong những cấu hình cơ bản và phổ biến nhất trong điện tử tương tự. Không giống mạch đảo, tín hiệu đầu ra của mạch không đảo cùng pha với tín hiệu đầu vào. Hệ số khuếch đại được xác định bởi tỷ số của hai điện trở hồi tiếp, cho phép thiết kế linh hoạt với độ chính xác cao. Bài báo này trình bày chi tiết nguyên lý hoạt động, phân tích toán học, tính toán giá trị điện trở và các lưu ý thực tế khi thiết kế mạch. Một ví dụ cụ thể được đưa ra cùng với sơ đồ mạch và đồ thị quan hệ giữa hệ số khuếch đại và điện trở.\n\\end{abstract}\n\n\\section{Giới thiệu}\nKhuếch đại thuật toán (Operational Amplifier -- op-amp) là linh kiện chủ động được sử dụng rộng rãi trong các mạch xử lý tín hiệu tương tự. Khi làm việc ở chế độ vòng kín với hồi tiếp âm, op-amp có khả năng thực hiện các phép toán như cộng, trừ, tích phân, vi phân và khuếch đại tuyến tính. Mạch khuếch đại không đảo (non-inverting amplifier) là cấu hình cơ bản trong đó tín hiệu vào được đưa vào đầu vào không đảo ($+$) của op-amp, còn mạng hồi tiếp âm được kết nối từ đầu ra về đầu vào đảo ($-$). Ưu điểm của cấu trúc này là trở kháng đầu vào rất lớn (gần như vô cùng) do tín hiệu được đưa trực tiếp vào đầu vào không đảo, giúp nó phù hợp làm tầng đệm hoặc tiền khuếch đại cho các cảm biến có trở kháng nguồn cao.\n\nTrong bài báo này, chúng tôi phân tích cơ sở lý thuyết của mạch khuếch đại không đảo, tính toán hệ số khuếch đại và các tham số điện trở, đồng thời đưa ra một thiết kế minh họa với các giá trị thực tế. Mạch được mô hình hóa bằng phần mềm vẽ mạch tích hợp \\texttt{circuitikz}, và quan hệ giữa hệ số khuếch đại và điện trở được minh họa bằng \\texttt{pgfplots}.\n\n\\section{Cấu trúc mạch khuếch đại không đảo}\nSơ đồ mạch cơ bản của khuếch đại không đảo được trình bày trong Hình~\\ref{fig:noninv}. Điện áp đầu vào $V_{\\text{in}}$ được đặt vào chân không đảo ($+$) của op-amp. Mạng hồi tiếp gồm hai điện trở: $R_f$ nối từ đầu ra về chân đảo ($-$) và $R_g$ (thường gọi là điện trở nối đất) nối từ chân đảo xuống đất. Điện áp ra $V_{\\text{out}}$ được lấy tại đầu ra của op-amp.\n\n\\begin{figure}[H]\n\\centering\n\\begin{circuitikz}[american voltages]\n\\draw\n  % Op-amp\n  (0,0) node[op amp] (opamp) {}\n  % Input voltage source\n  (opamp.+) to[short] ++(-1.5,0) to[V, l=$V_{\\text{in}}$, invert] ++(0,-2) node[ground](GND1){}\n  % Ground for R_g\n  (opamp.-) to[short] ++(-1,0) coordinate (fb)\n  (fb) to[R, l=$R_f$] ++(0,2.5) coordinate (fbout)\n  (fbout) to[short] (fbout -| opamp.out) to[short] (opamp.out)\n  (fb) to[R, l=$R_g$, *-] ++(0,-2.5) node[ground](GND2){}\n  % Output\n  (opamp.out) to[short, -o] ++(1,0) node[right]{$V_{\\text{out}}$}\n  % Power supplies (optional, for completeness)\n  (opamp.up) node[above]{$V_{CC+}$} (opamp.down) node[below]{$V_{CC-}$}\n  ;\n\\end{circuitikz}\n\\caption{Sơ đồ mạch khuếch đại không đảo dùng op-amp với mạng hồi tiếp $R_f$ và $R_g$.}\n\\label{fig:noninv}\n\\end{figure}\n\nMạch hoạt động dựa trên nguyên lý hồi tiếp âm và giả thiết op-amp lý tưởng: hệ số khuếch đại vòng hở vô cùng lớn, trở kháng đầu vào vô cùng và điện áp lệch đầu vào bằng không. Nhờ hồi tiếp âm, op-amp sẽ điều chỉnh điện áp ra sao cho hiệu điện thế giữa hai đầu vào $V_d = V_+ - V_-$ tiến về \\SI{0}{\\volt} (điểm đất ảo nối đất không trực tiếp). Vì vậy, điện áp tại chân đảo $V_-$ gần như bằng $V_{\\text{in}}$.\n\n\\section{Phân tích và tính toán hệ số khuếch đại}\nÁp dụng định luật Kirchhoff dòng điện tại nút đảo $V_-$:\n\\begin{equation}\nI_{R_f} = I_{R_g}\n\\label{eq:kcl}\n\\end{equation}\nDòng qua $R_f$: $I_{R_f} = \\frac{V_{\\text{out}} - V_-}{R_f}$. Dòng qua $R_g$: $I_{R_g} = \\frac{V_-}{R_g}$ (vì đầu kia của $R_g$ nối đất). Từ (\\ref{eq:kcl}):\n\\[\n\\frac{V_{\\text{out}} - V_-}{R_f} = \\frac{V_-}{R_g}\n\\]\nVới giả thiết op-amp lý tưởng, $V_- \\approx V_{\\text{in}}$. Thay vào phương trình trên ta thu được:\n\\[\n\\frac{V_{\\text{out}} - V_{\\text{in}}}{R_f} = \\frac{V_{\\text{in}}}{R_g}\n\\]\nBiến đổi:\n\\[\nV_{\\text{out}} = V_{\\text{in}} \\left( 1 + \\frac{R_f}{R_g} \\right)\n\\]\nDo đó, hệ số khuếch đại điện áp vòng kín $A_v$ được xác định:\n\\begin{equation}\nA_v = \\frac{V_{\\text{out}}}{V_{\\text{in}}} = 1 + \\frac{R_f}{R_g}\n\\label{eq:gain}\n\\end{equation}\n\nPhương trình (\\ref{eq:gain}) cho thấy hệ số khuếch đại luôn lớn hơn hoặc bằng 1, phụ thuộc của tỉ số hai điện trở. Khi $R_f = 0$ (nối tắt chân đảo với đầu ra) thì $A_v = 1$, mạch trở thành bộ đệm điện áp (voltage follower). Khi $R_f \\gg R_g$, $A_v$ có thể rất lớn, nhưng trong thực tế bị giới hạn bởi các đặc tính không lý tưởng của op-amp như băng thông, điện áp nguồn cung cấp và điện áp bão hòa đầu ra.\n\n\\subsection{Ví dụ tính toán}\nGiả sử ta cần thiết kế một khuếch đại không đảo có hệ số khuếch đại $A_v = 11$. Dùng $R_g = \\SI{10}{\\kilo\\ohm}$. Từ (\\ref{eq:gain}) ta có:\n\\[\nR_f = R_g (A_v - 1) = \\SI{10}{\\kilo\\ohm} \\times 10 = \\SI{100}{\\kilo\\ohm}.\n\\]\nNhư vậy, chọn $R_f = \\SI{100}{\\kilo\\ohm}$ và $R_g = \\SI{10}{\\kilo\\ohm}$. Với các giá trị điện trở chuẩn E24, ta có thể lấy $R_g = \\SI{10}{\\kilo\\ohm}$ và $R_f = \\SI{100}{\\kilo\\ohm}$.\n\nBảng~\\ref{tab:params} liệt kê một vài cặp giá trị điện trở thông dụng và hệ số khuếch đại tương ứng.\n\\begin{table}[H]\n\\centering\n\\caption{Các cặp điện trở hồi tiếp thường dùng và hệ số khuếch đại.}\n\\label{tab:params}\n\\begin{tabular}{@{}ccc@{}}\n\\toprule\n$R_g$ (\\si{\\kilo\\ohm}) & $R_f$ (\\si{\\kilo\\ohm}) & $A_v = 1 + R_f/R_g$ \\\\\n\\midrule\n1   & 1   & 2   \\\\\n10  & 47  & 5.7 \\\\\n10  & 100 & 11  \\\\\n22  & 100 & 5.55 \\\\\n47  & 100 & 3.13 \\\\\n\\bottomrule\n\\end{tabular}\n\\end{table}\n\n\\section{Mối quan hệ giữa hệ số khuếch đại và điện trở}\nHình~\\ref{fig:gain} biểu diễn sự phụ thuộc của hệ số khuếch đại $A_v$ vào giá trị $R_f$ khi cố định $R_g = \\SI{10}{\\kilo\\ohm}$. Đồ thị được vẽ bằng \\texttt{pgfplots} với miền $R_f$ từ \\SI{0}{\\kilo\\ohm} đến \\SI{100}{\\kilo\\ohm}.\n\n\\begin{figure}[H]\n\\centering\n\\begin{tikzpicture}\n\\begin{axis}[\n    xlabel = {$R_f$ (\\si{\\kilo\\ohm})},\n    ylabel = {Hệ số khuếch đại $A_v$},\n    grid = both,\n    minor tick num = 1,\n    width = 0.85\\textwidth,\n    height = 6cm,\n    title = {Quan hệ $A_v(R_f)$ với $R_g = \\SI{10}{\\kilo\\ohm}$},\n]\n\\addplot[domain=0:100, samples=100, thick, blue] {1 + x/10};\n\\addlegendentry{$A_v = 1 + R_f/R_g$}\n\\end{axis}\n\\end{tikzpicture}\n\\caption{Đồ thị hệ số khuếch đại theo giá trị điện trở hồi tiếp $R_f$. $R_g$ được giữ cố định \\SI{10}{\\kilo\\ohm}.}\n\\label{fig:gain}\n\\end{figure}\n\nĐồ thị có dạng tuyến tính bậc nhất, hệ số góc bằng $1/R_g$. Như vậy việc lựa chọn $R_g$ nhỏ sẽ cho phép thay đổi $A_v$ nhanh theo $R_f$, nhưng cũng làm dòng hồi tiếp lớn hơn và ảnh hưởng đến công suất tiêu thụ cũng như nhiễu. Ngược lại, $R_g$ quá lớn sẽ khiến mạch nhạy cảm với dòng rò và nhiễu nền.\n\n\\section{Chọn điện trở và các lưu ý thực tế}\nTrong thực tế, không thể chọn $R_f$ và $R_g$ quá nhỏ vì dòng qua mạng hồi tiếp sẽ tăng, đòi hỏi op-amp phải cung cấp dòng cao hơn, dẫn đến méo dạng tín hiệu và tăng công suất tiêu hao. Ngược lại, điện trở quá lớn (hàng \\si{\\mega\\ohm}) sẽ làm tăng ảnh hưởng của dòng lệnh đầu vào (input bias current) và nhiễu nhiệt (Johnson noise). Dải giá trị hợp lý thường nằm trong khoảng từ vài \\si{\\kilo\\ohm} đến vài trăm \\si{\\kilo\\ohm}.\n\nĐiện trở nên được chọn loại có dung sai thấp (\\SI{1}{\\percent} hoặc \\SI{0.1}{\\percent}) để đảm bảo độ chính xác của hệ số khuếch đại. Nếu yêu cầu $A_v$ chính xác, có thể dùng biến trở tinh chỉnh mắc nối tiếp với $R_f$. Ngoài ra, tụ bù nhỏ (vài \\si{\\pico\\farad}) song song với $R_f$ có thể giúp cải thiện biên độ pha và ổn định tần số cao.\n\nMạch khuếch đại không đảo cũng cần chú ý đến dải điện áp đầu vào và ra, không được vượt quá điện áp nguồn cung cấp. Với op-amp thực tế như LM741, LM358 hay OP07, điện áp ra tối đa thường thấp hơn điện áp nguồn khoảng \\SI{1.5}{\\volt} đến \\SI{2}{\\volt}. Khi thiết kế, cần đảm bảo $V_{\\text{out}}$ dự kiến luôn nằm trong vùng tuyến tính của op-amp.\n\n\\section{Kết quả mô phỏng và kiểm chứng}\nĐể kiểm tra lý thuyết, ta thực hiện mô phỏng mạch với $R_g = \\SI{10}{\\kilo\\ohm}$, $R_f = \\SI{100}{\\kilo\\ohm}$ (cho $A_v = 11$). Điện áp đầu vào $V_{\\text{in}}$ dạng sin biên độ \\SI{0.1}{\\volt} tần số \\SI{1}{\\kilo\\hertz}. Bảng~\\ref{tab:sim} tổng hợp kết quả điện áp đầu ra lý thuyết và mô phỏng (coi mô phỏng là lý tưởng). Các giá trị thu được hoàn toàn trùng khớp với $A_v = 11$.\n\n\\begin{table}[H]\n\\centering\n\\caption{Kết quả đầu ra dự kiến cho $A_v = 11$ với các mức điện áp vào khác nhau.}\n\\label{tab:sim}\n\\begin{tabular}{@{}ccc@{}}\n\\toprule\n$V_{\\text{in}}$ (\\si{\\volt}) & $V_{\\text{out}}$ lý thuyết (\\si{\\volt}) & $V_{\\text{out}}$ mô phỏng (\\si{\\volt}) \\\\\n\\midrule\n0.1 & 1.1 & 1.1 \\\\\n0.5 & 5.5 & 5.5 \\\\\n1.0 & 11.0 & 11.0 \\\\\n2.0 & 22.0 & 22.0 (bị giới hạn bởi nguồn) \\\\\n\\bottomrule\n\\end{tabular}\n\\end{table}\n\nỞ mức đầu vào \\SI{2}{\\volt}, điện áp ra lý thuyết là \\SI{22}{\\volt}, nhưng nếu nguồn cung cấp chỉ $\\pm \\SI{12}{\\volt}$ thì đầu ra sẽ bị kẹt (clipping) ở mức gần \\SI{10.5}{\\volt}. Điều này nhấn mạnh tầm quan trọng của việc chọn điện áp nguồn phù hợp với biên độ tín hiệu mong muốn.\n\n\\section{Kết luận}\nMạch khuếch đại không đảo dùng op-amp cung cấp một giải pháp khuếch đại tuyến tính đơn giản, trở kháng đầu vào cao và hệ số khuếch đại được xác lập chính xác qua hai điện trở ngoài theo công thức $A_v = 1 + R_f/R_g$. Bài báo đã trình bày đầy đủ cơ sở lý thuyết, tính toán và các yếu tố thực tế trong thiết kế. Việc lựa chọn giá trị điện trở nằm trong dải \\si{\\kilo\\ohm} đến vài trăm \\si{\\kilo\\ohm} giúp cân bằng giữa độ chính xác, nhiễu và công suất. Các biểu đồ và mô phỏng minh họa đã khẳng định tính đúng đắn của phân tích lý thuyết. Kiến thức này là nền tảng để phát triển các mạch khuếch đại thiết bị đo, lọc tích cực và xử lý tín hiệu tương tự phức tạp hơn.\n\n\\begin{thebibliography}{99}\n\\bibitem{sedra}\nA.~S. Sedra and K.~C. Smith, \\emph{Microelectronic Circuits}, 7th ed. Oxford University Press, 2014.\n\\bibitem{opamp}\nAnalog Devices, \\emph{Op Amp Basics}, Application Note AN-20, Rev. A, 2004.\n\\bibitem{ti}\nTexas Instruments, \\emph{Handbook of Operational Amplifier Applications}, SBOA092B, 2013.\n\\end{thebibliography}\n\n\\end{document}\n",
+          "metadata": {
+            "finishReason": "stop",
+            "rawFinishReason": "end_turn",
+            "usage": {
+              "inputTokens": 1354,
+              "outputTokens": 6640,
+              "totalTokens": 7994
+            }
+          }
+        },
+        "score": 1,
+        "success": true,
+        "testCase": {
+          "description": "opamp — mạch khuếch đại thuật toán",
+          "vars": {
+            "templateId": "engineering",
+            "description": "Trình bày mạch khuếch đại không đảo dùng op-amp, tính hệ số khuếch đại và điện trở."
+          },
+          "assert": [
+            {
+              "type": "regex",
+              "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{article\\}"
+            },
+            {
+              "type": "regex",
+              "value": "\\\\usepackage(\\[[^\\]]*\\])?\\{siunitx\\}"
+            },
+            {
+              "type": "regex",
+              "value": "\\\\(SI|si|qty|num)\\{"
+            },
+            {
+              "type": "contains",
+              "value": "\\end{document}"
+            },
+            {
+              "type": "javascript",
+              "value": "file://./scorers/validate-latex.ts"
+            }
+          ],
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 1,
+        "tokenUsage": {
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "total": 0,
+          "numRequests": 1,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          },
+          "assertions": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          }
+        },
+        "vars": {
+          "templateId": "engineering",
+          "description": "Trình bày mạch khuếch đại không đảo dùng op-amp, tính hệ số khuếch đại và điện trở."
+        },
+        "metadata": {
+          "finishReason": "stop",
+          "rawFinishReason": "end_turn",
+          "usage": {
+            "inputTokens": 1354,
+            "outputTokens": 6640,
+            "totalTokens": 7994
+          },
+          "_promptfooFileMetadata": {}
+        },
+        "failureReason": 0
+      },
+      {
+        "cost": 0,
+        "gradingResult": {
+          "pass": true,
+          "score": 1,
+          "reason": "All assertions passed",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0
+          },
+          "componentResults": [
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "regex",
+                "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{article\\}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "regex",
+                "value": "\\\\usepackage(\\[[^\\]]*\\])?\\{siunitx\\}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "regex",
+                "value": "\\\\(SI|si|qty|num)\\{"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\end{document}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "validateLatex: OK — không có diagnostic.",
+              "assertion": {
+                "type": "javascript",
+                "value": "file://./scorers/validate-latex.ts"
+              }
+            }
+          ]
+        },
+        "id": "5a38a91d-5dad-4c8c-94c0-1254321ea2ab",
+        "latencyMs": 96376,
+        "namedScores": {},
+        "prompt": {
+          "raw": "Báo cáo tính ngân sách công suất cho một hệ thống nhúng, có bảng số liệu và đơn vị.",
+          "label": "{{description}}",
+          "config": {}
+        },
+        "promptId": "1e6bd1d5aab4bf787795c1f9955d1ac1cc90fa253cfff6883a3c44dd53037d25",
+        "promptIdx": 0,
+        "provider": {
+          "id": "engineering-real-ai-provider",
+          "label": "engineering-real-ai"
+        },
+        "response": {
+          "output": "\\documentclass[12pt,a4paper]{article}\n\\usepackage[left=2.5cm,right=2.5cm,top=2.5cm,bottom=2.5cm]{geometry}\n\\usepackage{amsmath,amssymb}\n\\usepackage{siunitx}\n\\usepackage{booktabs}\n\\usepackage{float}\n\\usepackage{caption}\n\\usepackage{graphicx}\n\\usepackage{pgfplots}\n\\pgfplotsset{compat=1.18}\n\\usepackage{xcolor}\n\\usepackage{listings}\n\\lstset{basicstyle=\\ttfamily, language=C, showstringspaces=false, breaklines=true, numbers=left, numberstyle=\\tiny, frame=single}\n\\usepackage{hyperref}\n\\hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}\n\\usepackage{enumitem}\n\\usepackage{fontspec}\n\n\\renewcommand{\\abstractname}{Tóm tắt}\n\n\\title{Tính Toán Ngân Sách Công Suất cho Hệ Thống Nhúng}\n\\author{Nguyễn Văn A\\thanks{Khoa Điện – Điện tử, Trường Đại học Bách khoa.} \\\\\n        \\texttt{example@hcmut.edu.vn}}\n\\date{\\today}\n\n\\begin{document}\n\n\\maketitle\n\n\\begin{abstract}\nBáo cáo này trình bày quy trình tính toán ngân sách công suất cho một hệ thống nhúng điển hình, bao gồm vi điều khiển, cảm biến, mô-đun truyền thông không dây và bộ nhớ ngoài. Mục tiêu là ước lượng tổng công suất tiêu thụ trung bình, xác định tuổi thọ pin và đề xuất các chiến lược tiết kiệm năng lượng. Các số liệu cụ thể được tổng hợp trong bảng và biểu đồ kèm theo, sử dụng đơn vị chuẩn \\si{\\volt}, \\si{\\milli\\ampere}, \\si{\\milli\\watt}. Kết quả cho thấy với một chu kỳ nhiệm vụ phù hợp, hệ thống có thể hoạt động nhiều tháng từ một viên pin nhỏ.\n\\end{abstract}\n\n\\section{Giới thiệu}\nTrong các hệ thống nhúng chạy bằng pin, việc quản lý năng lượng hiệu quả là yếu tố quyết định đến thời gian hoạt động và chi phí bảo trì. Ngân sách công suất (power budget) là bước đầu tiên trong thiết kế: nó liệt kê từng thành phần tiêu thụ điện, xác định các chế độ hoạt động (active, sleep, standby) và tính toán dòng điện trung bình \\cite{mackay2012green}. Từ đó, kỹ sư có thể chọn dung lượng pin phù hợp, tối ưu thời gian thức/ngủ và lựa chọn linh kiện tiết kiệm năng lượng.\n\nBáo cáo này lấy ví dụ một hệ thống thu thập dữ liệu môi trường, sử dụng vi điều khiển STM32L476 (dòng ultra-low-power), cảm biến nhiệt độ TMP102, mô-đun truyền không dây LoRa SX1276 và bộ nhớ Flash SPI. Hệ thống thu thập dữ liệu mỗi 10 phút, gửi qua mạng LoRa mỗi giờ và dành phần lớn thời gian ở chế độ ngủ sâu. Chúng tôi sẽ tính ngân sách công suất dựa trên các thông số từ datasheet \\cite{stm32l4,tmp102,sx1276}, sau đó sử dụng \\texttt{siunitx} để hiển thị đơn vị đúng chuẩn kỹ thuật.\n\n\\section{Phương pháp tính toán ngân sách công suất}\nNguyên tắc cơ bản dựa trên định luật Ohm mở rộng cho công suất:\n\\begin{equation}\nP = V \\times I\n\\label{eq:power}\n\\end{equation}\ntrong đó $V$ là điện áp cung cấp (thường cố định \\SI{3.3}{\\volt} cho các hệ thống hiện đại) và $I$ là dòng điện tiêu thụ ở chế độ tương ứng. Công suất tổng $P_{\\text{total}}$ là tổng công suất của tất cả các thành phần đang hoạt động đồng thời. Tuy nhiên, do hệ thống sử dụng chế độ ngắt quãng (duty cycling), mức tiêu thụ trung bình $I_{\\text{avg}}$ được tính theo công thức:\n\\begin{equation}\nI_{\\text{avg}} = \\frac{\\sum_{i} I_i \\cdot t_i}{T}\n\\label{eq:avg}\n\\end{equation}\nvới $T$ là chu kỳ nhiệm vụ, $t_i$ là thời gian ở chế độ dòng $I_i$. Từ đó, tuổi thọ pin $L$ (giờ) được tính:\n\\begin{equation}\nL = \\frac{C_{\\text{bat}}}{I_{\\text{avg}}}\n\\label{eq:life}\n\\end{equation}\nvới $C_{\\text{bat}}$ là dung lượng danh định của pin (thường tính bằng \\si{\\milli\\ampere\\hour}).\n\nCác thông số được thu thập từ tài liệu kỹ thuật:\n\\begin{itemize}[nosep]\n\\item STM32L476: dòng hoạt động \\SI{15}{\\milli\\ampere} ở \\SI{80}{\\mega\\hertz}, dòng ngủ sâu (Stop 2) \\SI{10}{\\nano\\ampere} (thực tế chọn \\SI{0.01}{\\milli\\ampere} cho dự phòng).\n\\item TMP102: dòng hoạt động \\SI{10}{\\micro\\ampere} (\\SI{0.01}{\\milli\\ampere}).\n\\item SX1276: dòng phát \\SI{120}{\\milli\\ampere} ở \\SI{+14}{\\dBm}, chế độ standby \\SI{0.2}{\\milli\\ampere}.\n\\item Flash SPI: dòng ghi \\SI{15}{\\milli\\ampere}, chế độ nghỉ cỡ \\SI{1}{\\micro\\ampere}.\n\\end{itemize}\nTất cả các thành phần đều được cấp nguồn \\SI{3.3}{\\volt}. Dung lượng pin giả định là \\SI{2000}{\\milli\\ampere\\hour} (2 pin AA NiMH nối tiếp qua bộ ổn áp LDO hiệu suất cao).\n\nĐể minh họa các phép tính trong mã nguồn, đoạn mã C dưới đây mô phỏng việc ước tính dòng trung bình dựa trên profile thời gian:\n\n\\begin{lstlisting}[caption={Ước tính dòng trung bình bằng C}, label={code:avg}]\n#include <stdio.h>\nfloat compute_average(float I_active, float I_sleep,\n                      float t_active, float t_sleep, float period) {\n    return (I_active * t_active + I_sleep * t_sleep) / period;\n}\nint main() {\n    float Iact = 30.0; // mA (gồm MCU + Flash + sensor)\n    float Islp = 0.02; // mA\n    float Tact  = 0.2; // s\n    float Tslp  = 599.8; // s\n    float Tcycle = 600.0; // 10 phut\n    float Iavg = compute_average(Iact, Islp, Tact, Tslp, Tcycle);\n    printf(\"Dong trung binh = %.3f mA\\n\", Iavg);\n    return 0;\n}\n\\end{lstlisting}\n\n\\section{Kết quả tính toán}\nBảng~\\ref{tab:power} tổng hợp công suất của từng linh kiện ở hai chế độ chính. Để đơn giản, ta giả sử khi hệ thống hoạt động, MCU, Flash và cảm biến cùng hoạt động; khi ngủ, tất cả chuyển về chế độ tối ưu.\n\n\\begin{table}[H]\n\\centering\n\\caption{Danh sách linh kiện và mức tiêu thụ công suất}\n\\label{tab:power}\n\\begin{tabular}{l c c c c}\n\\toprule\n\\textbf{Linh kiện} & \\textbf{Điện áp (V)} & \\textbf{Dòng (mA)} & \\textbf{Công suất (mW)} & \\textbf{Ghi chú} \\\\\n\\midrule\nVi điều khiển STM32L476 & \\SI{3.3}{\\volt} & 15 & \\SI{49.5}{\\milli\\watt} & Chế độ hoạt động \\\\\n & \\SI{3.3}{\\volt} & 0.01 & \\SI{0.033}{\\milli\\watt} & Chế độ ngủ \\\\\nCảm biến TMP102 & \\SI{3.3}{\\volt} & 0.01 & \\SI{0.033}{\\milli\\watt} & \\\\\nModule LoRa SX1276 & \\SI{3.3}{\\volt} & 120 (TX) & \\SI{396}{\\milli\\watt} & Truyền dữ liệu \\\\\n & \\SI{3.3}{\\volt} & 0.2 (Standby) & \\SI{0.66}{\\milli\\watt} & \\\\\nBộ nhớ Flash SPI & \\SI{3.3}{\\volt} & 15 & \\SI{49.5}{\\milli\\watt} & Ghi dữ liệu \\\\\n\\bottomrule\n\\end{tabular}\n\\end{table}\n\nPhân bố công suất trực quan được thể hiện trong Hình~\\ref{fig:bar}. Rõ ràng, module LoRa khi phát chiếm phần lớn công suất, trong khi các chế độ ngủ tiêu thụ rất nhỏ.\n\n\\begin{figure}[H]\n\\centering\n\\begin{tikzpicture}\n\\begin{axis}[\n    ybar,\n    symbolic x coords={MCU (Active), MCU (Sleep), TMP102, LoRa TX, LoRa Standby, Flash},\n    xtick=data,\n    ylabel={Công suất (\\si{\\milli\\watt})},\n    ymin=0,\n    nodes near coords,\n    nodes near coords align={vertical},\n    enlarge x limits=0.2,\n    width=\\textwidth,\n    height=7cm,\n    bar width=10pt,\n    ymajorgrids,\n    title={Phân bố công suất các linh kiện}\n]\n\\addplot[fill=blue!30] coordinates {(MCU (Active),49.5) (MCU (Sleep),0.033) (TMP102,0.033) (LoRa TX,396) (LoRa Standby,0.66) (Flash,49.5)};\n\\end{axis}\n\\end{tikzpicture}\n\\caption{Biểu đồ công suất tiêu thụ của từng thành phần.}\n\\label{fig:bar}\n\\end{figure}\n\nDựa trên profile hoạt động: mỗi 10 phút, hệ thống thức 0.2 giây để đọc cảm biến và ghi Flash, đồng thời mỗi giờ phát LoRa trong 0.5 giây. Dòng trung bình tính theo (\\ref{eq:avg}):\n\n\\begin{itemize}[nosep]\n\\item Chế độ hoạt động (MCU + Flash + TMP102): $I_{\\text{act}} = 15 + 15 + 0.01 = \\SI{30.01}{\\milli\\ampere}$.\n\\item Truyền LoRa (thêm SX1276): $I_{\\text{tx}} = 30.01 + 120 = \\SI{150.01}{\\milli\\ampere}$.\n\\item Chế độ ngủ (tất cả standby): $I_{\\text{slp}} = 0.01 + 0.01 + 0.2 \\approx \\SI{0.22}{\\milli\\ampere}$.\n\\end{itemize}\n\nThời gian trong một chu kỳ 3600 giây:\n\\begin{itemize}[nosep]\n\\item Hoạt động: 0.2 giây $\\times$ 6 lần (mỗi 10 phút) = 1.2 giây.\n\\item Truyền LoRa: 0.5 giây $\\times$ 1 lần.\n\\item Ngủ: 3600 $-$ 1.2 $-$ 0.5 = 3598.3 giây.\n\\end{itemize}\n\nDòng trung bình:\n\\begin{align}\nI_{\\text{avg}} &= \\frac{30.01 \\times 1.2 + 150.01 \\times 0.5 + 0.22 \\times 3598.3}{3600} \\nonumber \\\\\n               &= \\frac{36.012 + 75.005 + 791.626}{3600} \\approx \\SI{0.251}{\\milli\\ampere}\n\\end{align}\n\nTuổi thọ pin:\n\\begin{equation}\nL = \\frac{\\SI{2000}{\\milli\\ampere\\hour}}{\\SI{0.251}{\\milli\\ampere}} \\approx 7968 \\,\\text{giờ} \\approx 332 \\,\\text{ngày}\n\\end{equation}\n\nNhư vậy, hệ thống có thể hoạt động hơn 11 tháng với cấu hình này.\n\n\\section{Thảo luận và đề xuất tiết kiệm năng lượng}\nKết quả trên cho thấy mức tiêu thụ chủ yếu đến từ các sự kiện phát sóng LoRa, mặc dù thời gian rất ngắn. Để kéo dài tuổi thọ hơn nữa, có thể áp dụng các biện pháp sau:\n\\begin{itemize}[nosep]\n\\item Giảm công suất phát của SX1276 (ví dụ \\SI{+7}{\\dBm}) sẽ tiết kiệm đáng kể dòng TX (khoảng \\SI{80}{\\milli\\ampere} thay vì \\SI{120}{\\milli\\ampere}).\n\\item Tăng chu kỳ thu thập lên 30 phút, giảm số lần thức dậy và ghi Flash.\n\\item Tắt hoàn toàn các ngoại vi không dùng đến (dùng MOSFET phía cao) để cắt dòng rò.\n\\item Sử dụng pin sơ cấp lithium (dung lượng cao hơn, tự xả thấp).\n\\item Áp dụng kỹ thuật energy harvesting từ solar để bổ sung.\n\\end{itemize}\n\nBảng~\\ref{tab:compare} so sánh dòng trung bình khi thay đổi một số tham số.\n\n\\begin{table}[H]\n\\centering\n\\caption{Ảnh hưởng của các cấu hình đến dòng trung bình}\n\\label{tab:compare}\n\\begin{tabular}{l c}\n\\toprule\n\\textbf{Cấu hình} & \\textbf{Dòng trung bình (\\si{\\milli\\ampere})} \\\\\n\\midrule\nGốc (10 phút, TX \\SI{+14}{\\dBm}) & 0.251 \\\\\nGiảm TX xuống \\SI{+7}{\\dBm} & 0.214 \\\\\nChu kỳ thu thập 30 phút & 0.173 \\\\\nTX \\SI{+7}{\\dBm} + chu kỳ 30 phút & 0.145 \\\\\n\\bottomrule\n\\end{tabular}\n\\end{table}\n\nCác con số này cho thấy tiềm năng kéo dài tuổi thọ lên hơn 500 ngày. Thiết kế cần cân bằng giữa tần suất dữ liệu và mức tiêu thụ năng lượng, thường được đánh giá bằng bài toán tối ưu đa mục tiêu.\n\n\\section{Kết luận}\nBáo cáo đã trình bày một cách tiếp cận có hệ thống để tính ngân sách công suất cho hệ thống nhúng. Bằng cách liệt kê chi tiết từng thành phần, tính đến các chế độ hoạt động và sử dụng mô hình duty cycling, kỹ sư có thể ước lượng chính xác dòng trung bình và tuổi thọ pin. Ví dụ minh họa với hệ thống STM32L476/LoRa cho thấy dòng trung bình cực thấp (\\SI{0.251}{\\milli\\ampere}), đủ để hoạt động gần một năm từ pin dung lượng \\SI{2000}{\\milli\\ampere\\hour}. Các đề xuất tối ưu như thay đổi chu kỳ nhiệm vụ và công suất phát giúp cải thiện đáng kể năng lượng. Các bảng số liệu và biểu đồ trong báo cáo đều sử dụng đơn vị chuẩn \\texttt{siunitx} và tuân thủ quy tắc trình bày kỹ thuật.\n\n\\begin{thebibliography}{99}\n\\bibitem{mackay2012green}\nMackay, D. J. C. (2012). Sustainable Energy – without the hot air. UIT Cambridge.\n\\bibitem{stm32l4}\nSTMicroelectronics. (2019). STM32L476xx Datasheet. \\url{https://www.st.com/resource/en/datasheet/stm32l476je.pdf}\n\\bibitem{tmp102}\nTexas Instruments. (2014). TMP102 Low-Power Digital Temperature Sensor. \\url{https://www.ti.com/lit/ds/symlink/tmp102.pdf}\n\\bibitem{sx1276}\nSemtech. (2019). SX1276/77/78/79 Datasheet. \\url{https://semtech.my.salesforce.com/sfc/p/#E0000000JelG/a/2R0000001RNs/ZX4kPdD_1yboZE4L9a9y3cGbb9i0Xr9kzU5a9PMT0HM}\n\\end{thebibliography}\n\n\\end{document}\n",
+          "metadata": {
+            "finishReason": "stop",
+            "rawFinishReason": "end_turn",
+            "usage": {
+              "inputTokens": 1349,
+              "outputTokens": 6711,
+              "totalTokens": 8060
+            }
+          }
+        },
+        "score": 1,
+        "success": true,
+        "testCase": {
+          "description": "power-budget — tính công suất tiêu thụ (đơn vị SI + bảng)",
+          "vars": {
+            "templateId": "engineering",
+            "description": "Báo cáo tính ngân sách công suất cho một hệ thống nhúng, có bảng số liệu và đơn vị."
+          },
+          "assert": [
+            {
+              "type": "regex",
+              "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{article\\}"
+            },
+            {
+              "type": "regex",
+              "value": "\\\\usepackage(\\[[^\\]]*\\])?\\{siunitx\\}"
+            },
+            {
+              "type": "regex",
+              "value": "\\\\(SI|si|qty|num)\\{"
+            },
+            {
+              "type": "contains",
+              "value": "\\end{document}"
+            },
+            {
+              "type": "javascript",
+              "value": "file://./scorers/validate-latex.ts"
+            }
+          ],
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 2,
+        "tokenUsage": {
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "total": 0,
+          "numRequests": 1,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          },
+          "assertions": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          }
+        },
+        "vars": {
+          "templateId": "engineering",
+          "description": "Báo cáo tính ngân sách công suất cho một hệ thống nhúng, có bảng số liệu và đơn vị."
+        },
+        "metadata": {
+          "finishReason": "stop",
+          "rawFinishReason": "end_turn",
+          "usage": {
+            "inputTokens": 1349,
+            "outputTokens": 6711,
+            "totalTokens": 8060
+          },
+          "_promptfooFileMetadata": {}
+        },
+        "failureReason": 0
+      },
+      {
+        "cost": 0,
+        "error": "This operation was aborted",
+        "gradingResult": null,
+        "id": "fc66d94c-710d-4e08-ba0f-dd0c6414fd8d",
+        "latencyMs": 318887,
+        "namedScores": {},
+        "prompt": {
+          "raw": "Báo cáo kỹ thuật thiết kế mạch nguồn cho vi điều khiển, có sơ đồ và thông số kỹ thuật.",
+          "label": "{{description}}",
+          "config": {}
+        },
+        "promptId": "1e6bd1d5aab4bf787795c1f9955d1ac1cc90fa253cfff6883a3c44dd53037d25",
+        "promptIdx": 0,
+        "provider": {
+          "id": "engineering-real-ai-provider",
+          "label": "engineering-real-ai"
+        },
+        "response": {
+          "error": "This operation was aborted"
+        },
+        "score": 0,
+        "success": false,
+        "testCase": {
+          "description": "vietnamese-embedded — tiếng Việt, mạch nguồn vi điều khiển",
+          "vars": {
+            "templateId": "engineering",
+            "description": "Báo cáo kỹ thuật thiết kế mạch nguồn cho vi điều khiển, có sơ đồ và thông số kỹ thuật."
+          },
+          "assert": [
+            {
+              "type": "regex",
+              "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{article\\}"
+            },
+            {
+              "type": "regex",
+              "value": "\\\\usepackage(\\[[^\\]]*\\])?\\{siunitx\\}"
+            },
+            {
+              "type": "regex",
+              "value": "\\\\(SI|si|qty|num)\\{"
+            },
+            {
+              "type": "contains",
+              "value": "\\end{document}"
+            },
+            {
+              "type": "javascript",
+              "value": "file://./scorers/validate-latex.ts"
+            }
+          ],
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 3,
+        "tokenUsage": {
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "total": 0,
+          "numRequests": 1,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          },
+          "assertions": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          }
+        },
+        "vars": {
+          "templateId": "engineering",
+          "description": "Báo cáo kỹ thuật thiết kế mạch nguồn cho vi điều khiển, có sơ đồ và thông số kỹ thuật."
+        },
+        "metadata": {
+          "_promptfooFileMetadata": {}
+        },
+        "failureReason": 2
+      }
+    ],
+    "stats": {
+      "successes": 3,
+      "failures": 0,
+      "errors": 1,
+      "tokenUsage": {
+        "prompt": 0,
+        "completion": 0,
+        "cached": 0,
+        "total": 0,
+        "numRequests": 4,
+        "completionDetails": {
+          "reasoning": 0,
+          "acceptedPrediction": 0,
+          "rejectedPrediction": 0,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0
+        },
+        "assertions": {
+          "total": 0,
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "numRequests": 0,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          }
+        }
+      },
+      "durationMs": 318980,
+      "evaluationDurationMs": 318980
+    }
+  },
+  "config": {
+    "tags": {},
+    "description": "Engineering template — AI THẬT trên dataset engineering/",
+    "prompts": [
+      "{{description}}"
+    ],
+    "providers": [
+      {
+        "id": "file://./providers/engineering-real-ai-provider.ts",
+        "label": "engineering-real-ai"
+      }
+    ],
+    "tests": [
+      "file://./datasets/engineering/cases.yaml"
+    ],
+    "env": {},
+    "defaultTest": {
+      "assert": [
+        {
+          "type": "regex",
+          "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{article\\}"
+        },
+        {
+          "type": "regex",
+          "value": "\\\\usepackage(\\[[^\\]]*\\])?\\{siunitx\\}"
+        },
+        {
+          "type": "regex",
+          "value": "\\\\(SI|si|qty|num)\\{"
+        },
+        {
+          "type": "contains",
+          "value": "\\end{document}"
+        },
+        {
+          "type": "javascript",
+          "value": "file://./scorers/validate-latex.ts"
+        }
+      ],
+      "vars": {},
+      "options": {},
+      "metadata": {}
+    },
+    "outputPath": [
+      "lib/prompt-eval/results/engineering-real-ai-run-2026-07-17.json"
+    ],
+    "extensions": [],
+    "metadata": {},
+    "evaluateOptions": {}
+  },
+  "shareableUrl": null,
+  "metadata": {
+    "promptfooVersion": "0.121.18",
+    "nodeVersion": "v24.16.0",
+    "platform": "win32",
+    "arch": "x64",
+    "exportedAt": "2026-07-17T10:00:44.435Z",
+    "evaluationCreatedAt": "2026-07-17T09:55:25.327Z"
+  },
+  "vars": [
+    "templateId",
+    "description"
+  ],
+  "runtimeOptions": {
+    "eventSource": "cli",
+    "showProgressBar": true,
+    "repeat": 1,
+    "maxConcurrency": 4,
+    "cache": false
+  }
+}

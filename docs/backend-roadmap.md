@@ -58,7 +58,7 @@ template `#later`) và đặc thù của hệ thống:
   route/component, chưa có 1 lớp kiểm tra session/redirect thống nhất.
 - **BE-4.3 `[Platform]`:** Di chuyển dữ liệu file vật lý sang Cloud Storage (ví dụ: AWS S3 hoặc Supabase Storage), cung cấp pre-signed URLs cho việc tải/hiển thị assets.
 
-### ⚪ Phase 6: Mở rộng Template `#later`
+### 🟢 Phase 6: Mở rộng Template `#later` — ✅ **HOÀN TẤT 7/7 (2026-07-17) — tổng 11 template**
 
 *Mục tiêu: Bổ sung 7 template còn thiếu so với ý định sản phẩm ban đầu — xem
 [`docs/project-overview-pdr.md`](./project-overview-pdr.md) § Product Description
@@ -73,20 +73,21 @@ template đã có.*
 > (`lib/types/document.ts`) chỉ có 4 giá trị (`academic`/`math`/`thesis`/`slides`), và `TEMPLATES`
 > là `Record<TemplateId, DocumentTemplate>` nên về mặt kiểu TypeScript không thể có 11 entry. "11"
 > bị chép nhầm từ mô tả sản phẩm ban đầu mà không đối chiếu lại với code. Phase này ghi nhận đúng
-> việc CẦN LÀM để số 11 (hoặc gần đó) trở thành sự thật trong code — 4 hiện có + 7 dưới đây = 11.
+> việc CẦN LÀM để số 11 (hoặc gần đó) trở thành sự thật trong code — 4 gốc + 7 dưới đây = 11
+> (✅ **2026-07-17: ĐÃ ĐỦ 11 template trong code** — cả 7 đã thêm + verify + eval, Phase 6 đóng).
 
 **7 template cần thêm** (mỗi template ước tính effort tương đương ~0.5–1 ngày nếu theo đúng pattern
 4 template hiện có — xem `lib/templates/registry.ts` mục `academic`/`math` làm ví dụ tham chiếu):
 
 | Template mới | `LatexClass` dùng | Ghi chú kỹ thuật riêng |
 |:--|:--|:--|
-| `report` | `report` (đã có trong `LatexClass`) | Báo cáo chung — khác `thesis` (không cần chapter hierarchy/TOC dài, ngắn hơn). |
-| `physics` | `article` | Cần ký hiệu vector (`\vec{}`/`bm`), đơn vị SI (`siunitx`) — kiểm tra package có an toàn Tectonic sandbox trước khi thêm vào allowlist. |
-| `chemistry` | `article` | Cần `mhchem` cho công thức hoá học (phản ứng, mũi tên cân bằng) — package phổ biến CTAN, khả năng cao an toàn. |
-| `engineering` | `article` hoặc `report` | Có thể cần biểu đồ mạch (`circuitikz`) — nếu dùng, phải theo đúng nguyên tắc positive-alternative đã áp dụng ở E6 (không chỉ FORBIDDEN mà có hướng dẫn thay thế cụ thể khi thiếu). |
-| `letter` | `letter` (đã có trong `LatexClass`, CHƯA có template dùng) | Document class `letter` khác cấu trúc `\begin{letter}{...}` — không dùng `\section` như các template khác, cần `renderMock()` riêng biệt hoàn toàn. |
-| `cv` | `article` (khuyến nghị — tránh `moderncv` nếu chưa audit an toàn Tectonic sandbox) | **Cần audit an toàn trước khi chọn package** — nhiều CV package (`moderncv`, `europasscv`) có thể cần `\includegraphics` (ảnh đại diện) — mâu thuẫn với nguyên tắc đã ghi ở đầu file registry.ts: "NO `\includegraphics` external files". Cần quyết định: bỏ ảnh đại diện, hoặc dùng placeholder/TikZ. |
-| `exam` | `exam` (đã có trong `LatexClass`, CHƯA có template dùng) | Document class `exam` có lệnh riêng cho câu hỏi/điểm số (`\question`, `\part`, `\begin{solution}`) — cần `knownTheoremEnvironments` tương đương để validate đúng, không lẫn với `amsthm` của `math`. |
+| ✅ `report` **(xong 2026-07-16)** | `report` | Báo cáo chung theo `\section` (KHÔNG `\chapter`) — preamble set `\renewcommand{\thesection}{\arabic{section}}` để section đánh số 1,2,3. Verify: `templates.test.ts`+`api-templates.test.ts` + compile Tectonic thật (PDF ~23KB) + **eval Promptfoo** (deterministic 4/4; real-AI baseline ~25–50% → đã mở rộng allowlist "report-appropriate"). Label đã Việt hoá. |
+| ✅ `physics` **(xong 2026-07-17)** | `article` | `siunitx` (đơn vị SI) + `bm` (vector đậm) + `\vec{}`. **Đã verify AN TOÀN Tectonic**: cả `siunitx` lẫn `bm` có trong bundle, compile PDF ~28KB. Verify: `templates.test.ts`+`api-templates.test.ts` + compile thật + eval (det 4/4; **real-AI 4/4 first-pass sạch**). Label "Vật lý". |
+| ✅ `chemistry` **(xong 2026-07-16)** | `article` | `mhchem` cho công thức/phản ứng (`\ce{}`), + `siunitx` (đơn vị) + bộ bảng/hình an toàn. Verify: `templates.test.ts`+`api-templates.test.ts` + compile Tectonic thật (mhchem CÓ trong bundle, PDF ~25KB) + eval (det 4/4; **real-AI 4/4 first-pass ngay lần đầu**). Label Việt hoá "Hóa học". |
+| ✅ `engineering` **(xong 2026-07-17)** | `article` | siunitx (đơn vị) + circuitikz (mạch) + listings (code) + pgfplots/pgfplotstable + bảng. **circuitikz ĐÃ AUDIT an toàn Tectonic**: có trong bundle, compile PDF ~24KB, KHÔNG kích hoạt shell-escape/`write18`. Guidance dùng **positive-alternative** cho circuitikz (component thiếu → labelled block `\node[draw]`, KHÔNG `\includegraphics`). Verify: test + compile thật + eval (det 4/4; real-AI 3/3 case hoàn tất PASS sau khi thêm pgfplotstable, 1 case abort do timeout tạm thời). Label "Kỹ thuật". |
+| ✅ `letter` **(xong 2026-07-17)** | `letter` | `\signature`/`\address`/`\begin{letter}`/`\opening`/`\closing` — KHÔNG `\section`/`\maketitle`. renderMock dùng `docRaw()` (generic, không title). Verify: `templates.test.ts`+`api-templates.test.ts` + compile thật (letter.cls trong bundle, PDF ~9KB) + eval (det 4/4; **real-AI 4/4 first-pass**). Label "Thư từ". |
+| ✅ `cv` **(xong 2026-07-17)** | `article` | **Đã quyết: `article` tự layout — KHÔNG moderncv, KHÔNG ảnh ngoài** (header tự dựng + `\section*` + itemize + `\hfill`; placeholder ảnh bằng TikZ nếu cần). Giải quyết đúng mối lo rủi ro cao nhất. Verify: test + compile thật (PDF ~16KB) + eval (det 4/4; **real-AI 4/4 first-pass** — AI TRÁNH đúng moderncv/`\cventry`/`\includegraphics`). Label "CV / Sơ yếu lý lịch". |
+| ✅ `exam` **(xong 2026-07-17)** | `exam` | `\question`/`\part`/`\begin{solution}`/`\begin{choices}`. Đặt `knownTheoremEnvironments` = các env của class exam (questions/parts/subparts/choices/checkboxes/solution...) để validateLatex nhận diện (KHÔNG lẫn amsthm). Verify: `templates.test.ts`+`api-templates.test.ts` + compile thật (exam.cls trong bundle, PDF ~19KB) + eval (det 4/4; **real-AI 4/4 first-pass**). Label "Đề thi". |
 
 **Checklist per-template (đúng 8 field của `DocumentTemplate` interface, `lib/templates/registry.ts`):**
 
@@ -109,17 +110,86 @@ template đã có.*
       khi tin prompt đã đúng.
 
 **Thứ tự làm đề xuất** (rủi ro thấp → cao, để phát hiện sớm nếu có vấn đề an toàn/kiến trúc):
-1. `report` (gần giống `thesis`/`academic` nhất, rủi ro thấp nhất — tốt để làm đầu tiên xác nhận lại
-   pattern còn đúng sau khi đã có 4 template).
-2. `chemistry` (chỉ cần 1 package mới `mhchem`, không có vấn đề an toàn đặc biệt).
-3. `physics` (tương tự `chemistry`, thêm `siunitx`).
-4. `engineering` (cân nhắc kỹ `circuitikz` trước khi cam kết).
-5. `exam` (cần `knownTheoremEnvironments` riêng — độ phức tạp trung bình).
-6. `letter` (document class hoàn toàn khác cấu trúc — cần soạn `body` cho `letter` class đúng cú
-   pháp riêng, vd. `\begin{letter}{...}`/`\opening`/`\closing`; **đã verify** helper `docRaw()`
-   hiện có trong `registry.ts` là generic — nhận `body: string[]` bất kỳ, không giả định `\section`
-   — nên vẫn tái dùng được, chỉ cần soạn đúng nội dung `body` theo cú pháp `letter`).
-7. `cv` (làm CUỐI — cần quyết định trước về ảnh đại diện/package, rủi ro an toàn cao nhất trong 7).
+1. ✅ `report` — **XONG (2026-07-16).** Section-based (report class, không `\chapter`), preamble
+   `\renewcommand{\thesection}{\arabic{section}}`. Verify: `templates.test.ts` (+1) +
+   `api-templates.test.ts` (+1) + compile Tectonic thật ra PDF ~23KB. Pattern 4-template vẫn đúng.
+   - **Eval Promptfoo (2026-07-16):** đã dựng scaffolding riêng cho `report` (dataset
+     `datasets/report/cases.yaml` + provider mock & real-ai + 2 config, theo pattern `math`).
+     Deterministic (MockProvider) **4/4 (100%)**. Real-AI (`sotatek-anthropic`/`deepseek-v4-pro`)
+     baseline: compliance first-pass **THẤP & DAO ĐỘNG (~25–50%** qua 3 lần chạy) — AI dùng đúng
+     report class + `\section` + fontspec + `\renewcommand` theo guidance, NHƯNG liên tục kéo vào
+     package an toàn ngoài allowlist (mỗi lần khác nhau: float/array → longtable/caption →
+     amssymb/makecell) và thỉnh thoảng `\chapter`. Đã mở rộng allowlist `report` thành bộ
+     "report-appropriate" (thêm `amssymb` + gói bảng/hình an toàn: array/longtable/tabularx/
+     multirow/caption/subcaption/float/enumitem). Đuôi dài (makecell…) **để repair loop xử lý ở
+     production**, KHÔNG đuổi bắt vào allowlist (whack-a-mole). Artifact:
+     `lib/prompt-eval/results/report-real-ai-run-2026-07-16.json`. *Bài học: eval 4 case + model
+     non-deterministic ⇒ số % chỉ mang tính chỉ báo; giá trị thật là phát hiện GAP (allowlist hẹp +
+     amssymb bị thiếu).*
+   - **Prompt hardening (2026-07-16, option a):** thêm "package contract" tường minh vào
+     `promptGuidance` của report — liệt kê ĐẦY ĐỦ gói được phép + "chỉ dùng các gói này, KHÔNG
+     `\usepackage` gì ngoài danh sách" + positive-alternative cho gói AI hay thêm nhầm
+     (makecell→array/tabularx, mathtools→amssymb, subfig→subcaption), siết `\chapter`/`\part`, và cấm
+     rõ `inputenc`/`fontenc` (XeLaTeX+fontspec đã lo UTF-8). Nguyên nhân gốc: `buildGeneratePrompt`
+     chỉ "nói" cho AI 4 gói base, KHÔNG nói allowlist ⇒ AI tự thêm gói rồi bị validate loại.
+     **Real-AI first-pass: 25–50% → 75% (sau package contract) → 100% (sau khi cấm inputenc/fontenc).**
+     Artifact: `results/report-real-ai-run-2026-07-16-hardened.json`. Lưu ý: n=4 + non-deterministic
+     ⇒ 100% là chỉ báo xu hướng mạnh, KHÔNG phải bảo chứng luôn-100%.
+     **Follow-up (✅ ĐÃ LÀM 2026-07-16):** inject `packageAllowlist` vào prompt CHUNG cho MỌI template
+     tại `buildStructureHint` (`lib/ai/prompts/generate-latex.ts`) — "ALLOWED PACKAGES...use ONLY
+     these...never inputenc/fontenc", DRY (đọc từ registry, hết drift), có unit test (`prompts.test.ts`).
+     Đây là lý do `chemistry` (làm sau) đạt **100% first-pass ngay lần đầu** mà không cần vòng lặp sửa
+     như report.
+   - **Việt hoá (2026-07-16):** đổi `label/category/description` sang tiếng Việt cho **CẢ 5 template**
+     (UI-only — KHÔNG đụng `promptGuidance`/hợp đồng AI, không đụng test). UI đọc động qua
+     `listTemplates()` nên tự cập nhật.
+2. ✅ `chemistry` — **XONG (2026-07-16).** article + `mhchem` (`\ce{}`); allowlist thêm mhchem/siunitx
+   + gói bảng/hình an toàn. `promptGuidance` domain-focused (bắt buộc `\ce{}`, mũi tên `->`/`<=>`/`->[\Delta]`,
+   trạng thái (s)/(l)/(g)/(aq), siunitx cho đơn vị) — KHÔNG chép tay allowlist (đã có injection chung ở
+   Task A). Verify: `templates.test.ts` + `api-templates.test.ts` + compile Tectonic thật (mhchem có
+   trong bundle, PDF ~25KB) + eval (deterministic 4/4; **real-AI 4/4 first-pass NGAY lần đầu** — nhờ
+   hardening-from-start + allowlist injection chung, KHÔNG cần vòng lặp sửa như report). Label "Hóa học".
+3. ✅ `physics` — **XONG (2026-07-17).** article + `siunitx` (đơn vị SI) + `bm` (vector đậm) + `\vec{}`.
+   `promptGuidance` domain-focused (vector, đơn vị BẮT BUỘC qua siunitx `\SI/\si/\num` + unit macro,
+   symbols amssymb) — dựa vào allowlist injection chung của Task A. **An toàn Tectonic đã verify**:
+   `siunitx`+`bm` đều có trong bundle, compile PDF ~28KB, không lỗi. Verify: `templates.test.ts` +
+   `api-templates.test.ts` + compile thật + eval (deterministic 4/4; **real-AI 4/4 first-pass sạch
+   ngay lần đầu**). Label "Vật lý".
+4. ✅ `engineering` — **XONG (2026-07-17).** article; siunitx (đơn vị) + circuitikz (sơ đồ mạch) +
+   listings (code) + pgfplots/pgfplotstable + bảng. **circuitikz đã AUDIT an toàn Tectonic** (có
+   trong bundle, PDF ~24KB, KHÔNG shell-escape/`write18`) — giải quyết đúng mối lo roadmap nêu.
+   `promptGuidance` có **positive-alternative** cho circuitikz (component thiếu → `\node[draw]` labelled
+   block, KHÔNG `\includegraphics`). Eval real-AI lộ `pgfplotstable` (companion của pgfplots) → đã thêm
+   vào allowlist; sau đó 3/3 case hoàn tất đều PASS (1 case abort do timeout tạm thời, không phải lỗi
+   template). Verify: `templates.test.ts` + `api-templates.test.ts` + compile thật + eval (det 4/4).
+   Label "Kỹ thuật".
+5. ✅ `exam` — **XONG (2026-07-17).** document class `exam`; `\question[pts]`/`\begin{parts}`/
+   `\begin{choices}`(`\choice`/`\CorrectChoice`)/`\begin{solution}`. Đặt `knownTheoremEnvironments`
+   = các env của class exam để validateLatex nhận diện (dùng chung cơ chế, KHÔNG lẫn amsthm của
+   math). `promptGuidance` liệt kê env exam được phép + FORBIDDEN theorem/lemma. Verify:
+   `templates.test.ts` + `api-templates.test.ts` + compile thật (exam.cls có trong bundle, PDF ~19KB)
+   + eval (deterministic 4/4; **real-AI 4/4 first-pass sạch** dù class hoàn toàn khác article). Label "Đề thi".
+6. ✅ `letter` — **XONG (2026-07-17).** document class `letter` (cấu trúc hoàn toàn khác): preamble
+   `\signature{}`/`\address{}`, thân `\begin{letter}{recipient}`/`\opening{}`/body/`\closing{}`/`\end{letter}`.
+   renderMock dùng **`docRaw()`** (generic, không `\maketitle`/title — đúng như dự đoán roadmap).
+   `promptGuidance` nêu rõ KHÔNG `\section`/`\maketitle`/abstract. Verify: `templates.test.ts` +
+   `api-templates.test.ts` + compile thật (letter.cls có trong bundle, PDF ~9KB) + eval (det 4/4;
+   **real-AI 4/4 first-pass sạch**). Label "Thư từ".
+7. ✅ `cv` — **XONG (2026-07-17) — template CUỐI, đóng Phase 6.** Rủi ro cao nhất (ảnh đại diện/
+   moderncv) đã xử lý bằng quyết định: **`article` tự layout, KHÔNG moderncv/europasscv, KHÔNG
+   `\includegraphics` ảnh** (header tự dựng thủ công + `\section*` + itemize + `\hfill` căn ngày;
+   placeholder ảnh bằng TikZ box nếu cần). `promptGuidance` FORBIDDEN moderncv/`\cventry`/ảnh ngoài.
+   Verify: `templates.test.ts` + `api-templates.test.ts` + compile thật (PDF ~16KB) + eval
+   (deterministic 4/4; **real-AI 4/4 first-pass** — AI tránh đúng moderncv/`\cventry`/`\includegraphics`).
+   Label "CV / Sơ yếu lý lịch".
+
+> ✅ **PHASE 6 HOÀN TẤT (2026-07-17):** cả 7 template đã thêm (`report`, `chemistry`, `physics`,
+> `exam`, `engineering`, `letter`, `cv`) → **tổng 11 template** trong code (4 gốc + 7). Con số "11"
+> trong mô tả sản phẩm ban đầu (từng là lỗi tài liệu) nay là SỰ THẬT trong `TemplateId`. Mỗi template
+> đều: verify bằng unit + integration test, compile Tectonic THẬT ra PDF, và eval Promptfoo
+> (deterministic + real-AI). Kèm fix DRY xuyên suốt: `buildStructureHint` inject `packageAllowlist`
+> cho MỌI template (giảm repair loop). Các package mới đều đã audit an toàn Tectonic (mhchem/siunitx/
+> bm/exam.cls/circuitikz/letter.cls — không cần shell-escape).
 
 ### ⚪ Phase 5: CI/CD & DevOps (Platform Maturity)
 

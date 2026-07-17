@@ -1,0 +1,836 @@
+{
+  "evalId": "eval-23N-2026-07-16T09:56:05",
+  "results": {
+    "version": 3,
+    "timestamp": "2026-07-16T09:56:05.737Z",
+    "prompts": [
+      {
+        "id": "1e6bd1d5aab4bf787795c1f9955d1ac1cc90fa253cfff6883a3c44dd53037d25",
+        "raw": "{{description}}",
+        "label": "{{description}}",
+        "provider": "report-real-ai",
+        "metrics": {
+          "score": 4,
+          "testPassCount": 4,
+          "testFailCount": 0,
+          "testErrorCount": 0,
+          "assertPassCount": 21,
+          "assertFailCount": 0,
+          "totalLatencyMs": 501082,
+          "tokenUsage": {
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "total": 0,
+            "numRequests": 4,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            },
+            "assertions": {
+              "total": 0,
+              "prompt": 0,
+              "completion": 0,
+              "cached": 0,
+              "numRequests": 0,
+              "completionDetails": {
+                "reasoning": 0,
+                "acceptedPrediction": 0,
+                "rejectedPrediction": 0,
+                "cacheReadInputTokens": 0,
+                "cacheCreationInputTokens": 0
+              }
+            }
+          },
+          "namedScores": {},
+          "namedScoresCount": {},
+          "namedScoreWeights": {},
+          "cost": 0
+        }
+      }
+    ],
+    "results": [
+      {
+        "cost": 0,
+        "gradingResult": {
+          "pass": true,
+          "score": 1,
+          "reason": "All assertions passed",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0
+          },
+          "componentResults": [
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "regex",
+                "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{report\\}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\begin{document}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\end{document}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "validateLatex: OK — không có diagnostic.",
+              "assertion": {
+                "type": "javascript",
+                "value": "file://./scorers/validate-latex.ts"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\section"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "not-contains",
+                "value": "\\chapter"
+              }
+            }
+          ]
+        },
+        "id": "401085cf-f6fd-434c-8043-04de3b67222d",
+        "latencyMs": 67258,
+        "namedScores": {},
+        "prompt": {
+          "raw": "Viết báo cáo ngắn về kết quả khảo sát mức độ hài lòng của khách hàng quý 3.",
+          "label": "{{description}}",
+          "config": {}
+        },
+        "promptId": "1e6bd1d5aab4bf787795c1f9955d1ac1cc90fa253cfff6883a3c44dd53037d25",
+        "promptIdx": 0,
+        "provider": {
+          "id": "report-real-ai-provider",
+          "label": "report-real-ai"
+        },
+        "response": {
+          "output": "\\documentclass{report}\n\\usepackage{fontspec}\n\\usepackage[top=2.5cm, bottom=2.5cm, left=2.5cm, right=2.5cm]{geometry}\n\\usepackage{amsmath}\n\\usepackage{amssymb}\n\\usepackage{graphicx}\n\\usepackage{hyperref}\n\\usepackage{tikz}\n\\usepackage{pgfplots}\n\\pgfplotsset{compat=1.18}\n\\usepackage{xcolor}\n\\usepackage{enumitem}\n\\usepackage{booktabs}\n\\usepackage{tabularx}\n\\usepackage{multirow}\n\\usepackage{caption}\n\\usepackage{float}\n\\renewcommand{\\thesection}{\\arabic{section}}\n\n\\title{\\textbf{BÁO CÁO KẾT QUẢ KHẢO SÁT MỨC ĐỘ HÀI LÒNG CỦA KHÁCH HÀNG\\\\QUÝ 3 NĂM 2025}}\n\\author{Phòng Kinh doanh \\& Dịch vụ Khách hàng}\n\\date{Tháng 10 năm 2025}\n\n\\begin{document}\n\\maketitle\n\n\\begin{abstract}\nBáo cáo này trình bày kết quả khảo sát mức độ hài lòng của khách hàng trong quý~3/2025. Khảo sát được thực hiện trên 1~250 khách hàng đã sử dụng sản phẩm và dịch vụ của công ty. Điểm hài lòng trung bình đạt 4.2/5, cải thiện 0.3 điểm so với quý trước. Các yếu tố được đánh giá cao nhất là chất lượng sản phẩm và thời gian giao hàng; trong khi đó, dịch vụ sau bán hàng và giá cả vẫn cần cải thiện. Dựa trên kết quả phân tích, báo cáo đề xuất một số giải pháp nhằm nâng cao trải nghiệm khách hàng trong thời gian tới.\n\\end{abstract}\n\n\\section{Giới thiệu}\nTrong bối cảnh cạnh tranh ngày càng gay gắt, việc thấu hiểu và đáp ứng kỳ vọng của khách hàng là yếu tố sống còn đối với sự phát triển bền vững của doanh nghiệp. Chương trình khảo sát mức độ hài lòng của khách hàng được triển khai định kỳ hàng quý nhằm thu thập ý kiến phản hồi, đo lường hiệu quả hoạt động và xác định các điểm cần cải tiến.\n\nMục tiêu của báo cáo nhằm:\n\\begin{enumerate}[label=(\\arabic*)]\n    \\item Tổng hợp kết quả khảo sát quý~3/2025.\n    \\item Đánh giá xu hướng thay đổi so với quý~2/2025.\n    \\item Đề xuất các biện pháp cải thiện dựa trên dữ liệu thực tế.\n\\end{enumerate}\nPhạm vi báo cáo bao gồm toàn bộ khách hàng đã phát sinh giao dịch trong giai đoạn từ tháng~7 đến tháng~9/2025, thuộc ba kênh bán hàng chính: trực tuyến, cửa hàng vật lý và đại lý phân phối.\n\n\\subsection{Phương pháp khảo sát}\nKhảo sát được thiết kế dưới dạng bảng hỏi trực tuyến gồm 18 câu hỏi, chia thành 5 nhóm yếu tố chính: chất lượng sản phẩm, thời gian giao hàng, dịch vụ khách hàng, giá cả và dịch vụ sau bán hàng. Thang đo Likert 5 mức được sử dụng (1~=~Rất không hài lòng, 5~=~Rất hài lòng). Dữ liệu được thu thập qua email và ứng dụng di động, có xác thực mã giao dịch để đảm bảo tính chính xác.\n\nMẫu khảo sát gồm 1~250 khách hàng được lựa chọn ngẫu nhiên có phân tầng theo kênh mua hàng, với tỉ lệ phản hồi hợp lệ đạt 84\\% (1~050 phiếu). Các phân tích thống kê mô tả và so sánh được thực hiện trên phần mềm nội bộ, độ tin cậy của thang đo được kiểm định qua hệ số Cronbach's Alpha ($\\alpha > 0.8$ cho tất cả các nhóm yếu tố).\n\n\\section{Kết quả khảo sát}\n\\subsection{Điểm hài lòng tổng thể và theo yếu tố}\nĐiểm hài lòng trung bình toàn diện là 4.21/5, tăng 0.31 điểm so với quý~2/2025 (3.90). Bảng~\\ref{tab:tonghop} tổng hợp điểm trung bình và mức cải thiện cho từng yếu tố.\n\n\\begin{table}[H]\n\\centering\n\\caption{Điểm hài lòng trung bình theo yếu tố}\n\\label{tab:tonghop}\n\\begin{tabular}{lrrr}\n\\toprule\n\\textbf{Yếu tố} & \\textbf{Điểm TB Q2} & \\textbf{Điểm TB Q3} & \\textbf{Thay đổi} \\\\\n\\midrule\nChất lượng sản phẩm       & 4.12 & 4.48 & +0.36 \\\\\nThời gian giao hàng       & 3.85 & 4.35 & +0.50 \\\\\nDịch vụ khách hàng        & 3.95 & 4.18 & +0.23 \\\\\nGiá cả                    & 3.72 & 3.85 & +0.13 \\\\\nDịch vụ sau bán hàng      & 3.80 & 3.95 & +0.15 \\\\\n\\bottomrule\n\\end{tabular}\n\\vspace{0.2cm}\n\\par\\small\\textit{Thang điểm từ 1 đến 5; số mẫu $n = 1\\,050$.}\n\\end{table}\n\nNhận xét: Hai yếu tố có mức cải thiện mạnh nhất là thời gian giao hàng (tăng 0.50 điểm) và chất lượng sản phẩm (tăng 0.36 điểm), cho thấy những nỗ lực vận hành và kiểm soát chất lượng đã đem lại hiệu quả rõ rệt. Dịch vụ khách hàng duy trì đà tăng ổn định, trong khi giá cả và dịch vụ sau bán hàng vẫn ở mức thấp hơn, cần tiếp tục chú trọng.\n\n\\subsection{Phân bố mức độ hài lòng}\nHình~\\ref{fig:phanbo} minh họa phân bố điểm hài lòng chung của khách hàng. Tỉ lệ khách hàng đánh giá “Hài lòng” và “Rất hài lòng” (4--5 điểm) chiếm 78\\%, tăng 11\\% so với quý trước; tỉ lệ khách hàng không hài lòng (1--2 điểm) chỉ còn 4\\%.\n\n\\begin{figure}[H]\n\\centering\n\\begin{tikzpicture}\n\\begin{axis}[\n    ybar,\n    ymin=0, ymax=45,\n    xlabel={Mức hài lòng},\n    ylabel={Tỉ lệ (\\%)},\n    xtick=data,\n    symbolic x coords={Rất không HL, Không HL, Bình thường, Hài lòng, Rất hài lòng},\n    xticklabel style={text width=2cm, align=center, font=\\scriptsize},\n    bar width=15pt,\n    nodes near coords,\n    nodes near coords align={vertical},\n    nodes near coords style={font=\\footnotesize},\n    enlarge x limits=0.2,\n    title={Phân bố mức độ hài lòng chung -- Quý 3/2025}\n]\n\\addplot[fill=blue!40] coordinates {(Rất không HL,2) (Không HL,3) (Bình thường,17) (Hài lòng,48) (Rất hài lòng,30)};\n\\addplot[fill=orange!40] coordinates {(Rất không HL,3) (Không HL,5) (Bình thường,25) (Hài lòng,42) (Rất hài lòng,25)};\n\\legend{Q3/2025, Q2/2025}\n\\end{axis}\n\\end{tikzpicture}\n\\caption{So sánh phân bố mức độ hài lòng giữa quý~2 và quý~3/2025}\n\\label{fig:phanbo}\n\\end{figure}\n\n\\subsection{Kết quả theo kênh bán hàng}\nBảng~\\ref{tab:kenh} cho thấy sự khác biệt rõ rệt giữa các kênh: kênh trực tuyến đạt điểm hài lòng cao nhất (4.45), tiếp theo là cửa hàng vật lý (4.10), trong khi đại lý phân phối thấp nhất (3.88). Nguyên nhân chính đến từ khâu tư vấn và hỗ trợ sau mua chưa đồng đều tại các đại lý.\n\n\\begin{table}[H]\n\\centering\n\\caption{Điểm hài lòng tổng thể theo kênh bán hàng}\n\\label{tab:kenh}\n\\begin{tabular}{lrr}\n\\toprule\n\\textbf{Kênh bán hàng} & \\textbf{Điểm trung bình} & \\textbf{Số phiếu} \\\\\n\\midrule\nTrực tuyến        & 4.45 & 420 \\\\\nCửa hàng vật lý   & 4.10 & 380 \\\\\nĐại lý phân phối  & 3.88 & 250 \\\\\n\\bottomrule\n\\end{tabular}\n\\end{table}\n\n\\section{Phân tích và thảo luận}\n\\subsection{Sự cải thiện về thời gian giao hàng}\nKết quả cho thấy thời gian giao hàng tăng 0.50 điểm, vượt mục tiêu đặt ra đầu quý (0.30 điểm). Điều này phản ánh tác động tích cực của hệ thống quản lý kho mới và việc ký hợp đồng với đơn vị vận chuyển thứ hai. Phân tích sâu hơn cho thấy tỉ lệ đơn hàng giao đúng hẹn đạt 92\\%, tăng từ 84\\% của quý~2.\n\nTuy nhiên, một số phàn nàn về đóng gói vẫn tồn tại; khoảng 6\\% khách hàng phản ánh hàng hóa bị móp méo nhẹ. Đây là điểm cần được đội vận hành xem xét trong thiết kế bao bì sắp tới.\n\n\\subsection{Dịch vụ sau bán hàng -- điểm nghẽn cần gỡ}\nDịch vụ sau bán hàng đạt 3.95/5, thấp nhất trong các yếu tố. Các khiếu nại phổ biến liên quan đến thời gian phản hồi yêu cầu bảo hành (trung bình 3.2 ngày) và sự thiếu nhất quán trong quy trình đổi trả. Đánh giá dạng mở cũng cho thấy khách hàng mong muốn có kênh chat trực tuyến thời gian thực thay vì chỉ email. Đây là cơ hội để triển khai chatbot hoặc tổng đài hỗ trợ 24/7.\n\n\\subsection{Hàm ý về giá cả}\nMặc dù điểm giá cả chỉ tăng nhẹ, các phân tích nhóm cho thấy khách hàng tại kênh đại lý đặc biệt nhạy cảm với giá; họ so sánh trực tiếp với sản phẩm cạnh tranh. Cần xem xét các chương trình khuyến mãi có mục tiêu và chính sách giá linh hoạt theo khu vực để cải thiện chỉ số này.\n\n\\section{Kết luận và kiến nghị}\nKhảo sát quý~3/2025 ghi nhận sự hài lòng của khách hàng ở mức cao (4.21/5) với các cải thiện đáng kể ở chất lượng sản phẩm và giao hàng. Tuy nhiên, dịch vụ sau bán hàng và giá cả vẫn là những yếu tố then chốt cần đầu tư cải thiện.\n\nCác kiến nghị cụ thể:\n\\begin{enumerate}[label=\\textbf{\\arabic*.}]\n    \\item \\textbf{Nâng cấp dịch vụ sau bán hàng:} Triển khai quy trình đổi trả tự động, đặt mục tiêu rút ngắn thời gian phản hồi bảo hành xuống dưới 24 giờ. Thí điểm kênh hỗ trợ trực tuyến (live chat) tại thị trường trọng điểm.\n    \\item \\textbf{Tối ưu giá cả và khuyến mãi:} Phân tích độ co giãn giá theo từng khu vực để thiết kế chính sách giá phù hợp; tăng cường các gói combo ưu đãi cho khách hàng mua lặp lại.\n    \\item \\textbf{Chuẩn hóa trải nghiệm tại đại lý:} Tổ chức đào tạo định kỳ về kỹ năng tư vấn và chăm sóc khách hàng cho nhân viên đại lý, đồng thời gắn điểm thưởng với chỉ số hài lòng.\n    \\item \\textbf{Duy trì đà cải tiến:} Tiếp tục đầu tư vào hệ thống logistics và kiểm soát chất lượng, coi đây là lợi thế cạnh tranh cốt lõi.\n\\end{enumerate}\n\nKhảo sát quý~4 dự kiến sẽ bổ sung thêm chỉ số đo lường mức độ trung thành (NPS) để có cái nhìn toàn diện hơn về hành vi và thái độ của khách hàng.\n\n\\begin{thebibliography}{99}\n\\bibitem{noibo1} Phòng Kinh doanh, \\textit{Báo cáo kết quả khảo sát hài lòng khách hàng quý~2/2025}, Tài liệu nội bộ, tháng~7/2025.\n\\bibitem{noibo2} Phòng Vận hành, \\textit{Kế hoạch cải tiến logistics và đóng gói -- giai đoạn 3}, Tài liệu nội bộ, tháng~9/2025.\n\\bibitem{mkt} Nhóm Marketing, \\textit{Phân tích hành vi khách hàng theo kênh}, Báo cáo thường niên 2025.\n\\end{thebibliography}\n\n\\end{document}\n",
+          "metadata": {
+            "finishReason": "stop",
+            "rawFinishReason": "end_turn",
+            "usage": {
+              "inputTokens": 1366,
+              "outputTokens": 4978,
+              "totalTokens": 6344
+            }
+          }
+        },
+        "score": 1,
+        "success": true,
+        "testCase": {
+          "description": "basic-report — báo cáo ngắn: phải dùng \\section, KHÔNG \\chapter",
+          "vars": {
+            "templateId": "report",
+            "description": "Viết báo cáo ngắn về kết quả khảo sát mức độ hài lòng của khách hàng quý 3."
+          },
+          "assert": [
+            {
+              "type": "regex",
+              "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{report\\}"
+            },
+            {
+              "type": "contains",
+              "value": "\\begin{document}"
+            },
+            {
+              "type": "contains",
+              "value": "\\end{document}"
+            },
+            {
+              "type": "javascript",
+              "value": "file://./scorers/validate-latex.ts"
+            },
+            {
+              "type": "contains",
+              "value": "\\section"
+            },
+            {
+              "type": "not-contains",
+              "value": "\\chapter"
+            }
+          ],
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 0,
+        "tokenUsage": {
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "total": 0,
+          "numRequests": 1,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          },
+          "assertions": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          }
+        },
+        "vars": {
+          "templateId": "report",
+          "description": "Viết báo cáo ngắn về kết quả khảo sát mức độ hài lòng của khách hàng quý 3."
+        },
+        "metadata": {
+          "finishReason": "stop",
+          "rawFinishReason": "end_turn",
+          "usage": {
+            "inputTokens": 1366,
+            "outputTokens": 4978,
+            "totalTokens": 6344
+          },
+          "_promptfooFileMetadata": {}
+        },
+        "failureReason": 0
+      },
+      {
+        "cost": 0,
+        "gradingResult": {
+          "pass": true,
+          "score": 1,
+          "reason": "All assertions passed",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0
+          },
+          "componentResults": [
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "regex",
+                "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{report\\}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\begin{document}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\end{document}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "validateLatex: OK — không có diagnostic.",
+              "assertion": {
+                "type": "javascript",
+                "value": "file://./scorers/validate-latex.ts"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "not-contains",
+                "value": "\\chapter"
+              }
+            }
+          ]
+        },
+        "id": "c9e9eaf0-70d9-43d2-a31e-f417e895a628",
+        "latencyMs": 109375,
+        "namedScores": {},
+        "prompt": {
+          "raw": "Báo cáo kỹ thuật đánh giá hiệu năng hệ thống, kèm bảng số liệu benchmark.",
+          "label": "{{description}}",
+          "config": {}
+        },
+        "promptId": "1e6bd1d5aab4bf787795c1f9955d1ac1cc90fa253cfff6883a3c44dd53037d25",
+        "promptIdx": 0,
+        "provider": {
+          "id": "report-real-ai-provider",
+          "label": "report-real-ai"
+        },
+        "response": {
+          "output": "\\documentclass[12pt,a4paper]{report}\n\\usepackage[top=2.5cm, bottom=2.5cm, left=3cm, right=2.5cm]{geometry}\n\\usepackage{amsmath,amssymb}\n\\usepackage{graphicx}\n\\usepackage{hyperref}\n\\usepackage{tikz,pgfplots}\n\\pgfplotsset{compat=1.18}\n\\usepackage{xcolor}\n\\usepackage{listings}\n\\usepackage{enumitem}\n\\usepackage{booktabs,array,longtable,tabularx,multirow}\n\\usepackage{caption,subcaption}\n\\usepackage{float}\n\n\\renewcommand{\\thesection}{\\arabic{section}}\n\n\\title{\\textbf{BÁO CÁO KỸ THUẬT} \\\\ Đánh Giá Hiệu Năng Hệ Thống Xử Lý Giao Dịch}\n\\author{Phòng Kỹ thuật Hạ tầng \\\\ Công ty TNHH Giải pháp Công nghệ}\n\\date{\\today}\n\n\\begin{document}\n\n\\maketitle\n\n\\begin{abstract}\nBáo cáo này trình bày kết quả đánh giá hiệu năng của hệ thống xử lý giao dịch tập trung phiên bản 3.2. Mục tiêu chính là xác định khả năng đáp ứng của nền tảng dưới các mức tải khác nhau, đo lường thời gian phản hồi, thông lượng và mức sử dụng tài nguyên. Ba cấu hình phần cứng được thử nghiệm với các kịch bản tải tăng dần từ 1.000 đến 100.000 yêu cầu đồng thời. Các công cụ giám sát chuẩn được sử dụng nhằm đảm bảo tính khách quan và lặp lại của kết quả. Dữ liệu thu thập cho thấy cấu hình 16 nhân/32~GB RAM vượt trội về thông lượng và duy trì thời gian phản hồi ổn định nhất, trong khi cấu hình 4 nhân/8~GB RAM bắt đầu suy giảm đáng kể trên 50.000 yêu cầu. Báo cáo đưa ra các khuyến nghị cụ thể về việc lựa chọn hạ tầng và tối ưu cấu hình nhằm đảm bảo chất lượng dịch vụ.\n\\end{abstract}\n\n\\section{Mở đầu}\n\\label{sec:intro}\n\nHệ thống xử lý giao dịch là thành phần trung tâm của nhiều ứng dụng doanh nghiệp hiện đại, yêu cầu tính sẵn sàng cao và thời gian phản hồi thấp. Trước khi đưa phiên bản 3.2 vào vận hành chính thức, nhóm kỹ thuật tiến hành một đợt kiểm thử hiệu năng toàn diện nhằm xác lập đường cơ sở (baseline) và phát hiện sớm các điểm nghẽn tiềm ẩn. Báo cáo này mô tả chi tiết phương pháp, môi trường thử nghiệm, kết quả benchmark cùng các phân tích và khuyến nghị.\n\nPhạm vi đánh giá tập trung vào ba chỉ số hiệu năng chính: thời gian phản hồi trung bình (Response Time -- RT), thông lượng (Throughput -- số giao dịch trên giây), và mức sử dụng tài nguyên máy chủ (CPU, RAM). Các thử nghiệm được lặp lại trên ba cấu hình phần cứng để đánh giá ảnh hưởng của năng lực tính toán đến hiệu năng tổng thể. Toàn bộ dữ liệu được thu thập tự động và lưu trữ dưới dạng chuỗi thời gian, phục vụ cho phân tích sau kiểm thử.\n\nNgoài các chỉ số định lượng, nhóm còn ghi nhận các hành vi hệ thống như tỉ lệ lỗi, hiện tượng quá tải hàng đợi, và thời gian khởi động dịch vụ sau khi khởi tạo lại. Những quan sát này giúp bổ sung cho bức tranh toàn cảnh về chất lượng vận hành của nền tảng.\n\n\\section{Phương pháp đánh giá}\n\\label{sec:method}\n\n\\subsection{Mô hình hệ thống}\nHệ thống được triển khai dưới dạng cụm máy chủ đồng nhất, mỗi máy cài đặt hệ điều hành Linux (kernel 5.15), cơ sở dữ liệu PostgreSQL 15 và máy chủ ứng dụng viết bằng Java 17 trên nền Spring Boot 3.1. Kiến trúc xử lý theo mô hình RESTful, các giao dịch được mã hóa JSON và không lưu trạng thái. Bộ cân bằng tải Nginx phân phối yêu cầu tới các nút theo thuật toán round‑robin. Ba cấu hình kiểm thử được thiết lập như Bảng~\\ref{tab:config}.\n\n\\begin{table}[H]\n\\centering\n\\caption{Cấu hình phần cứng dùng trong benchmark}\n\\label{tab:config}\n\\begin{tabular}{@{}llll@{}}\n\\toprule\n\\textbf{Tham số} & \\textbf{Cấu hình A} & \\textbf{Cấu hình B} & \\textbf{Cấu hình C} \\\\ \n\\midrule\nCPU (nhân/luồng)   & 4 / 4        & 8 / 16       & 16 / 32      \\\\\nTần số tối đa (GHz) & 3.2          & 3.6          & 3.8          \\\\\nRAM (GB)           & 8            & 16           & 32           \\\\\nỔ đĩa (SSD NVMe)   & 256 GB       & 512 GB       & 1 TB         \\\\\nHệ điều hành        & Ubuntu 22.04 & Ubuntu 22.04 & Ubuntu 22.04 \\\\\n\\bottomrule\n\\end{tabular}\n\\end{table}\n\n\\subsection{Công cụ đo lường}\n\\label{sec:tools}\nĐể đảm bảo tính tái lập, toàn bộ quá trình sinh tải và thu thập số liệu được thực hiện thông qua bộ công cụ chuyên dụng:\n\\begin{itemize}[nosep]\n    \\item \\textbf{Apache JMeter 5.6}: phát sinh tải HTTP, cấu hình theo kịch bản bước sóng (step‑wise) tăng dần.\n    \\item \\textbf{Prometheus 2.48 + Grafana 10.2}: giám sát tài nguyên máy chủ, thu thập các chỉ số CPU, RAM, I/O.\n    \\item \\textbf{Custom Logger}: module ghi nhận chi tiết từng giao dịch, bao gồm thời gian xử lí nghiệp vụ, độ trễ mạng nội bộ và mã phản hồi.\n\\end{itemize}\n\n\\subsection{Kịch bản kiểm thử}\nHai kịch bản chính được xây dựng:\n\\begin{enumerate}[label=\\textbf{KBS\\arabic*}, leftmargin=*]\n    \\item \\textbf{Tải tĩnh}: số lượng người dùng đồng thời cố định (100, 500, 1000) trong 10 phút, dùng để xác lập baseline.\n    \\item \\textbf{Tải động}: số người dùng tăng từ 100 lên 1000 với bước nhảy 100 mỗi 2 phút, phản ánh điều kiện thực tế trong giờ cao điểm.\n\\end{enumerate}\nMỗi kịch bản được chạy ba lần, kết quả lấy giá trị trung vị để loại nhiễu.\n\n\\section{Kết quả thử nghiệm}\n\\label{sec:results}\n\n\\subsection{Dữ liệu đầu vào}\nCác thử nghiệm sử dụng tập dữ liệu giao dịch mô phỏng có cấu trúc: mỗi giao dịch bao gồm 6 trường (ID khách hàng, số tiền, mã sản phẩm, thời gian, loại giao dịch, mã chi nhánh) và khối lượng dữ liệu khoảng 1.2~KB. Phân phối loại giao dịch tuân theo quy luật 70--20--10 (70\\% tra cứu, 20\\% cập nhật, 10\\% tạo mới). Tải được sinh từ máy trạm riêng biệt kết nối mạng LAN 1~Gbps, đảm bảo tắc nghẽn mạng không ảnh hưởng tới phép đo.\n\n\\subsection{Kết quả chi tiết}\n\nBảng~\\ref{tab:latency} thể hiện thời gian phản hồi trung bình và độ lệch chuẩn của ba cấu hình ứng với các mức tải khác nhau.\n\n\\begin{table}[H]\n\\centering\n\\caption{Thời gian phản hồi trung bình (ms) $\\pm$ độ lệch chuẩn}\n\\label{tab:latency}\n\\begin{tabular}{@{}lccc@{}}\n\\toprule\n\\textbf{Số yêu cầu đồng thời} & \\textbf{Cấu hình A}  & \\textbf{Cấu hình B} & \\textbf{Cấu hình C} \\\\ \n\\midrule\n1.000   & 12.3 $\\pm$ 1.1  & 11.8 $\\pm$ 0.9  & 11.2 $\\pm$ 0.7  \\\\\n10.000  & 38.7 $\\pm$ 4.5  & 29.4 $\\pm$ 2.8  & 22.6 $\\pm$ 1.9  \\\\\n50.000  & 152.4 $\\pm$ 22.1 & 87.3 $\\pm$ 7.6  & 51.8 $\\pm$ 4.1  \\\\\n100.000 & 510.2 $\\pm$ 68.5 & 245.6 $\\pm$ 19.3 & 112.7 $\\pm$ 8.9  \\\\\n\\bottomrule\n\\end{tabular}\n\\end{table}\n\nThông lượng và tỉ lệ lỗi được tổng hợp trong Bảng~\\ref{tab:throughput}.\n\n\\begin{table}[H]\n\\centering\n\\caption{Thông lượng (req/giây) và tỉ lệ lỗi (\\%)}\n\\label{tab:throughput}\n\\begin{tabular}{@{}lcccccc@{}}\n\\toprule\n\\multirow{2}{*}{\\textbf{Số yêu cầu}} & \\multicolumn{2}{c}{\\textbf{Cấu hình A}} & \\multicolumn{2}{c}{\\textbf{Cấu hình B}} & \\multicolumn{2}{c}{\\textbf{Cấu hình C}} \\\\\n\\cmidrule(lr){2-3} \\cmidrule(lr){4-5} \\cmidrule(lr){6-7}\n & Thông lượng & Lỗi & Thông lượng & Lỗi & Thông lượng & Lỗi \\\\ \n\\midrule\n1.000  & 82  & 0.0 & 85  & 0.0 & 89  & 0.0 \\\\\n10.000 & 253 & 0.2 & 339 & 0.0 & 442 & 0.0 \\\\\n50.000 & 328 & 4.7 & 572 & 1.1 & 965 & 0.3 \\\\\n100.000& 196 & 18.9& 408 & 7.4 & 882 & 1.8 \\\\\n\\bottomrule\n\\end{tabular}\n\\end{table}\n\nMức sử dụng tài nguyên trung bình trong khoảng thời gian chịu tải đỉnh được ghi nhận ở Bảng~\\ref{tab:resource}.\n\n\\begin{table}[H]\n\\centering\n\\caption{Sử dụng tài nguyên trung bình tại tải 100.000 yêu cầu}\n\\label{tab:resource}\n\\begin{tabular}{@{}lccc@{}}\n\\toprule\n\\textbf{Chỉ số}        & \\textbf{Cấu hình A} & \\textbf{Cấu hình B} & \\textbf{Cấu hình C} \\\\ \n\\midrule\nCPU (\\%)               & 98.2                & 76.5                & 52.3                \\\\\nRAM đã cấp phát (GB)   & 7.4                 & 12.1                & 18.9                \\\\\nI/O chờ trung bình (ms) & 45.2                & 12.8                & 4.1                 \\\\\n\\bottomrule\n\\end{tabular}\n\\end{table}\n\n\\subsection{Biểu diễn trực quan}\nHình~\\ref{fig:latency_curve} minh họa đường cong thời gian phản hồi trung bình của ba cấu hình khi tải tăng dần, cho thấy cấu hình C duy trì độ dốc thấp nhất, thể hiện khả năng mở rộng tốt.\n\n\\begin{figure}[H]\n    \\centering\n    \\begin{tikzpicture}\n        \\begin{axis}[\n            width=0.85\\textwidth,\n            height=7cm,\n            xlabel={Số yêu cầu đồng thời},\n            ylabel={Thời gian phản hồi (ms)},\n            legend style={at={(0.02,0.98)}, anchor=north west, cells={anchor=west}},\n            grid=major,\n            xtick={1000,10000,50000,100000},\n            xticklabels={1K, 10K, 50K, 100K},\n            ymin=0, ymax=550\n        ]\n        \\addplot[color=red, mark=square*, thick] coordinates {\n            (1000,12.3) (10000,38.7) (50000,152.4) (100000,510.2)\n        };\n        \\addplot[color=blue, mark=triangle*, thick] coordinates {\n            (1000,11.8) (10000,29.4) (50000,87.3) (100000,245.6)\n        };\n        \\addplot[color=green!60!black, mark=*, thick] coordinates {\n            (1000,11.2) (10000,22.6) (50000,51.8) (100000,112.7)\n        };\n        \\legend{Cấu hình A, Cấu hình B, Cấu hình C}\n        \\end{axis}\n    \\end{tikzpicture}\n    \\caption{Đường cong thời gian phản hồi trung bình theo tải}\n    \\label{fig:latency_curve}\n\\end{figure}\n\nXu hướng suy giảm thông lượng của cấu hình A khi vượt qua ngưỡng 50.000 yêu cầu được thể hiện rõ trong Hình~\\ref{fig:throughput}, phản ánh hiện tượng bão hòa CPU.\n\n\\begin{figure}[H]\n    \\centering\n    \\begin{tikzpicture}\n        \\begin{axis}[\n            width=0.85\\textwidth,\n            height=7cm,\n            xlabel={Số yêu cầu đồng thời},\n            ylabel={Thông lượng (req/s)},\n            legend style={at={(0.02,0.02)}, anchor=south west, cells={anchor=west}},\n            grid=major,\n            xtick={1000,10000,50000,100000},\n            xticklabels={1K, 10K, 50K, 100K}\n        ]\n        \\addplot[color=red, mark=square*, thick] coordinates {\n            (1000,82) (10000,253) (50000,328) (100000,196)\n        };\n        \\addplot[color=blue, mark=triangle*, thick] coordinates {\n            (1000,85) (10000,339) (50000,572) (100000,408)\n        };\n        \\addplot[color=green!60!black, mark=*, thick] coordinates {\n            (1000,89) (10000,442) (50000,965) (100000,882)\n        };\n        \\legend{Cấu hình A, Cấu hình B, Cấu hình C}\n        \\end{axis}\n    \\end{tikzpicture}\n    \\caption{Thông lượng của các cấu hình dưới tải tăng dần}\n    \\label{fig:throughput}\n\\end{figure}\n\n\\section{Phân tích kết quả}\n\\label{sec:analysis}\n\nDữ liệu cho thấy mối tương quan rõ rệt giữa năng lực phần cứng và chất lượng dịch vụ. Cấu hình C, với 16 nhân vật lý và 32~GB RAM, không chỉ đạt thông lượng cao nhất mà còn duy trì được độ ổn định vượt trội: ngay ở mức 100.000 yêu cầu đồng thời, thời gian phản hồi chỉ hơn 112~ms, thấp hơn gần 5 lần so với cấu hình A. Quan sát Bảng~\\ref{tab:resource}, cấu hình C chỉ sử dụng 52\\% CPU, cho thấy vẫn còn dư địa để chịu tải lớn hơn hoặc xử lý các tác vụ nền phát sinh.\n\nTrái lại, cấu hình A bộc lộ điểm nghẽn rõ rệt tại mốc 50.000 yêu cầu: tỉ lệ lỗi tăng vọt lên 4.7\\% trong khi thông lượng bắt đầu suy giảm (từ 328~req/s xuống 196~req/s ở 100.000 yêu cầu). Nguyên nhân chính là hiện tượng tranh chấp CPU và thiếu hụt bộ nhớ đệm: mức sử dụng CPU luôn duy trì trên 98\\%, số tác vụ chờ I/O lên tới 45.2~ms, gây nên hiệu ứng thắt cổ chai điển hình.\n\nCấu hình B cho kết quả trung gian, phù hợp với nhiều kịch bản có tải thấp hơn 50.000 yêu cầu. Dù vậy, ở 100.000 yêu cầu, thông lượng giảm 29\\% so với đỉnh, trong khi tỉ lệ lỗi là 7.4\\% --- cao hơn cấu hình C nhưng vẫn có thể chấp nhận được nếu kết hợp cơ chế thử lại (retry) ở tầng ứng dụng.\n\nPhân tích hồi quy cho thấy thời gian phản hồi của cấu hình C chỉ tăng tuyến tính ($R^2 = 0.998$) với độ dốc thấp, trong khi cấu hình A và B thể hiện xu hướng phi tuyến khi vượt ngưỡng bão hòa, phù hợp với lý thuyết hàng đợi M/M/c. Điều này khẳng định rằng đầu tư vào nhiều nhân CPU và bộ nhớ lớn hơn là chiến lược tối ưu để bảo đảm mở rộng theo chiều ngang của ứng dụng.\n\n\\section{Kết luận và khuyến nghị}\n\\label{sec:conclusion}\n\nQua đợt đánh giá hiệu năng, nhóm kỹ thuật rút ra một số kết luận chính:\n\\begin{itemize}\n    \\item Hệ thống xử lý giao dịch phiên bản 3.2 hoạt động ổn định và đáp ứng tốt yêu cầu thực tế, miễn là lựa chọn cấu hình phần cứng tương xứng với tải dự kiến.\n    \\item Cấu hình C (16 nhân/32~GB RAM) cho thấy hiệu năng vượt trội, khuyến nghị sử dụng cho môi trường sản xuất có lưu lượng từ 10.000 yêu cầu đồng thời trở lên.\n    \\item Cấu hình A chỉ phù hợp làm môi trường phát triển hoặc kiểm thử nội bộ, không nên đưa vào vận hành thực tế khi tải có thể vượt 10.000 yêu cầu.\n    \\item Các kết quả benchmark cũng gợi ý một số hướng tối ưu tiếp theo: áp dụng kết nối cơ sở dữ liệu pooling, tinh chỉnh tham số JVM, và triển khai cơ chế caching ở tầng ứng dụng nhằm giảm áp lực I/O.\n\\end{itemize}\n\nNhóm đề xuất triển khai cấu hình C cho cụm máy chủ chính, đồng thời thiết lập ngưỡng cảnh báo tự động dựa trên các chỉ số thu thập được (CPU $\\ge$ 80\\%, tỉ lệ lỗi $\\ge$ 1\\%) để có biện pháp can thiệp kịp thời. Các đợt đánh giá tương tự nên được lặp lại định kỳ mỗi khi có thay đổi kiến trúc hoặc nâng cấp phiên bản phần mềm nhằm duy trì đường cơ sở hiệu năng đáng tin cậy.\n\n\\begin{thebibliography}{99}\n\\bibitem{jain} R. Jain, \\textit{The Art of Computer Systems Performance Analysis}, John Wiley \\& Sons, 1991.\n\\bibitem{spring} Spring Boot Documentation, \\textit{Performance Tuning}, truy cập tháng 3/2025.\n\\bibitem{pg} PostgreSQL Global Development Group, \\textit{Server Configuration}, tài liệu phiên bản 15.\n\\bibitem{jmeter} Apache JMeter, \\textit{User's Manual}, Apache Software Foundation, 2023.\n\\end{thebibliography}\n\n\\end{document}\n",
+          "metadata": {
+            "finishReason": "stop",
+            "rawFinishReason": "end_turn",
+            "usage": {
+              "inputTokens": 1361,
+              "outputTokens": 7984,
+              "totalTokens": 9345
+            }
+          }
+        },
+        "score": 1,
+        "success": true,
+        "testCase": {
+          "description": "technical-report — báo cáo kỹ thuật kèm bảng số liệu",
+          "vars": {
+            "templateId": "report",
+            "description": "Báo cáo kỹ thuật đánh giá hiệu năng hệ thống, kèm bảng số liệu benchmark."
+          },
+          "assert": [
+            {
+              "type": "regex",
+              "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{report\\}"
+            },
+            {
+              "type": "contains",
+              "value": "\\begin{document}"
+            },
+            {
+              "type": "contains",
+              "value": "\\end{document}"
+            },
+            {
+              "type": "javascript",
+              "value": "file://./scorers/validate-latex.ts"
+            },
+            {
+              "type": "not-contains",
+              "value": "\\chapter"
+            }
+          ],
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 1,
+        "tokenUsage": {
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "total": 0,
+          "numRequests": 1,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          },
+          "assertions": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          }
+        },
+        "vars": {
+          "templateId": "report",
+          "description": "Báo cáo kỹ thuật đánh giá hiệu năng hệ thống, kèm bảng số liệu benchmark."
+        },
+        "metadata": {
+          "finishReason": "stop",
+          "rawFinishReason": "end_turn",
+          "usage": {
+            "inputTokens": 1361,
+            "outputTokens": 7984,
+            "totalTokens": 9345
+          },
+          "_promptfooFileMetadata": {}
+        },
+        "failureReason": 0
+      },
+      {
+        "cost": 0,
+        "gradingResult": {
+          "pass": true,
+          "score": 1,
+          "reason": "All assertions passed",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0
+          },
+          "componentResults": [
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "regex",
+                "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{report\\}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\begin{document}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\end{document}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "validateLatex: OK — không có diagnostic.",
+              "assertion": {
+                "type": "javascript",
+                "value": "file://./scorers/validate-latex.ts"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "not-contains",
+                "value": "\\chapter"
+              }
+            }
+          ]
+        },
+        "id": "526de9b3-a7eb-4426-94f9-46481286aa58",
+        "latencyMs": 87226,
+        "namedScores": {},
+        "prompt": {
+          "raw": "Báo cáo tổng kết dự án phần mềm gồm mục tiêu, tiến độ, rủi ro và kiến nghị.",
+          "label": "{{description}}",
+          "config": {}
+        },
+        "promptId": "1e6bd1d5aab4bf787795c1f9955d1ac1cc90fa253cfff6883a3c44dd53037d25",
+        "promptIdx": 0,
+        "provider": {
+          "id": "report-real-ai-provider",
+          "label": "report-real-ai"
+        },
+        "response": {
+          "output": "\\documentclass{report}\n\\usepackage{geometry}\n\\geometry{a4paper, margin=2.5cm}\n\\usepackage{fontspec}\n\\usepackage{amsmath,amssymb}\n\\usepackage{graphicx}\n\\usepackage{hyperref}\n\\usepackage{tikz}\n\\usepackage{pgfplots}\n\\pgfplotsset{compat=1.18}\n\\usepackage{xcolor}\n\\usepackage{listings}\n\\lstset{\n  basicstyle=\\ttfamily\\small,\n  frame=single,\n  language=SQL,\n  showstringspaces=false,\n  columns=flexible,\n  captionpos=b\n}\n\\usepackage{enumitem}\n\\usepackage{booktabs,array,longtable,tabularx,multirow}\n\\usepackage{caption,subcaption}\n\\usepackage{float}\n\n% Cấu hình font tiếng Việt (Latin Modern mặc định hỗ trợ Unicode)\n% Đánh số mục ở dạng 1,2,3 (thay vì chương)\n\\renewcommand{\\thesection}{\\arabic{section}}\n\n% Metadata\n\\title{Báo cáo Tổng kết Dự án Phần mềm\\\\Hệ thống Quản lý Bán hàng Trực tuyến \\textit{SmartShop}}\n\\author{Ban Quản lý Dự án}\n\\date{\\today}\n\n\\begin{document}\n\\maketitle\n\n\\begin{abstract}\nBáo cáo này tổng kết toàn bộ quá trình triển khai dự án phần mềm \\textbf{SmartShop} --- hệ thống quản lý bán hàng trực tuyến dành cho các cửa hàng vừa và nhỏ. Nội dung tập trung vào bốn trụ cột chính: mục tiêu dự án, tiến độ thực hiện, quản lý rủi ro và các kiến nghị cho những giai đoạn tiếp theo. Dự án đã hoàn thành các chức năng cốt lõi, bàn giao đúng hạn và nhận được phản hồi tích cực từ nhóm người dùng thử nghiệm. Tuy nhiên, một số vấn đề về hiệu năng và bảo mật cần được ưu tiên khắc phục trong phiên bản nâng cấp sắp tới. Báo cáo cũng rút ra bài học kinh nghiệm về quy trình phát triển Agile và đề xuất các giải pháp kỹ thuật – quản lý nhằm tối ưu hóa sản phẩm.\n\\end{abstract}\n\n\\section{Giới thiệu}\n\\subsection{Bối cảnh và mục đích}\nHệ thống quản lý bán hàng trực tuyến \\textbf{SmartShop} được khởi xướng nhằm giải quyết bài toán số hóa quy trình bán lẻ cho các cửa hàng quy mô vừa và nhỏ tại thị trường nội địa. Trong bối cảnh thương mại điện tử phát triển mạnh, nhiều chủ cửa hàng gặp khó khăn trong việc quản lý tồn kho, đơn hàng, khách hàng và tài chính một cách đồng bộ. Phần mềm SmartShop hướng tới cung cấp một nền tảng web đơn giản, dễ sử dụng, chi phí thấp nhưng đáp ứng đầy đủ các nghiệp vụ cơ bản.\n\nMục đích của báo cáo tổng kết là cung cấp cái nhìn toàn cảnh về những gì dự án đã đạt được, so sánh với kế hoạch ban đầu, phân tích các rủi ro phát sinh và đưa ra những kiến nghị có giá trị cho các bên liên quan, bao gồm nhà đầu tư, đội ngũ phát triển và khách hàng.\n\n\\subsection{Phạm vi báo cáo}\nBáo cáo bao quát toàn bộ vòng đời dự án kể từ khi phê duyệt ý tưởng (tháng 4/2024) đến khi bàn giao phiên bản 1.0 (tháng 11/2024). Các nội dung chính gồm:\n\\begin{itemize}[nosep]\n    \\item Mục tiêu chiến lược và chức năng của sản phẩm.\n    \\item Tiến độ theo từng giai đoạn (Sprint) và kết quả đạt được.\n    \\item Nhận diện và biện pháp xử lý các rủi ro kỹ thuật, nhân sự và thị trường.\n    \\item Đề xuất cải tiến, lộ trình bảo trì và phát triển phiên bản tiếp theo.\n\\end{itemize}\n\n\\section{Mục tiêu dự án}\n\\subsection{Mục tiêu tổng thể}\nDự án SmartShop được triển khai với ba mục tiêu chiến lược:\n\\begin{enumerate}[label=(\\arabic*)]\n    \\item \\textbf{Số hóa quy trình bán lẻ:} Thay thế hoàn toàn sổ sách giấy bằng hệ thống điện tử, giúp chủ cửa hàng theo dõi doanh thu, tồn kho và công nợ theo thời gian thực.\n    \\item \\textbf{Tăng cường trải nghiệm khách hàng:} Cung cấp giao diện đa nền tảng (responsive web) để nhân viên bán hàng có thể thao tác nhanh chóng trên máy tính bảng hoặc điện thoại di động.\n    \\item \\textbf{Tối ưu chi phí vận hành:} Giảm thiểu sai sót trong nhập liệu, tự động hóa báo cáo cuối ngày, cuối tháng, đồng thời tiết kiệm chi phí nhân lực kế toán.\n\\end{enumerate}\n\n\\subsection{Mục tiêu cụ thể}\nSau khi phân tích yêu cầu, nhóm phát triển đã xác định 6 chức năng cốt lõi (MVP – Minimum Viable Product) cần hoàn thành trước tháng 11/2024:\n\\begin{itemize}[nosep]\n    \\item \\textbf{Quản lý danh mục sản phẩm:} thêm, sửa, xoá sản phẩm; phân loại theo nhóm; hỗ trợ hình ảnh và mã vạch.\n    \\item \\textbf{Xử lý đơn hàng:} tạo đơn tại quầy, tính tổng tiền, áp dụng khuyến mại, in hoá đơn.\n    \\item \\textbf{Quản lý tồn kho:} cập nhật số lượng nhập -- xuất, cảnh báo tồn kho thấp.\n    \\item \\textbf{Quản lý khách hàng:} lưu thông tin khách, lịch sử mua hàng, điểm tích luỹ.\n    \\item \\textbf{Báo cáo và thống kê:} doanh thu theo ngày/tuần/tháng, sản phẩm bán chạy, lợi nhuận ước tính.\n    \\item \\textbf{Phân quyền người dùng:} quản trị viên, nhân viên thu ngân, kế toán với các quyền hạn khác nhau.\n\\end{itemize}\n\nBảng~\\ref{tab:kpi} tổng hợp các chỉ số đo lường hiệu quả (KPI) mà dự án cam kết đạt được sau giai đoạn thử nghiệm.\n\n\\begin{table}[H]\n\\centering\n\\caption{Chỉ số KPI của dự án SmartShop}\n\\label{tab:kpi}\n\\begin{tabular}{@{}p{5cm}cc@{}}\n\\toprule\n\\textbf{Chỉ số} & \\textbf{Mục tiêu} & \\textbf{Thực tế đạt được} \\\\\n\\midrule\nThời gian xử lý một đơn hàng (giây) & < 10 & 8.2 \\\\\nTỷ lệ lỗi dữ liệu tồn kho (\\%) & < 0.5 & 0.3 \\\\\nSố cửa hàng thử nghiệm & \\geq 5 & 6 \\\\\nĐiểm hài lòng người dùng (trên 10) & \\geq 8 & 8.7 \\\\\nThời gian đào tạo (phút/cửa hàng) & < 30 & 22 \\\\\n\\bottomrule\n\\end{tabular}\n\\end{table}\n\n\\section{Tiến độ thực hiện}\n\\subsection{Lộ trình và các giai đoạn}\nDự án được tổ chức theo mô hình Scrum với 6 Sprint, mỗi Sprint kéo dài 3 tuần (Bảng~\\ref{tab:sprint}). Toàn bộ quá trình diễn ra từ tháng 4 đến tháng 11 năm 2024.\n\n\\begin{table}[H]\n\\centering\n\\caption{Các Sprint và khối lượng công việc}\n\\label{tab:sprint}\n\\begin{tabular}{@{}clll@{}}\n\\toprule\n\\textbf{Sprint} & \\textbf{Thời gian} & \\textbf{Nội dung chính} & \\textbf{Trạng thái} \\\\\n\\midrule\n1 & 4/2024 – 4/2024 & Thu thập yêu cầu, thiết kế kiến trúc & Hoàn thành đúng hạn \\\\\n2 & 5/2024 – 5/2024 & Phát triển module quản lý sản phẩm, cơ sở dữ liệu & Hoàn thành đúng hạn \\\\\n3 & 6/2024 – 7/2024 & Module đơn hàng, thanh toán, in hoá đơn & Hoàn thành, chậm 3 ngày \\\\\n4 & 8/2024 – 8/2024 & Module khách hàng, tồn kho, báo cáo & Hoàn thành đúng hạn \\\\\n5 & 9/2024 – 10/2024 & Kiểm thử tích hợp, triển khai thử nghiệm (UAT) & Hoàn thành đúng hạn \\\\\n6 & 10/2024 – 11/2024 & Sửa lỗi, tối ưu, bàn giao chính thức & Hoàn thành đúng hạn \\\\\n\\bottomrule\n\\end{tabular}\n\\end{table}\n\n\\subsection{Kết quả đạt được theo từng giai đoạn}\nTrong Sprint 3, việc chậm 3 ngày là do phát sinh yêu cầu thay đổi về tích hợp cổng thanh toán MoMo, khiến nhóm phải điều chỉnh thiết kế API. Tuy nhiên, độ trễ được bù đắp ở Sprint 4 mà không ảnh hưởng đến mốc bàn giao cuối cùng. Hình~\\ref{fig:progress} minh hoạ tỷ lệ hoàn thành các chức năng theo từng Sprint, dựa trên số điểm story point đã đóng góp.\n\n\\begin{figure}[H]\n\\centering\n\\begin{tikzpicture}\n\\begin{axis}[\n    ybar stacked,\n    bar width=15pt,\n    width=0.9\\textwidth,\n    height=7cm,\n    legend style={at={(0.5,-0.15)}, anchor=north, legend columns=-1},\n    ylabel={Tỷ lệ hoàn thành (\\%)},\n    symbolic x coords={1,2,3,4,5,6},\n    xtick=data,\n    xlabel={Sprint},\n    ymajorgrids=true,\n    nodes near coords,\n    nodes near coords align={vertical},\n    ]\n\\addplot coordinates {(1,20) (2,40) (3,60) (4,80) (5,90) (6,100)};\n\\addplot coordinates {(1,80) (2,60) (3,40) (4,20) (5,10) (6,0)};\n\\legend{Đã hoàn thành, Chưa hoàn thành}\n\\end{axis}\n\\end{tikzpicture}\n\\caption{Tiến độ hoàn thành chức năng qua các Sprint (tính theo story point).}\n\\label{fig:progress}\n\\end{figure}\n\nNgoài ra, nhóm đã thực hiện kiểm thử tự động cho 85\\% các API, đảm bảo độ phủ mã nguồn >= 70\\%. Các tài liệu hướng dẫn sử dụng dạng video và PDF được bàn giao kèm sản phẩm.\n\n\\subsection{Chi phí và nguồn lực}\nTổng ngân sách được duyệt là 1.2 tỷ VNĐ, thực chi 1.15 tỷ VNĐ, tiết kiệm 4.2\\% so với dự toán. Nhân sự bao gồm 2 lập trình viên full-stack, 1 chuyên viên UX/UI, 1 kiểm thử viên và 1 quản lý dự án. Không có biến động nhân sự đáng kể nào trong suốt dự án.\n\n\\section{Quản lý rủi ro}\n\\subsection{Nhận diện và phân loại}\nNgay từ giai đoạn lập kế hoạch, nhóm đã xác định 8 rủi ro tiềm ẩn và phân loại theo mức độ tác động (Bảng~\\ref{tab:risks}). Các rủi ro chính xoay quanh công nghệ, yêu cầu thay đổi và bảo mật dữ liệu.\n\n\\begin{table}[H]\n\\centering\n\\caption{Danh mục rủi ro và biện pháp xử lý}\n\\label{tab:risks}\n\\begin{tabular}{@{}>{\\raggedright\\arraybackslash}p{2.5cm}>{\\raggedright\\arraybackslash}p{2.5cm}>{\\raggedright\\arraybackslash}p{2.5cm}>{\\raggedright\\arraybackslash}p{2cm}@{}}\n\\toprule\n\\textbf{Rủi ro} & \\textbf{Nguyên nhân} & \\textbf{Biện pháp giảm thiểu} & \\textbf{Trạng thái} \\\\\n\\midrule\nThay đổi yêu cầu nghiệp vụ & Khách hàng bổ sung tính năng & Duy trì backlog linh hoạt, ưu tiên theo giá trị kinh doanh & Đã xử lý \\\\\nHiệu năng truy vấn chậm & Lượng dữ liệu lớn, thiếu chỉ mục & Tối ưu hoá câu lệnh SQL, đánh chỉ mục thường xuyên & Đang giám sát \\\\\nLỗ hổng bảo mật XSS/SQL Injection & Thiếu kiểm tra đầu vào & Sử dụng prepared statement, lọc dữ liệu đầu vào, pentest định kỳ & Đã xử lý \\\\\nPhụ thuộc vào bên thứ ba (cổng thanh toán) & API thay đổi đột ngột & Xây dựng lớp wrapper, cập nhật định kỳ & Đã kiểm soát \\\\\nThiếu nhân sự đột xuất & Nghỉ ốm, việc riêng & Lập kế hoạch dự phòng, chia sẻ kiến thức chéo & Không phát sinh \\\\\nKhó khăn trong đào tạo người dùng & Giao diện chưa trực quan & Tổ chức hướng dẫn trực tiếp, video mô phỏng & Đã xử lý \\\\\nMất dữ liệu do sự cố máy chủ & Lỗi phần cứng hoặc tấn công mạng & Sao lưu tự động hằng ngày, lưu trữ phân tán & Đã kiểm tra \\\\\nChi phí vượt ngân sách & Phát sinh ngoài dự kiến & Theo dõi chi tiêu theo Sprint, duyệt chi nghiêm ngặt & Không xảy ra \\\\\n\\bottomrule\n\\end{tabular}\n\\end{table}\n\n\\subsection{Bài học kinh nghiệm}\nViệc áp dụng quy trình Scrum giúp nhóm phản ứng nhanh với thay đổi, nhưng cũng bộc lộ một số điểm yếu: thời lượng họp hằng ngày (daily) đôi khi kéo dài, công cụ theo dõi tiến độ (Jira) chưa được sử dụng triệt để. Nhóm đã khắc phục bằng cách giới hạn thời gian họp tối đa 15 phút và cử một thành viên chịu trách nhiệm cập nhật Jira sau mỗi sprint.\n\n\\section{Kết luận và kiến nghị}\n\\subsection{Tổng kết dự án}\nDự án SmartShop đã hoàn thành đầy đủ các mục tiêu đề ra trong phiên bản 1.0. Sản phẩm được triển khai thử nghiệm thành công tại 6 cửa hàng, giúp giảm trung bình 40\\% thời gian thao tác nghiệp vụ và giảm 60\\% sai lệch số liệu so với phương thức thủ công. Người dùng đánh giá cao giao diện thân thiện và tốc độ xử lý. Về mặt quản lý, dự án kết thúc trong phạm vi ngân sách và chỉ chậm tiến độ không đáng kể ở một Sprint.\n\n\\subsection{Kiến nghị}\nTừ kết quả đạt được và những vấn đề còn tồn tại, nhóm dự án đề xuất một số kiến nghị cho giai đoạn tiếp theo:\n\n\\begin{enumerate}[label=\\bfseries{Kiến nghị \\arabic*:}]\n    \\item \\textbf{Nâng cấp hiệu năng:} Mặc dù thời gian phản hồi trung bình hiện tại dưới 2 giây, khi số lượng đơn hàng tăng cao (>1000 đơn/ngày) hệ thống có dấu hiệu chậm. Cần nghiên cứu giải pháp cache (Redis) và kiến trúc microservices để sẵn sàng mở rộng.\n    \\item \\textbf{Tăng cường bảo mật:} Đề nghị bổ sung kiểm thử xâm nhập (penetration test) chuyên sâu, triển khai Web Application Firewall (WAF) và mã hoá dữ liệu nhạy cảm như thông tin thanh toán theo chuẩn PCI-DSS.\n    \\item \\textbf{Phát triển module di động:} Nhiều chủ cửa hàng mong muốn có ứng dụng di động thuần (Native App) ngoài phiên bản web. Nên ưu tiên xây dựng phiên bản dành cho nhân viên thu ngân trên Android để cải thiện trải nghiệm.\n    \\item \\textbf{Mở rộng thị trường:} Sau khi ổn định phiên bản 1.1, có thể tiếp cận các chuỗi cửa hàng quy mô lớn hơn, kết hợp tích hợp với các sàn thương mại điện tử (Shopee, Lazada) nhằm đồng bộ đơn hàng đa kênh.\n    \\item \\textbf{Đào tạo và hỗ trợ:} Xây dựng trung tâm trợ giúp trực tuyến (Help Center) với FAQ, video hướng dẫn chi tiết, giảm tải cho đội hỗ trợ kỹ thuật.\n\\end{enumerate}\n\n\\subsection{Kế hoạch bảo trì}\nBên cạnh các kiến nghị phát triển, nhóm cam kết duy trì hỗ trợ kỹ thuật cho phiên bản 1.0 trong 6 tháng đầu, bao gồm sửa lỗi nghiêm trọng (critical bugs) trong vòng 24 giờ và phát hành bản vá định kỳ mỗi hai tuần. Lộ trình chi tiết sẽ được trình bày trong báo cáo bảo trì tiếp theo.\n\n\\begin{thebibliography}{99}\n\\bibitem{scrum} Schwaber, K. \\& Sutherland, J. (2020). \\textit{The Scrum Guide}. Scrum.org.\n\\bibitem{agile} Highsmith, J. (2009). \\textit{Agile Project Management: Creating Innovative Products}. Addison-Wesley.\n\\bibitem{owasp} OWASP Foundation. (2023). \\textit{OWASP Top Ten Web Application Security Risks}. OWASP.org.\n\\bibitem{sqlperf} Faroult, S. \\& Robson, P. (2006). \\textit{The Art of SQL}. O'Reilly Media.\n\\end{thebibliography}\n\n\\end{document}\n",
+          "metadata": {
+            "finishReason": "stop",
+            "rawFinishReason": "end_turn",
+            "usage": {
+              "inputTokens": 1368,
+              "outputTokens": 6734,
+              "totalTokens": 8102
+            }
+          }
+        },
+        "score": 1,
+        "success": true,
+        "testCase": {
+          "description": "project-summary — báo cáo tổng kết dự án (mục tiêu/tiến độ/rủi ro/kiến nghị)",
+          "vars": {
+            "templateId": "report",
+            "description": "Báo cáo tổng kết dự án phần mềm gồm mục tiêu, tiến độ, rủi ro và kiến nghị."
+          },
+          "assert": [
+            {
+              "type": "regex",
+              "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{report\\}"
+            },
+            {
+              "type": "contains",
+              "value": "\\begin{document}"
+            },
+            {
+              "type": "contains",
+              "value": "\\end{document}"
+            },
+            {
+              "type": "javascript",
+              "value": "file://./scorers/validate-latex.ts"
+            },
+            {
+              "type": "not-contains",
+              "value": "\\chapter"
+            }
+          ],
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 2,
+        "tokenUsage": {
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "total": 0,
+          "numRequests": 1,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          },
+          "assertions": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          }
+        },
+        "vars": {
+          "templateId": "report",
+          "description": "Báo cáo tổng kết dự án phần mềm gồm mục tiêu, tiến độ, rủi ro và kiến nghị."
+        },
+        "metadata": {
+          "finishReason": "stop",
+          "rawFinishReason": "end_turn",
+          "usage": {
+            "inputTokens": 1368,
+            "outputTokens": 6734,
+            "totalTokens": 8102
+          },
+          "_promptfooFileMetadata": {}
+        },
+        "failureReason": 0
+      },
+      {
+        "cost": 0,
+        "gradingResult": {
+          "pass": true,
+          "score": 1,
+          "reason": "All assertions passed",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0
+          },
+          "componentResults": [
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "regex",
+                "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{report\\}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\begin{document}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "\\end{document}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "validateLatex: OK — không có diagnostic.",
+              "assertion": {
+                "type": "javascript",
+                "value": "file://./scorers/validate-latex.ts"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "not-contains",
+                "value": "\\chapter"
+              }
+            }
+          ]
+        },
+        "id": "977de1b8-0641-4f6c-a5b1-2643d8ce0f0b",
+        "latencyMs": 237223,
+        "namedScores": {},
+        "prompt": {
+          "raw": "Báo cáo thực tập: giới thiệu đơn vị, công việc đã làm, và bài học kinh nghiệm.",
+          "label": "{{description}}",
+          "config": {}
+        },
+        "promptId": "1e6bd1d5aab4bf787795c1f9955d1ac1cc90fa253cfff6883a3c44dd53037d25",
+        "promptIdx": 0,
+        "provider": {
+          "id": "report-real-ai-provider",
+          "label": "report-real-ai"
+        },
+        "response": {
+          "output": "\\documentclass[a4paper,12pt]{report}\n\n% XeLaTeX + UTF-8: only fontspec needed; no fontenc/inputenc\n\\usepackage{fontspec}\n\n% Allowed packages\n\\usepackage{geometry}\n\\geometry{margin=2.5cm}\n\\usepackage{amsmath,amssymb}\n\\usepackage{graphicx}\n\\usepackage{tikz}\n\\usetikzlibrary{positioning, shapes.geometric, arrows.meta, fit}\n\\usepackage{pgfplots}\n\\pgfplotsset{compat=1.18}\n\\usepackage{xcolor}\n\\usepackage{listings}\n\\lstset{\n  basicstyle=\\ttfamily\\small,\n  breaklines=true,\n  frame=single,\n  language=Python,\n  numbers=left,\n  numberstyle=\\tiny\\color{gray}\n}\n\\usepackage{enumitem}\n\\usepackage{booktabs}\n\\usepackage{longtable,tabularx,multirow}\n\\usepackage{caption,subcaption}\n\\usepackage{float}\n\\usepackage{hyperref}\n\\hypersetup{\n  colorlinks=true,\n  linkcolor=blue,\n  citecolor=blue,\n  urlcolor=blue,\n  pdftitle={Báo cáo thực tập},\n  pdfauthor={Nguyễn Văn A},\n  pdfsubject={Báo cáo thực tập tốt nghiệp}\n}\n\n% Remove chapter numbering so sections start at 1\n\\renewcommand{\\thesection}{\\arabic{section}}\n\n\\begin{document}\n\n\\title{\n  \\textbf{BÁO CÁO THỰC TẬP TỐT NGHIỆP}\\\\[0.5em]\n  \\large Giới thiệu đơn vị, công việc đã làm và bài học kinh nghiệm\n}\n\\author{\n  \\textbf{Sinh viên:} Nguyễn Văn A\\\\\n  \\textbf{MSSV:} 20221234\\\\\n  \\textbf{Khoa:} Công nghệ Thông tin\\\\\n  \\textbf{Trường:} Đại học Bách Khoa Hà Nội\n}\n\\date{Tháng 6 năm 2025}\n\\maketitle\n\n\\begin{abstract}\nBáo cáo này tổng kết quá trình thực tập tốt nghiệp tại Công ty TNHH Công nghệ Số Việt (VDS). Trong thời gian 3 tháng, tác giả đã tham gia nhóm phát triển phần mềm, thực hiện các nhiệm vụ từ phân tích yêu cầu, lập trình backend, kiểm thử đến viết tài liệu kỹ thuật. Báo cáo mô tả cơ cấu tổ chức của đơn vị, chi tiết công việc đã làm, những kết quả đạt được (minh họa bằng số liệu và biểu đồ), cùng các bài học chuyên môn và kỹ năng mềm thu được. Cuối cùng, một số đề xuất được đưa ra nhằm nâng cao hiệu quả thực tập và chất lượng sản phẩm tại đơn vị.\n\\end{abstract}\n\n% ===========================\n\\section{Giới thiệu}\n\\label{sec:intro}\n\n\\subsection{Giới thiệu đơn vị thực tập}\n\\label{sec:donvi}\n\nCông ty TNHH Công nghệ Số Việt (VDS) là doanh nghiệp hoạt động trong lĩnh vực phát triển phần mềm và tư vấn chuyển đổi số, thành lập năm 2015 tại Hà Nội. Với hơn 80 nhân viên, VDS cung cấp các giải pháp về quản lý doanh nghiệp (ERP), ứng dụng di động và hệ thống phân tích dữ liệu cho khách hàng trong và ngoài nước. Triết lý của công ty là “Công nghệ phục vụ con người”, chú trọng đổi mới sáng tạo và liên tục cải tiến quy trình.\n\nCơ cấu tổ chức của VDS gồm 4 phòng ban chính: Phòng Kinh doanh \\& Tư vấn, Phòng Phát triển Sản phẩm, Phòng Kiểm thử Chất lượng (QA) và Phòng Hành chính – Nhân sự. Phòng Phát triển Sản phẩm, nơi tác giả thực tập, lại được chia thành các nhóm chuyên biệt: nhóm Frontend, nhóm Backend và nhóm Dữ liệu. Hình~\\ref{fig:orgchart} minh họa sơ đồ tổ chức dưới dạng biểu đồ TikZ.\n\n\\begin{figure}[H]\n  \\centering\n  \\begin{tikzpicture}[\n      node distance=1.4cm,\n      box/.style={draw, rounded corners, minimum width=3cm, minimum height=1cm, align=center},\n      arrow/.style={-{Latex[length=2mm]}, thick}\n    ]\n    \\node (ceo) [box, fill=blue!10] {Ban Giám đốc};\n    \\node (kd) [box, below left=1.2cm and 1.5cm of ceo, fill=green!10] {Kinh doanh \\& Tư vấn};\n    \\node (sp) [box, below=1.2cm of ceo, fill=orange!10] {Phát triển Sản phẩm};\n    \\node (qa) [box, below right=1.2cm and 1.5cm of ceo, fill=red!10] {Kiểm thử (QA)};\n    \\node (hc) [box, right=2.5cm of qa, fill=purple!10] {Hành chính – NS};\n\n    \\draw [arrow] (ceo.south) -- ++(0,-0.2) -| (kd.north);\n    \\draw [arrow] (ceo.south) -- (sp.north);\n    \\draw [arrow] (ceo.south) -- ++(0,-0.2) -| (qa.north);\n    \\draw [arrow] (ceo.east) -- ++(0.5,0) |- (hc.north);\n\n    % Sub-teams under Phát triển Sản phẩm\n    \\node (fe) [box, below left=0.8cm and -0.5cm of sp, fill=orange!5, minimum width=2.2cm] {Frontend};\n    \\node (be) [box, below right=0.8cm and -0.5cm of sp, fill=orange!5, minimum width=2.2cm] {Backend};\n    \\node (data) [box, below=2.2cm of sp, fill=orange!5, minimum width=2.2cm] {Dữ liệu};\n\n    \\draw [arrow] (sp.south) -- ++(0,-0.1) -| (fe.north);\n    \\draw [arrow] (sp.south) -- ++(0,-0.1) -| (be.north);\n    \\draw [arrow] (sp.south) -- ++(0,-0.1) -| (data.north);\n\n    \\node at (current bounding box.south) [below=0.5cm, font=\\small] {Nguồn: Phòng Hành chính – Nhân sự (2025)};\n  \\end{tikzpicture}\n  \\caption{Sơ đồ tổ chức Công ty VDS (minh họa).}\n  \\label{fig:orgchart}\n\\end{figure}\n\n\\subsection{Mục tiêu và phạm vi báo cáo}\n\\label{sec:muctieu}\n\nMục tiêu của báo cáo là ghi nhận và đánh giá toàn bộ quá trình thực tập, từ khâu làm quen môi trường đến khi hoàn thành các nhiệm vụ được giao. Phạm vi tập trung vào ba nội dung chính: (1) giới thiệu về đơn vị thực tập và văn hóa làm việc; (2) mô tả các công việc đã thực hiện cùng kết quả; (3) đúc kết những bài học kinh nghiệm và đề xuất cải tiến. Báo cáo không đi sâu vào kiến trúc toàn hệ thống mà chỉ giới hạn ở module Backend dịch vụ đặt lịch – dự án cụ thể mà tác giả được phân công.\n\n\\subsection{Bối cảnh thực tập}\n\\label{sec:bctt}\n\nTrước khi thực tập, tác giả đã được trang bị kiến thức nền tảng về lập trình hướng đối tượng, cơ sở dữ liệu quan hệ và phát triển web qua các môn học tại trường. Tuy nhiên, việc áp dụng kiến thức vào một dự án thực tế với quy mô doanh nghiệp vẫn là một thách thức. Chương trình thực tập 12 tuần tại VDS được thiết kế theo mô hình \\emph{learning by doing}, trong đó mỗi thực tập sinh được ghép cặp với một kỹ sư hướng dẫn (mentor) và tham gia vào một dự án thực tế. Tác giả được phân công vào nhóm Backend, dưới sự dẫn dắt của anh Trần Minh B, kỹ sư cao cấp với hơn 6 năm kinh nghiệm.\n\n% ===========================\n\\section{Công việc đã thực hiện}\n\\label{sec:congviec}\n\n\\subsection{Kế hoạch và phân công công việc}\n\\label{sec:kehoach}\n\nNgay từ tuần đầu tiên, tác giả cùng mentor đã lập kế hoạch chi tiết với các mốc thời gian cụ thể. Bảng~\\ref{tab:kehoach} tóm tắt các giai đoạn chính của quá trình thực tập.\n\n\\begin{table}[H]\n  \\centering\n  \\caption{Kế hoạch thực tập 12 tuần}\n  \\label{tab:kehoach}\n  \\begin{tabularx}{\\textwidth}{@{}c>{\\raggedright}XcX@{}}\n    \\toprule\n    \\textbf{Giai đoạn} & \\textbf{Nội dung} & \\textbf{Thời gian} & \\textbf{Sản phẩm đầu ra} \\\\\n    \\midrule\n    1 -- 2 & Làm quen môi trường, học công cụ (Git, Jira, Docker), tìm hiểu cơ sở dữ liệu dự án. & 2 tuần & Tài liệu ghi chú cá nhân \\\\\n    3 -- 4 & Phân tích yêu cầu, thiết kế API cho module đặt lịch. & 2 tuần & Tài liệu API, sơ đồ luồng dữ liệu \\\\\n    5 -- 7 & Lập trình backend (Node.js + PostgreSQL), tích hợp xác thực JWT. & 3 tuần & Mã nguồn commit lên Git \\\\\n    8 -- 9 & Viết unit test, kiểm thử tích hợp với nhóm Frontend. & 2 tuần & Báo cáo test coverage \\\\\n    10 -- 11 & Hoàn thiện tính năng, viết tài liệu kỹ thuật và hướng dẫn sử dụng. & 2 tuần & Tài liệu kỹ thuật \\\\\n    12 & Tổng kết, trình bày kết quả trước nhóm và mentor. & 1 tuần & Slide báo cáo, nhật ký thực tập \\\\\n    \\bottomrule\n  \\end{tabularx}\n\\end{table}\n\n\\subsection{Mô tả chi tiết các nhiệm vụ}\n\\label{sec:nhiemvu}\n\n\\textbf{Phân tích yêu cầu:} Tác giả tham gia các buổi họp daily stand-up và sprint planning, ghi nhận yêu cầu từ phía khách hàng (một chuỗi phòng khám tư nhân) về tính năng đặt lịch khám trực tuyến. Yêu cầu chính gồm: người dùng có thể xem khung giờ trống, chọn bác sĩ và đặt lịch; hệ thống gửi email xác nhận; quản trị viên có thể xem báo cáo thống kê lượt đặt lịch theo ngày. Từ đó, tác giả đã vẽ sơ đồ use-case và thiết kế các endpoint RESTful API.\n\n\\textbf{Lập trình backend:} Module được phát triển bằng Node.js (Express framework) và PostgreSQL. Tác giả chịu trách nhiệm chính với hai endpoint:\n\\begin{itemize}[nosep]\n  \\item \\texttt{GET /api/slots?date=\\ldots\\&doctor\\_id=\\ldots} -- trả về danh sách khung giờ còn trống.\n  \\item \\texttt{POST /api/appointments} -- tạo lịch hẹn mới, kiểm tra xung đột và gửi email (qua nodemailer).\n\\end{itemize}\nĐoạn mã minh họa cho hàm kiểm tra xung đột lịch hẹn được trình bày trong Hình~\\ref{fig:code}.\n\n\\begin{figure}[H]\n  \\centering\n  \\begin{lstlisting}[caption={Hàm kiểm tra xung đột lịch hẹn (Node.js)},\n                     label={fig:code}]\n// check conflict with existing appointments\nasync function hasConflict(pool, doctorId, slotTime) {\n  const query = `\n    SELECT COUNT(*) as cnt FROM appointments\n    WHERE doctor_id = $1\n      AND slot_time = $2\n      AND status = 'confirmed';\n  `;\n  const res = await pool.query(query, [doctorId, slotTime]);\n  return res.rows[0].cnt > 0;\n}\n  \\end{lstlisting}\n\\end{figure}\n\n\\textbf{Kiểm thử:} Tác giả viết 28 unit test sử dụng Jest, đạt độ phủ (coverage) 87\\% cho các hàm logic chính. Kết quả kiểm thử tích hợp với frontend cho thấy hệ thống hoạt động ổn định, thời gian phản hồi trung bình dưới 200 ms.\n\n\\textbf{Tài liệu kỹ thuật:} Tài liệu API được viết theo chuẩn OpenAPI 3.0, bao gồm mô tả request/response, mã lỗi và ví dụ. Tài liệu hướng dẫn triển khai (deployment guide) cũng được bổ sung để nhóm DevOps tham khảo.\n\n% ===========================\n\\section{Kết quả và phân tích}\n\\label{sec:ketqua}\n\n\\subsection{Kết quả đạt được}\n\\label{sec:ketquadat}\n\nSau 12 tuần, module đặt lịch đã được tích hợp thành công vào hệ thống thử nghiệm (staging). Một số chỉ số định lượng được ghi nhận:\n\\begin{itemize}[nosep]\n  \\item Số dòng code mới (backend): 1 250 LOC, trong đó 80\\% được viết bởi tác giả.\n  \\item Số lỗi (bug) phát hiện trong giai đoạn kiểm thử: 12, tất cả đã được sửa.\n  \\item Độ phủ kiểm thử đơn vị: 87\\%.\n  \\item Thời gian phản hồi trung bình của API \\texttt{GET /slots}: 95 ms (dưới tải 200 request/giây).\n\\end{itemize}\nHình~\\ref{fig:performance} minh họa thời gian phản hồi của hai API chính qua các lần tối ưu hóa (dữ liệu minh họa).\n\n\\begin{figure}[H]\n  \\centering\n  \\begin{tikzpicture}\n    \\begin{axis}[\n        ybar,\n        width=0.9\\textwidth,\n        height=6cm,\n        ylabel={Thời gian phản hồi (ms)},\n        xlabel={Lần đo (sau tối ưu)},\n        symbolic x coords={Ban đầu,Vòng 1,Vòng 2,Vòng 3},\n        xtick=data,\n        legend style={at={(0.5,-0.18)}, anchor=north, legend columns=-1},\n        nodes near coords,\n        ymin=0,\n        bar width=15pt,\n        enlarge x limits=0.2,\n      ]\n      \\addplot [fill=blue!30] coordinates {(Ban đầu,185) (Vòng 1,140) (Vòng 2,112) (Vòng 3,95)};\n      \\addplot [fill=red!30] coordinates {(Ban đầu,210) (Vòng 1,170) (Vòng 2,145) (Vòng 3,130)};\n      \\legend{GET /slots, POST /appointments}\n    \\end{axis}\n  \\end{tikzpicture}\n  \\caption{Thời gian phản hồi trung bình của hai API sau mỗi vòng tối ưu.}\n  \\label{fig:performance}\n\\end{figure}\n\n\\subsection{Đánh giá và nhận xét}\n\\label{sec:danhgia}\n\nNhìn chung, các công việc được giao đều hoàn thành đúng tiến độ và đáp ứng yêu cầu chất lượng. Tuy nhiên, trong giai đoạn đầu tác giả gặp khó khăn khi làm quen với convention code của công ty và công cụ quản lý mã nguồn GitFlow. Sự hỗ trợ kịp thời từ mentor đã giúp rút ngắn thời gian làm quen. Một điểm cần cải thiện là tác giả chưa có cơ hội tham gia sâu vào khâu thiết kế kiến trúc tổng thể; phần lớn thời gian tập trung vào một module riêng biệt.\n\n% ===========================\n\\section{Bài học kinh nghiệm}\n\\label{sec:baihoc}\n\n\\subsection{Bài học về chuyên môn}\n\\label{sec:chuyenmon}\n\n\\begin{itemize}[nosep]\n  \\item \\textbf{Kỹ năng lập trình backend thực tế:} Thực hành với Node.js và PostgreSQL giúp củng cố kiến thức về xử lý bất đồng bộ, indexing cơ sở dữ liệu và tối ưu truy vấn. Tác giả nhận thấy rằng việc viết query có chủ đích sử dụng index đã giảm thời gian truy vấn từ 300 ms xuống còn 50 ms trong trường hợp tìm kiếm khung giờ trống theo bác sĩ.\n  \\item \\textbf{Kiểm thử tự động:} Việc viết unit test không chỉ phát hiện lỗi sớm mà còn đóng vai trò như tài liệu sống cho hành vi của mã nguồn. Tác giả đã học cách sử dụng Jest để mock các dịch vụ ngoại vi (database, email) và đảm bảo tính độc lập của test.\n  \\item \\textbf{Quy trình phát triển phần mềm Agile:} Trải nghiệm thực tế với Scrum (sprint 2 tuần, daily stand-up, retrospective) cho thấy tầm quan trọng của giao tiếp liên tục và phân chia công việc thành các hạng mục nhỏ (user stories).\n\\end{itemize}\n\n\\subsection{Bài học về kỹ năng mềm và làm việc nhóm}\n\\label{sec:kynangmem}\n\n\\begin{itemize}[nosep]\n  \\item \\textbf{Giao tiếp hiệu quả:} Trong các buổi họp với Frontend và QA, việc diễn đạt rõ ràng các ràng buộc kỹ thuật giúp giảm thiểu hiểu nhầm và rút ngắn thời gian debug tích hợp.\n  \\item \\textbf{Quản lý thời gian:} Sử dụng công cụ Jira và kỹ thuật Pomodoro đã giúp tác giả duy trì sự tập trung và hoàn thành nhiệm vụ đúng hạn, tránh tình trạng nước đến chân mới nhảy.\n  \\item \\textbf{Tinh thần học hỏi chủ động:} Môi trường doanh nghiệp thay đổi nhanh đòi hỏi khả năng tự nghiên cứu. Tác giả đã dành thời gian ngoài giờ để tìm hiểu về Docker và CI/CD, nhờ đó có thể hỗ trợ nhóm DevOps khi cần.\n  \\item \\textbf{Phản hồi và thích nghi:} Những lời nhận xét thẳng thắn từ mentor về coding style ban đầu khiến tác giả nhận ra tầm quan trọng của clean code. Nhờ đó, chất lượng mã được cải thiện rõ rệt sau 3 tuần.\n\\end{itemize}\n\n% ===========================\n\\section{Kết luận và đề xuất}\n\\label{sec:ketluan}\n\n\\subsection{Kết luận}\n\\label{sec:ketluan1}\n\nQuá trình thực tập tại VDS đã mang lại cho tác giả cái nhìn toàn diện về vòng đời phát triển phần mềm trong môi trường doanh nghiệp. Những kiến thức lý thuyết được áp dụng vào bài toán thực tế, đồng thời các kỹ năng mềm cũng được mài giũa. Kết quả là một module backend hoạt động ổn định, được kiểm thử kỹ lưỡng và có tài liệu đầy đủ, đóng góp vào dự án chung của công ty.\n\n\\subsection{Đề xuất cho đơn vị thực tập}\n\\label{sec:dexuatdv}\n\\begin{enumerate}[nosep]\n  \\item Tăng cường đào tạo nội bộ về quy trình CI/CD cho thực tập sinh ngay từ tuần đầu để họ có thể tham gia sâu hơn vào các công đoạn triển khai.\n  \\item Xây dựng một kho tài liệu mẫu (template) về coding convention và thiết kế API, giúp thực tập sinh nhanh chóng hòa nhập.\n  \\item Tổ chức các buổi chia sẻ kiến thức (tech talk) hàng tuần, khuyến khích thực tập sinh trình bày về chủ đề họ đã nghiên cứu.\n\\end{enumerate}\n\n\\subsection{Đề xuất cho sinh viên thực tập tiếp theo}\n\\label{sec:dexuatsv}\n\\begin{enumerate}[nosep]\n  \\item Chủ động tìm hiểu trước về công nghệ sẽ sử dụng (Node.js, Docker, PostgreSQL) trước khi bắt đầu kỳ thực tập.\n  \\item Ghi chép nhật ký công việc mỗi ngày; điều này không chỉ giúp hoàn thiện báo cáo mà còn là công cụ tự đánh giá tiến độ.\n  \\item Mạnh dạn đặt câu hỏi và xin phản hồi từ mentor – sai lầm được sửa sớm sẽ trở thành bài học quý giá.\n\\end{enumerate}\n\n% ===========================\n\\begin{thebibliography}{99}\n\n\\bibitem{nodejs} \nOpenJS Foundation (2025). \\textit{Node.js v20 LTS documentation}. \n\\url{https://nodejs.org}. Truy cập ngày 10/6/2025.\n\n\\bibitem{postgresql} \nPostgreSQL Global Development Group (2025). \\textit{PostgreSQL 16 Documentation}. \n\\url{https://www.postgresql.org/docs/16/}. Truy cập ngày 10/6/2025.\n\n\\bibitem{scrum} \nSchwaber, K., Sutherland, J. (2020). \\textit{Scrum Guide 2020}. \n\\url{https://scrumguides.org}. Truy cập ngày 12/6/2025.\n\n\\bibitem{clean} \nMartin, R.C. (2008). \\textit{Clean Code: A Handbook of Agile Software Craftsmanship}. Prentice Hall.\n\n\\bibitem{vds} \nCông ty TNHH Công nghệ Số Việt (VDS). \\textit{Website nội bộ}. \n\\url{http://vds.internal}. Truy cập ngày 5/6/2025.\n\n\\end{thebibliography}\n\n\\end{document}\n",
+          "metadata": {
+            "finishReason": "stop",
+            "rawFinishReason": "end_turn",
+            "usage": {
+              "inputTokens": 1362,
+              "outputTokens": 9040,
+              "totalTokens": 10402
+            }
+          }
+        },
+        "score": 1,
+        "success": true,
+        "testCase": {
+          "description": "vietnamese-report — tiếng Việt có dấu đầy đủ (Unicode + font)",
+          "vars": {
+            "templateId": "report",
+            "description": "Báo cáo thực tập: giới thiệu đơn vị, công việc đã làm, và bài học kinh nghiệm."
+          },
+          "assert": [
+            {
+              "type": "regex",
+              "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{report\\}"
+            },
+            {
+              "type": "contains",
+              "value": "\\begin{document}"
+            },
+            {
+              "type": "contains",
+              "value": "\\end{document}"
+            },
+            {
+              "type": "javascript",
+              "value": "file://./scorers/validate-latex.ts"
+            },
+            {
+              "type": "not-contains",
+              "value": "\\chapter"
+            }
+          ],
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 3,
+        "tokenUsage": {
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "total": 0,
+          "numRequests": 1,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          },
+          "assertions": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          }
+        },
+        "vars": {
+          "templateId": "report",
+          "description": "Báo cáo thực tập: giới thiệu đơn vị, công việc đã làm, và bài học kinh nghiệm."
+        },
+        "metadata": {
+          "finishReason": "stop",
+          "rawFinishReason": "end_turn",
+          "usage": {
+            "inputTokens": 1362,
+            "outputTokens": 9040,
+            "totalTokens": 10402
+          },
+          "_promptfooFileMetadata": {}
+        },
+        "failureReason": 0
+      }
+    ],
+    "stats": {
+      "successes": 4,
+      "failures": 0,
+      "errors": 0,
+      "tokenUsage": {
+        "prompt": 0,
+        "completion": 0,
+        "cached": 0,
+        "total": 0,
+        "numRequests": 4,
+        "completionDetails": {
+          "reasoning": 0,
+          "acceptedPrediction": 0,
+          "rejectedPrediction": 0,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0
+        },
+        "assertions": {
+          "total": 0,
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "numRequests": 0,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          }
+        }
+      },
+      "durationMs": 237368,
+      "evaluationDurationMs": 237368
+    }
+  },
+  "config": {
+    "tags": {},
+    "description": "Report template — AI THẬT trên dataset report/",
+    "prompts": [
+      "{{description}}"
+    ],
+    "providers": [
+      {
+        "id": "file://./providers/report-real-ai-provider.ts",
+        "label": "report-real-ai"
+      }
+    ],
+    "tests": [
+      "file://./datasets/report/cases.yaml"
+    ],
+    "env": {},
+    "defaultTest": {
+      "assert": [
+        {
+          "type": "regex",
+          "value": "\\\\documentclass(\\[[^\\]]*\\])?\\{report\\}"
+        },
+        {
+          "type": "contains",
+          "value": "\\begin{document}"
+        },
+        {
+          "type": "contains",
+          "value": "\\end{document}"
+        },
+        {
+          "type": "javascript",
+          "value": "file://./scorers/validate-latex.ts"
+        }
+      ],
+      "vars": {},
+      "options": {},
+      "metadata": {}
+    },
+    "outputPath": [
+      "lib/prompt-eval/results/report-real-ai-run-2026-07-16-hardened.json"
+    ],
+    "extensions": [],
+    "metadata": {},
+    "evaluateOptions": {}
+  },
+  "shareableUrl": null,
+  "metadata": {
+    "promptfooVersion": "0.121.18",
+    "nodeVersion": "v24.16.0",
+    "platform": "win32",
+    "arch": "x64",
+    "exportedAt": "2026-07-16T10:00:03.364Z",
+    "evaluationCreatedAt": "2026-07-16T09:56:05.737Z"
+  },
+  "vars": [
+    "templateId",
+    "description"
+  ],
+  "runtimeOptions": {
+    "eventSource": "cli",
+    "showProgressBar": true,
+    "repeat": 1,
+    "maxConcurrency": 4,
+    "cache": false
+  }
+}

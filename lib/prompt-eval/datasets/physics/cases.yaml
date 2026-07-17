@@ -1,0 +1,28 @@
+# lib/prompt-eval/datasets/physics/cases.yaml
+# Test case cho template `physics` (siunitx + vector). Theo pattern chemistry/report cases.yaml.
+# vars.templateId = "physics" (validate-latex scorer đọc để lấy allowlist). Assertion chung
+# (article, siunitx, dùng \SI/\si/\qty, validate-latex) đặt ở defaultTest của config.
+
+- description: "newton-dynamics — định luật II Newton (lực & gia tốc, có đơn vị)"
+  vars:
+    templateId: physics
+    description: "Trình bày định luật II Newton, quan hệ giữa lực và gia tốc, kèm ví dụ số có đơn vị."
+  assert: []
+
+- description: "kinematics — chuyển động thẳng biến đổi đều"
+  vars:
+    templateId: physics
+    description: "Viết tài liệu về chuyển động thẳng biến đổi đều: vận tốc, gia tốc, quãng đường."
+  assert: []
+
+- description: "electromagnetism — điện trường điện tích điểm (vector + Coulomb)"
+  vars:
+    templateId: physics
+    description: "Giải thích điện trường của một điện tích điểm, dùng ký hiệu vector và định luật Coulomb."
+  assert: []
+
+- description: "vietnamese-optics — tiếng Việt, giao thoa ánh sáng"
+  vars:
+    templateId: physics
+    description: "Báo cáo thí nghiệm đo bước sóng ánh sáng bằng giao thoa khe Young, có số liệu và đơn vị."
+  assert: []
